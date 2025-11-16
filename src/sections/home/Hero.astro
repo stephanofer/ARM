@@ -1,0 +1,403 @@
+---
+import SectionContainer from "@/components/SectionContainer.astro";
+
+const slides = [
+  {
+    id: 1,
+    title: "LIBE&AIKA",
+    subtitle: "Nuevas mesitas de noche.",
+    description: "Solo diseñamos y fabricamos muebles de madera ecológica",
+    buttonText: "DESCÚBRELAS",
+    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1920&q=80",
+  },
+  {
+    id: 2,
+    title: "COLECCIÓN NATURAL",
+    subtitle: "Muebles sostenibles.",
+    description: "Diseños únicos con materiales 100% ecológicos",
+    buttonText: "VER CATÁLOGO",
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1920&q=80",
+  },
+  {
+    id: 3,
+    title: "ESTILO MODERNO",
+    subtitle: "Diseño contemporáneo.",
+    description: "Transforma tu hogar con nuestros muebles exclusivos",
+    buttonText: "EXPLORAR",
+    image: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=1920&q=80",
+  },
+];
+---
+
+<SectionContainer id="hero" class="full-width">
+  <div class="hero-carousel">
+    <div class= carousel-container">
+      {
+        slides.map((slide, index) => (
+          <div
+            class="carousel-slide"
+            data-slide={index}
+            style={index === 0 ? "opacity: 1; visibility: visible;" : ""}
+          >
+            <img
+              src={slide.image}
+              alt={slide.title}
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+            <div class="slide-content">
+              <div class="content-wrapper">
+                <p class="slide-description">{slide.description}</p>
+                <h1 class="slide-title">{slide.title}</h1>
+                <h2 class="slide-subtitle">{slide.subtitle}</h2>
+                <button class="cta-button">{slide.buttonText}</button>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="carousel-indicators">
+      {
+        slides.map((_, index) => (
+          <button
+            class={`indicator ${index === 0 ? "active" : ""}`}
+            data-index={index}
+            aria-label={`Ir al slide ${index + 1}`}
+          />
+        ))
+      }
+    </div>
+  </div>
+</SectionContainer>
+
+<style>
+  .hero-carousel {
+    position: relative;
+    width: 100%;
+    height: calc(100dvh - 34.5px - 64px);
+    min-height: 600px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-slide.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+  }
+
+  .carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 5%;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.1) 60%,
+      transparent 100%
+    );
+  }
+
+  .content-wrapper {
+    max-width: 600px;
+    color: white;
+    animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .carousel-slide.active .content-wrapper {
+    animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .slide-description {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    opacity: 0.95;
+  }
+
+  .slide-title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+
+  .slide-subtitle {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+
+  .cta-button {
+    background-color: white;
+    color: #1a1a1a;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .cta-button:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .cta-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .carousel-indicators {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 10;
+  }
+
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+  }
+
+  .indicator:hover {
+    transform: scale(1.2);
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .indicator.active {
+    background-color: white;
+    transform: scale(1.3);
+  }
+
+  @media (max-width: 768px) {
+    .hero-carousel {
+      min-height: 500px;
+    }
+
+    .slide-content {
+      padding: 0 1.5rem;
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0.2) 100%
+      );
+    }
+
+    .content-wrapper {
+      max-width: 100%;
+    }
+
+    .carousel-indicators {
+      bottom: 2rem;
+      gap: 0.75rem;
+    }
+
+    .indicator {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .indicator {
+      width: 8px;
+      height: 8px;
+    }
+  }
+</style>
+
+<script>
+  class HeroCarousel {
+    private container: HTMLElement;
+    private slides: NodeListOf<HTMLElement>;
+    private indicators: NodeListOf<HTMLButtonElement>;
+    private prevBtn: HTMLButtonElement;
+    private nextBtn: HTMLButtonElement;
+    private currentIndex: number = 0;
+    private autoPlayInterval: number | null = null;
+    private isTransitioning: boolean = false;
+    private touchStartX: number = 0;
+    private touchEndX: number = 0;
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.slides = container.querySelectorAll(".carousel-slide");
+      this.indicators = container.querySelectorAll(".indicator");
+      this.prevBtn = null as any;
+      this.nextBtn = null as any;
+
+      this.init();
+    }
+
+    private init(): void {
+      this.indicators.forEach((indicator, index) => {
+        indicator.addEventListener("click", () => this.goToSlide(index));
+      });
+
+      // Touch events para swipe
+      this.container.addEventListener("touchstart", (e) => this.handleTouchStart(e), {
+        passive: true,
+      });
+      
+      this.container.addEventListener("touchend", (e) => this.handleTouchEnd(e), {
+        passive: true,
+      });
+
+      this.container.addEventListener("mouseenter", () => this.pauseAutoPlay());
+      this.container.addEventListener("mouseleave", () => this.startAutoPlay());
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          this.pauseAutoPlay();
+        } else {
+          this.startAutoPlay();
+        }
+      });
+
+      this.startAutoPlay();
+    }
+
+    private handleTouchStart(e: TouchEvent): void {
+      this.touchStartX = e.changedTouches[0].screenX;
+    }
+
+    private handleTouchEnd(e: TouchEvent): void {
+      this.touchEndX = e.changedTouches[0].screenX;
+      this.handleSwipe();
+    }
+
+    private handleSwipe(): void {
+      const swipeThreshold = 50;
+      const diff = this.touchStartX - this.touchEndX;
+
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          this.next();
+        } else {
+          this.prev();
+        }
+      }
+    }
+
+    private goToSlide(index: number): void {
+      if (this.isTransitioning || index === this.currentIndex) return;
+
+      this.isTransitioning = true;
+
+      this.slides[this.currentIndex].classList.remove("active");
+      this.indicators[this.currentIndex].classList.remove("active");
+
+      this.currentIndex = index;
+
+      this.slides[this.currentIndex].classList.add("active");
+      this.indicators[this.currentIndex].classList.add("active");
+
+      setTimeout(() => {
+        this.isTransitioning = false;
+      }, 800);
+
+      this.resetAutoPlay();
+    }
+
+    private next(): void {
+      const nextIndex = (this.currentIndex + 1) % this.slides.length;
+      this.goToSlide(nextIndex);
+    }
+
+    private prev(): void {
+      const prevIndex =
+        (this.currentIndex - 1 + this.slides.length) % this.slides.length;
+      this.goToSlide(prevIndex);
+    }
+
+    private startAutoPlay(): void {
+      this.pauseAutoPlay();
+      this.autoPlayInterval = window.setInterval(() => {
+        this.next();
+      }, 5000);
+    }
+
+    private pauseAutoPlay(): void {
+      if (this.autoPlayInterval) {
+        clearInterval(this.autoPlayInterval);
+        this.autoPlayInterval = null;
+      }
+    }
+
+    private resetAutoPlay(): void {
+      this.startAutoPlay();
+    }
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    const carouselElement = document.querySelector(".hero-carousel");
+    if (carouselElement) {
+      new HeroCarousel(carouselElement as HTMLElement);
+    }
+  });
+</script>

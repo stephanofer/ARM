@@ -1,0 +1,183 @@
+---
+import SectionContainer from "@/components/SectionContainer.astro";
+
+const categories = [
+  {
+    name: "Dormitorio",
+    image:
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+    link: "/productos?categoria=dormitorio",
+  },
+  {
+    name: "Montessori",
+    image:
+      "https://images.unsplash.com/photo-1631889993959-41b4e9c6e3c5?w=800&q=80",
+    link: "/productos?categoria=montessori",
+  },
+  {
+    name: "Comedor",
+    image:
+      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=800&q=80",
+    link: "/productos?categoria=comedor",
+  },
+  {
+    name: "Exterior",
+    image:
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+    link: "/productos?categoria=exterior",
+  },
+];
+---
+
+<SectionContainer id="categories" class="mt-4">
+  <div class="texts">
+    <h1>Categorías Destacadas</h1>
+    <p>Explora nuestras colecciones más populares</p>
+  </div>
+  <div class="categories-grid">
+    {
+      categories.map((category) => (
+        <article class="category-card">
+          <img
+            src={category.image}
+            alt={category.name}
+            class="category-image"
+            loading="lazy"
+          />
+          <div class="category-overlay">
+            <h2 class="category-title">{category.name}</h2>
+            <a href={category.link} class="category-link">
+              Ver colección
+            </a>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+  <div class="view-all">
+    <a href="/productos" class="view-all-link"> Ver todas las categorías </a>
+  </div>
+</SectionContainer>
+
+<style>
+
+  .texts {
+    margin-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: var(--fs-xl);
+    font-family: "Clash";
+    font-weight: 450;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .category-card {
+    position: relative;
+    aspect-ratio: 0.8 / 1.2;
+    overflow: hidden;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .category-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .category-card:hover .category-image {
+    transform: scale(1.05);
+  }
+
+  .category-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .category-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 400;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.02em;
+  }
+
+  .category-link {
+    font-size: 0.875rem;
+    color: white;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: opacity 0.2s ease;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .category-link:hover {
+    opacity: 0.8;
+  }
+
+  .view-all {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .view-all-link {
+    font-size: 1rem;
+    color: #333;
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .view-all-link::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #333;
+  }
+
+  .view-all-link:hover {
+    opacity: 0.7;
+  }
+
+  @media (max-width: 1024px) {
+    .categories-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .categories-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .category-card {
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

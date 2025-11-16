@@ -1,0 +1,21 @@
+---
+interface Props {
+  message: string;
+}
+
+const { message }: Props = Astro.props;
+---
+
+<div class="alert">
+  {message}
+</div>
+
+<style>
+  .alert {
+    text-align: center;
+    background-color: #454545;
+    color: #ffffff;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+</style>

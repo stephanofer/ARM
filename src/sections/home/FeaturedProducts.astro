@@ -1,0 +1,312 @@
+---
+import SectionContainer from "@/components/SectionContainer.astro";
+
+const products = [
+  {
+    id: 4,
+    brand: "ATTACK SHARK",
+    name: "TECLADO ATTACK SHARK X98 | INALAMBRICO | SW LINEAR BLUEBERRY | RGB | BLANCO - GRIS - GRIS OSCURO",
+    price: 289.00,
+    oldPrice: 329.00,
+    discount: 12,
+    image: "/favicon.svg",
+    reviews: 0,
+    available: true
+  },
+  {
+    id: 5,
+    brand: "ATTACK SHARK",
+    name: "TECLADO ATTACK SHARK X82 PRO HE | INALAMBRICO | MAGNETICO | RGB | BLANCO - COMIC",
+    price: 339.00,
+    oldPrice: 359.00,
+    discount: 6,
+    image: "/favicon.svg",
+    reviews: 0,
+    available: true
+  },
+  {
+    id: 6,
+    brand: "ATTACK SHARK",
+    name: "MOUSE ATTACK SHARK G3 PRO | BASE DE CARGA| INALAMBRICO | 25,000 DPI | BLANCO",
+    price: 129.00,
+    oldPrice: 149.00,
+    discount: 13,
+    image: "/favicon.svg",
+    reviews: 0,
+    available: true
+  }
+];
+---
+
+<SectionContainer id="featured-products" class="mt-4">
+  <div class="products-container">
+    <div class="titles">
+      <h1>Productos Destacados</h1>
+      <p>Los mejores productos seleccionados para ti</p>
+    </div>
+    <div class="products-grid">
+      {products.map((product) => (
+        <article class="product-card">
+          <div class="product-badge">
+            <span class="discount-badge">Ahorrar {product.discount}%</span>
+            <img src="/favicon.svg" alt="Attack Shark Logo" class="brand-logo-badge" />
+          </div>
+
+          <div class="product-image">
+            <img src={product.image} alt={product.name} />
+          </div>
+
+          <div class="product-info">
+            <p class="product-brand">{product.brand}</p>
+            <h3 class="product-title">{product.name}</h3>
+
+            <div class="product-pricing">
+              <span class="product-price">S/. {product.price.toFixed(2)}</span>
+              <span class="product-old-price">S/. {product.oldPrice.toFixed(2)}</span>
+            </div>
+
+            <div class="product-reviews">
+              <div class="stars">
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+              </div>
+              <span class="review-count">{product.reviews} reseña</span>
+            </div>
+
+            {product.available && (
+              <div class="product-availability">
+                <span class="availability-dot"></span>
+                <span class="availability-text">Disponible</span>
+              </div>
+            )}
+
+            <button class="add-to-cart-btn">Añadir al carrito</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</SectionContainer>
+
+<style>
+  .titles {
+    margin-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: var(--fs-xl);
+    font-family: "Clash";
+    font-weight: 450;
+  }
+
+  .products-container {
+    margin: 0 auto;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .product-card {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+  }
+
+  .product-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .discount-badge {
+    background: #dc2626;
+    color: white;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+
+  .brand-logo-badge {
+    width: 60px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .product-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+    min-height: 200px;
+  }
+
+  .product-image img {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .product-card:hover .product-image img {
+    transform: scale(1.05);
+  }
+
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+
+  .product-brand {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .product-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.4;
+    margin: 0;
+    min-height: 3.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-pricing {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #dc2626;
+  }
+
+  .product-old-price {
+    font-size: 1rem;
+    color: #999;
+    text-decoration: line-through;
+  }
+
+  .product-reviews {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    color: #d1d5db;
+    font-size: 1rem;
+  }
+
+  .review-count {
+    font-size: 0.875rem;
+    color: #666;
+  }
+
+  .product-availability {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .availability-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+  }
+
+  .availability-text {
+    font-size: 0.875rem;
+    color: #22c55e;
+    font-weight: 600;
+  }
+
+  .add-to-cart-btn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: auto;
+  }
+
+  .add-to-cart-btn:hover {
+    background: #1d4ed8;
+  }
+
+  @media (max-width: 768px) {
+    .products-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      padding: 1rem;
+    }
+
+    .product-image {
+      min-height: 160px;
+      padding: 1rem 0;
+    }
+
+    .product-image img {
+      max-height: 150px;
+    }
+
+    .product-title {
+      font-size: 0.875rem;
+      min-height: 3rem;
+    }
+
+    .product-price {
+      font-size: 1.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+:root {
+  color-scheme: light;
+  --fs-sm: clamp(0.8rem, -0.09vi + 0.82rem, 0.75rem);
+  --fs-base: clamp(1rem, 0vi + 1rem, 1rem);
+  --fs-md: clamp(1.2rem, 0.15vi + 1.21rem, 1.33rem);
+  --fs-lg: clamp(1.56rem, 0.39vi + 1.47rem, 1.78rem);
+  --fs-xl: clamp(1.95rem, 0.76vi + 1.76rem, 2.37rem);
+  --fs-xxl: clamp(2.44rem, 1.3vi + 2.12rem, 3.16rem);
+  --fs-xxxl: clamp(3.05rem, 2.1vi + 2.53rem, 6.21rem);
+  /* --foreground: #000; */
+  /* --resalt: rgb(0 118 209); */
+  /* --color-divider: rgb(20 20 20); */
+  /* --color-opacity: rgb(129 129 129); */
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/Inter.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Clash";
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url("/fonts/Clash.woff2") format("woff2");
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+@media (prefers-reduced-motion) {
+  html,
+  body {
+    scroll-behavior: auto;
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style-type: none;
+  padding: 0;
+}
+ul {
+  padding-inline-start: 0;
+}
+
+a {
+  color: white;
+}

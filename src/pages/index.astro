@@ -1,11 +1,23 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Brands from "@/sections/home/Brands.astro";
+import Categories from "@/sections/home/Categories.astro";
+import CustomersTestimonials from "@/sections/home/CustomersTestimonials.astro";
+import ElectronicCatalogs from "@/sections/home/ElectronicCatalogs.astro";
+import FeaturedProducts from "@/sections/home/FeaturedProducts.astro";
+import Hero from "@/sections/home/Hero.astro";
+import WhyUs from "@/sections/home/WhyUs.astro";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const title = "Página de Inicio";
+const description = "Bienvenido a la página de inicio de mi sitio web.";
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title={title} description={description}>
+  <Hero/>
+  <Brands />
+  <Categories />
+  <FeaturedProducts />
+  <WhyUs />
+  <ElectronicCatalogs />
+  <CustomersTestimonials />
+</BaseLayout>
