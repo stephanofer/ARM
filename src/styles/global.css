@@ -18,6 +18,27 @@
   /* --resalt: rgb(0 118 209); */
   /* --color-divider: rgb(20 20 20); */
   /* --color-opacity: rgb(129 129 129); */
+
+  /* --- PRIMARIOS --- */
+  --color-primary: #d2b48c;           /* beige principal del header */
+  --color-primary-dark: #b19572;      /* hover o versiones más fuertes */
+  --color-primary-light: #e8d7c2;     /* fondos suaves */
+
+  /* --- SECUNDARIOS --- */
+  --color-secondary: #c5a27c;         /* acentos, subrayados, enlaces */
+  --color-secondary-light: #f7f3ee;
+
+  /* --- NEUTROS --- */
+  --color-text: #1a1a1a;              /* texto fuerte */
+  --color-text-light: #555;           /* texto secundario */
+  --color-border: #e5e5e5;            /* bordes */
+  --color-bg: #ffffff;                /* fondo principal */
+  --color-bg-muted: #fafafa;          /* secciones alternadas */
+
+  /* --- SEMÁNTICOS (opcional) --- */
+  --success: #4caf50;
+  --danger: #ff5252;
+  --warning: #ffa726;
 }
 
 @font-face {

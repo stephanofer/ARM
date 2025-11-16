@@ -50,7 +50,7 @@ import SectionContainer from "@/components/SectionContainer.astro";
     margin: 0 auto;
   }
 
-  .texts{
+  .texts {
     margin-bottom: 3rem;
   }
 
@@ -105,6 +105,10 @@ import SectionContainer from "@/components/SectionContainer.astro";
     .brands-grid {
       grid-template-columns: repeat(4, 1fr);
     }
+    
+    .brand-item:nth-child(n + 9) {
+      display: none;
+    }
   }
 
   @media (max-width: 900px) {
@@ -115,6 +119,10 @@ import SectionContainer from "@/components/SectionContainer.astro";
     .brand-item {
       padding: 2rem 1.5rem;
       min-height: 120px;
+    }
+
+    .brand-item:nth-child(n + 7) {
+      display: none;
     }
   }
 

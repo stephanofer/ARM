@@ -27,4 +27,18 @@ const { id, class: className } = Astro.props;
   .mt-4 {
     margin-top: 3rem;
   }
+
+  /* Tablet: reducir margen */
+  @media (max-width: 900px) {
+    .mt-4 {
+      margin-top: 1.5rem;
+    }
+  }
+
+  /* Móvil: eliminar o casi eliminar margen */
+  @media (max-width: 600px) {
+    .mt-4 {
+      margin-top: 0.5rem; /* o 0 si quieres sin margen */
+    }
+  }
 </style>

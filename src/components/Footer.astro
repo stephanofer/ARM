@@ -6,8 +6,6 @@ import Instagram from "@/assets/svg/Instagram.svg";
 import Facebook from "@/assets/svg/Facebook.svg";
 import Tiktok from "@/assets/svg/Tiktok.svg";
 import Youtube from "@/assets/svg/Youtube.svg";
-
-
 ---
 
 <footer class="footer">
@@ -49,25 +47,25 @@ import Youtube from "@/assets/svg/Youtube.svg";
           <ul class="column-list social-list">
             <li>
               <a href="#" class="social-link">
-                <Instagram/>
+                <Instagram />
                 Instagram
               </a>
             </li>
             <li>
               <a href="#" class="social-link">
-                <Tiktok/>
+                <Tiktok />
                 Tik Tok
               </a>
             </li>
             <li>
               <a href="#" class="social-link">
-                <Facebook/>
+                <Facebook />
                 Facebook
               </a>
             </li>
             <li>
               <a href="#" class="social-link">
-                <Youtube/>
+                <Youtube />
                 Youtube
               </a>
             </li>
@@ -89,7 +87,6 @@ import Youtube from "@/assets/svg/Youtube.svg";
         </div>
       </div>
     </div>
-
 
     <div class="footer-bottom">
       <div class="footer-bottom-left">
@@ -136,7 +133,7 @@ import Youtube from "@/assets/svg/Youtube.svg";
   .footer-main {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 1.75rem;
     margin-bottom: 2rem;
     padding-bottom: 2rem;
   }
@@ -196,10 +193,12 @@ import Youtube from "@/assets/svg/Youtube.svg";
   }
 
   .column-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
     color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
   }
 
   .column-list {
@@ -246,8 +245,20 @@ import Youtube from "@/assets/svg/Youtube.svg";
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    color: #333;
     line-height: 1.6;
+    border-left: 2px solid #e5e5e5;
+    padding-left: 1rem;
+  }
+
+  .contact-info p {
+    line-height: 1.7;
+  }
+
+  .company-name {
+    font-weight: 700;
+    font-size: 1rem;
   }
 
   @media (min-width: 768px) {
@@ -366,4 +377,6 @@ import Youtube from "@/assets/svg/Youtube.svg";
     font-weight: 600;
     color: #1a1a1a;
   }
+
+  
 </style>

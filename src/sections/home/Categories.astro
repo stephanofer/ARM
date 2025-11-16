@@ -31,7 +31,7 @@ const categories = [
 
 <SectionContainer id="categories" class="mt-4">
   <div class="texts">
-    <h1>Categorías Destacadas</h1>
+    <h2>Categorías Destacadas</h2>
     <p>Explora nuestras colecciones más populares</p>
   </div>
   <div class="categories-grid">
@@ -45,7 +45,7 @@ const categories = [
             loading="lazy"
           />
           <div class="category-overlay">
-            <h2 class="category-title">{category.name}</h2>
+            <h3 class="category-title">{category.name}</h3>
             <a href={category.link} class="category-link">
               Ver colección
             </a>
@@ -74,7 +74,7 @@ const categories = [
   .categories-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+    gap: 1.2rem;
   }
 
   .category-card {
@@ -138,7 +138,7 @@ const categories = [
 
   .view-all {
     text-align: center;
-    margin-top: 2rem;
+    margin: 1rem 0;
   }
 
   .view-all-link {
