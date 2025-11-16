@@ -1,0 +1,269 @@
+---
+import SectionContainer from "@/components/SectionContainer.astro";
+import { email, emailLink, phoneLink, phoneNumber } from "@/const/links";
+
+import Paper from "@/assets/svg/Paper.svg";
+import CallPhone from "@/assets/svg/CallPhone.svg";
+import Email from "@/assets/svg/Email.svg";
+---
+
+<div class="contact-wrapper">
+  <div class="contact-header">
+    <h1 class="contact-title">Contacto</h1>
+    <p class="contact-subtitle">
+      Revisa nuestro apartado de <strong>preguntas frecuentes</strong> si tienes
+      cualquier duda y necesitas más ayuda o, escríbenos a <a
+        href="mailto:info@muebleslife.com"
+        class="email-link">{email}</a
+      >
+    </p>
+    <p class="contact-greeting">Lima, Perú</p>
+  </div>
+
+  <div class="contact-content">
+    <div class="map-container">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2906.8!2d-2.0!3d43.0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDAwJzAwLjAiTiAywrAwMCcwMC4wIlc!5e0!3m2!1ses!2ses!4v1234567890"
+        width="100%"
+        height="100%"
+        style="border:0;"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Ubicación de ARM CORPORATION"></iframe>
+    </div>
+
+    <div class="contact-info">
+      <div class="info-block">
+        <div class="info-icon">
+          <Email width="24" height="24" />
+        </div>
+        <div class="info-content">
+          <h3 class="info-label">Correo electrónico:</h3>
+          <a href={emailLink} class="info-value">{email}</a>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <div class="info-icon">
+          <CallPhone width="24" height="24" />
+        </div>
+        <div class="info-content">
+          <h3 class="info-label">Atención al cliente:</h3>
+          <a href={phoneLink} class="info-value phone">{phoneNumber}</a>
+          <p class="info-schedule">L-V, DE 10:00 A 17:00 h</p>
+          <p class="info-schedule">S: DE 10:00 a 13:00 h</p>
+          <p class="info-schedule schedule-highlight">
+            HORARIO AGOSTO:<br />L-V, DE 09:00 A 16:00 h<br />S: CERRADO
+          </p>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <div class="info-icon">
+          <Paper width="24" height="24" />
+        </div>
+        <div class="info-content">
+          <h3 class="info-label">Prensa:</h3>
+          <a href="mailto:marketing@muebleslife.com" class="info-value"
+            >marketing@muebleslife.com</a
+          >
+          <p class="info-extra">Colaboraciones:</p>
+          <a href="#" class="info-value form-link">Rellena este formulario</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-wrapper {
+    max-width: 1200px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin: auto;
+    margin-top: 4rem;
+  }
+
+  .contact-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .contact-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding: 0 1rem;
+  }
+
+  .contact-title {
+    font-size: var(--fs-xxl);
+    font-family: "Clash";
+    font-weight: 450;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .contact-subtitle {
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    color: #333;
+    max-width: 700px;
+    margin: 0 auto 1rem;
+  }
+
+  .contact-subtitle strong {
+    text-decoration: underline;
+  }
+
+  .email-link {
+    color: #333;
+    text-decoration: underline;
+  }
+
+  .contact-greeting {
+    font-size: var(--fs-sm);
+    color: #666;
+    margin-top: 1rem;
+  }
+
+  .contact-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (min-width: 968px) {
+    .contact-content {
+      grid-template-columns: 1.4fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .map-container {
+    width: 100%;
+    height: 450px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 968px) {
+    .map-container {
+      height: 600px;
+    }
+  }
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .info-block {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .info-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    color: #333;
+  }
+
+  .info-content {
+    flex: 1;
+  }
+
+  .info-label {
+    font-size: var(--fs-base);
+    font-family: 'Clash';
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .info-value {
+    display: block;
+    font-size: var(--fs-sm);
+    color: #333;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .info-value:hover {
+    color: #0076d1;
+  }
+
+  .info-value.phone {
+    /* font-size: var(--fs-md); */
+    font-weight: 550;
+  }
+
+  .info-schedule {
+    font-size: var(--fs-sm);
+    color: #666;
+    margin: 0.25rem 0;
+  }
+
+  .schedule-highlight {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e5e5;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .info-extra {
+    font-size: var(--fs-sm);
+    color: #666;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .form-link {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .contact-header {
+      margin-bottom: 2rem;
+    }
+
+    .contact-title {
+      font-size: var(--fs-xl);
+    }
+
+    .contact-subtitle{
+        font-size: var(--fs-sm);
+    }
+
+    .contact-wrapper{
+        margin-top: 2rem;
+    }
+
+
+    .map-container {
+      height: 350px;
+    }
+
+    .info-block {
+      gap: 1rem;
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+    }
+  }
+</style>

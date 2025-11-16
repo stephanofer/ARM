@@ -1,0 +1,179 @@
+---
+import SectionContainer from "@/components/SectionContainer.astro";
+---
+
+<section class="philosophy-section">
+  <div class="philosophy-content">
+    <h2 class="main-title">
+      Bueno para tu casa, bueno para el planeta. En LUFE, trabajamos desde el
+      sincero convencimiento de que trabajar con madera maciza natural es la
+      mejor decisión posible para amueblar con estilo y sostenibilidad.
+    </h2>
+
+    <div class="columns-container">
+      <div class="column left-column">
+        <p class="paragraph">
+          Los árboles crecen según el azar que dicta la naturaleza.
+        </p>
+
+        <p class="paragraph">
+          Basta un breve paseo por un bosque para comprobar que no hay dos
+          árboles iguales.
+        </p>
+
+        <p class="paragraph">
+          La madera es un producto vivo y natural. Y con sus nudos imperfectos y
+          sus vetas de formas abstractas...es uno de los materiales más bellos
+          que existen.
+        </p>
+
+        <p class="paragraph">Pero no solo bello.</p>
+
+        <p class="paragraph">
+          Por eso en LUFE estamos tan orgullosos de diseñar y fabricar muebles
+          de madera de verdad que cualquiera se pueda permitir pero que no
+          tengan un diseño cualquiera.
+        </p>
+      </div>
+
+      <div class="column right-column">
+        <p class="paragraph">
+          Y de hacerlo de forma sostenible, siendo respetuosos con nuestro
+          entorno y con el planeta.
+        </p>
+
+        <p class="paragraph">
+          Desde 2014 que se creó la marca, no hemos parado de diseñar pero
+          tampoco de cortar, lijar o martillear.
+        </p>
+
+        <p class="paragraph">
+          En LUFE nos manchamos de serrín cada día y esperamos que así siga
+          siendo.
+        </p>
+
+        <div class="signature-block">
+          <p class="founder-name">Hector Vega</p>
+          <p class="founder-title">Fundador de ARM Corportation</p>
+          <div class="signature">
+            <img
+              src="https://images.unsplash.com/photo-1633265486064-086b219458ec?w=300&h=150&fit=crop&q=80"
+              alt="Firma de Enrique Arrillaga"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .philosophy-section {
+    max-width: 1200px;
+    margin: 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-top: 4rem;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .main-title {
+    font-size: var(--fs-xxl);
+    font-family: "Clash";
+    font-weight: 450;
+    line-height: 1.3;
+    margin: 0 0 4rem 0;
+    color: #1a1a1a;
+    max-width: 1000px;
+  }
+
+  .columns-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .paragraph {
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+  }
+
+  .signature-block {
+    margin-top: 3rem;
+    padding-top: 2rem;
+  }
+
+  .founder-name {
+    font-size: var(--fs-md);
+    font-family: "Clash";
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .founder-title {
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    color: #999;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .signature {
+    width: 200px;
+    height: auto;
+  }
+
+  .signature img {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0.8;
+    mix-blend-mode: multiply;
+  }
+
+  @media (max-width: 968px) {
+    .philosophy-section {
+      padding: 4rem 1.5rem;
+    }
+
+    .main-title {
+      margin-bottom: 3rem;
+    }
+
+    .columns-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .signature-block {
+      margin-top: 2rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .philosophy-section {
+      padding: 3rem 1rem;
+    }
+
+    .main-title {
+      margin-bottom: 2rem;
+    }
+
+    .columns-container {
+      gap: 1.5rem;
+    }
+
+    .column {
+      gap: 1.25rem;
+    }
+  }
+</style>
