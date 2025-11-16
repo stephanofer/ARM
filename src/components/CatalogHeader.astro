@@ -1,0 +1,230 @@
+---
+interface Props {
+  title: string;
+  totalProducts: number;
+  currentView?: 'grid' | 'list';
+}
+
+const { title, totalProducts, currentView = 'grid' } = Astro.props;
+---
+
+<div class="catalog-header">
+  <div class="header-left">
+    <h1 class="catalog-title">{title}</h1>
+    <p class="catalog-count">Mostrando 1-{totalProducts} de {totalProducts} productos</p>
+  </div>
+
+  <div class="header-right">
+    <button class="mobile-filter-btn" id="headerFilterBtn" aria-label="Abrir filtros">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="4" y1="21" x2="4" y2="14"></line>
+        <line x1="4" y1="10" x2="4" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12" y2="3"></line>
+        <line x1="20" y1="21" x2="20" y2="16"></line>
+        <line x1="20" y1="12" x2="20" y2="3"></line>
+        <line x1="1" y1="14" x2="7" y2="14"></line>
+        <line x1="9" y1="8" x2="15" y2="8"></line>
+        <line x1="17" y1="16" x2="23" y2="16"></line>
+      </svg>
+      <span>Filtros</span>
+    </button>
+
+    <div class="sort-controls">
+      <label for="sortBy" class="sort-label">Ordenar por:</label>
+      <select id="sortBy" class="sort-select">
+        <option value="featured">Destacados</option>
+        <option value="name-asc">Nombre: A-Z</option>
+        <option value="name-desc">Nombre: Z-A</option>
+        <option value="newest">Más recientes</option>
+        <option value="availability">Disponibilidad</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<style>
+  .catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .header-left {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .catalog-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+  }
+
+  .catalog-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sort-label {
+    font-size: 0.875rem;
+    color: #374151;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .sort-select {
+    padding: 8px 36px 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #111827;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.2s ease;
+    min-width: 180px;
+  }
+
+  .sort-select:hover {
+    border-color: #9ca3af;
+  }
+
+  .sort-select:focus {
+    outline: none;
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+  }
+
+  .mobile-filter-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-filter-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+  }
+
+  .mobile-filter-btn:active {
+    transform: scale(0.98);
+  }
+
+  .mobile-filter-btn svg {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .mobile-filter-btn {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .catalog-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .header-left {
+      min-width: auto;
+    }
+
+    .header-right {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .sort-controls {
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .sort-select {
+      flex: 1;
+      min-width: auto;
+    }
+
+    .catalog-title {
+      font-size: 1.5rem;
+    }
+
+    .mobile-filter-btn {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sort-label {
+      display: none;
+    }
+
+    .sort-select {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Sort functionality
+  const sortSelect = document.getElementById('sortBy') as HTMLSelectElement;
+  
+  sortSelect?.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement;
+    const sortValue = target.value;
+    
+    // Here you would implement actual sorting logic
+    console.log('Sort by:', sortValue);
+    
+    // For SSR, you might want to update URL params and reload
+    // const url = new URL(window.location.href);
+    // url.searchParams.set('sort', sortValue);
+    // window.location.href = url.toString();
+  });
+
+  // Open filters from header button
+  const headerFilterBtn = document.getElementById('headerFilterBtn');
+  headerFilterBtn?.addEventListener('click', () => {
+    const mobileFilterToggle = document.getElementById('mobileFilterToggle') as HTMLButtonElement;
+    if (mobileFilterToggle) {
+      mobileFilterToggle.click();
+    }
+  });
+</script>

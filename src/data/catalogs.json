@@ -1,0 +1,32 @@
+[
+  {
+    "id": "todos",
+    "name": "Todos los Productos",
+    "slug": "todos"
+  },
+  {
+    "id": "dormitorio",
+    "name": "Dormitorio",
+    "slug": "dormitorio"
+  },
+  {
+    "id": "comedor",
+    "name": "Comedor",
+    "slug": "comedor"
+  },
+  {
+    "id": "estudio",
+    "name": "Estudio y Oficina",
+    "slug": "estudio"
+  },
+  {
+    "id": "infantil",
+    "name": "Infantil",
+    "slug": "infantil"
+  },
+  {
+    "id": "exterior",
+    "name": "Exterior",
+    "slug": "exterior"
+  }
+]

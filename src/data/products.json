@@ -1,0 +1,227 @@
+[
+  {
+    "id": "p01",
+    "name": "Cama Montessori",
+    "description": "Cama baja de madera maciza para niños.",
+    "inStock": true,
+    "category": "infantil",
+    "brand": "ARM Kids",
+    "material": "Pino",
+    "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&q=80",
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80",
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p02",
+    "name": "Mesa de Comedor",
+    "description": "Mesa robusta para 6 personas, acabado natural.",
+    "inStock": true,
+    "category": "comedor",
+    "brand": "ARM Classic",
+    "material": "Roble",
+    "image": "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
+      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p03",
+    "name": "Silla de Estudio",
+    "description": "Silla ergonómica de madera para escritorio.",
+    "inStock": false,
+    "category": "estudio",
+    "brand": "ARM Ergo",
+    "material": "Nogal",
+    "image": "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p04",
+    "name": "Librero Modular",
+    "description": "Librero adaptable a diferentes espacios.",
+    "inStock": true,
+    "category": "estudio",
+    "brand": "ARM Modular",
+    "material": "Pino",
+    "image": "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80",
+      "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80",
+      "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p05",
+    "name": "Mesa Exterior",
+    "description": "Mesa para jardín resistente a la intemperie.",
+    "inStock": false,
+    "category": "exterior",
+    "brand": "ARM Outdoor",
+    "material": "Teca",
+    "image": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800&q=80",
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p06",
+    "name": "Cama Serie 80",
+    "description": "Cama individual de diseño clásico.",
+    "inStock": true,
+    "category": "dormitorio",
+    "brand": "ARM Classic",
+    "material": "Roble",
+    "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+      "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p07",
+    "name": "Cama Serie 105",
+    "description": "Cama matrimonial con cabecera.",
+    "inStock": true,
+    "category": "dormitorio",
+    "brand": "ARM Classic",
+    "material": "Nogal",
+    "image": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p08",
+    "name": "Escritorio Minimalista",
+    "description": "Escritorio compacto para espacios reducidos.",
+    "inStock": false,
+    "category": "estudio",
+    "brand": "ARM Modular",
+    "material": "Pino",
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+      "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p09",
+    "name": "Banco de Cocina",
+    "description": "Banco alto para barra de cocina.",
+    "inStock": true,
+    "category": "comedor",
+    "brand": "ARM Modular",
+    "material": "Roble",
+    "image": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=800&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p10",
+    "name": "Mesa Auxiliar",
+    "description": "Mesa pequeña para sala o recámara.",
+    "inStock": true,
+    "category": "dormitorio",
+    "brand": "ARM Classic",
+    "material": "Nogal",
+    "image": "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80",
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80",
+      "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p11",
+    "name": "Silla Infantil",
+    "description": "Silla pequeña para niños, madera natural.",
+    "inStock": false,
+    "category": "infantil",
+    "brand": "ARM Kids",
+    "material": "Pino",
+    "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p12",
+    "name": "Mesa Montessori",
+    "description": "Mesa baja para actividades infantiles.",
+    "inStock": true,
+    "category": "infantil",
+    "brand": "ARM Kids",
+    "material": "Pino",
+    "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&q=80",
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80",
+      "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p13",
+    "name": "Cajonera Compacta",
+    "description": "Cajonera de tres niveles para recámara.",
+    "inStock": true,
+    "category": "dormitorio",
+    "brand": "ARM Modular",
+    "material": "Roble",
+    "image": "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80",
+      "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=800&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p14",
+    "name": "Mesa de Noche",
+    "description": "Mesa auxiliar para recámara, acabado mate.",
+    "inStock": false,
+    "category": "dormitorio",
+    "brand": "ARM Classic",
+    "material": "Nogal",
+    "image": "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?w=800&q=80",
+      "https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=800&q=80",
+      "https://images.unsplash.com/photo-1464983953574-0892a716854b?w=800&q=80"
+    ]
+  },
+  {
+    "id": "p15",
+    "name": "Silla Exterior",
+    "description": "Silla resistente para terraza o jardín.",
+    "inStock": true,
+    "category": "exterior",
+    "brand": "ARM Outdoor",
+    "material": "Teca",
+    "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
+    ]
+  }
+]

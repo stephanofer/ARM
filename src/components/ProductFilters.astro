@@ -1,0 +1,366 @@
+---
+interface Props {
+  currentCategory?: string;
+}
+
+const { currentCategory = 'todos' } = Astro.props;
+
+const categories = [
+  { id: 'todos', name: 'Todos los Productos', count: 15 },
+  { id: 'dormitorio', name: 'Dormitorio', count: 5 },
+  { id: 'comedor', name: 'Comedor', count: 2 },
+  { id: 'estudio', name: 'Estudio y Oficina', count: 3 },
+  { id: 'infantil', name: 'Infantil', count: 3 },
+  { id: 'exterior', name: 'Exterior', count: 2 },
+];
+
+const brands = [
+  { id: 'arm-classic', name: 'ARM Classic', count: 6 },
+  { id: 'arm-kids', name: 'ARM Kids', count: 3 },
+  { id: 'arm-modular', name: 'ARM Modular', count: 4 },
+  { id: 'arm-outdoor', name: 'ARM Outdoor', count: 2 },
+];
+
+const materials = [
+  { id: 'roble', name: 'Roble', count: 5 },
+  { id: 'pino', name: 'Pino', count: 5 },
+  { id: 'nogal', name: 'Nogal', count: 4 },
+  { id: 'teca', name: 'Teca', count: 1 },
+];
+---
+
+<aside class="filters-sidebar">
+  <div class="filters-header">
+    <h2 class="filters-title">Filtros</h2>
+    <button class="clear-filters" id="clearFilters">
+      Limpiar todo
+    </button>
+  </div>
+
+  <!-- Disponibilidad -->
+  <div class="filter-section">
+    <h3 class="filter-section-title">
+      <span>Disponibilidad</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </h3>
+    <div class="filter-options">
+      <label class="filter-option">
+        <input type="checkbox" name="stock" value="available" />
+        <span class="checkbox-custom"></span>
+        <span class="option-label">Disponible</span>
+      </label>
+      <label class="filter-option">
+        <input type="checkbox" name="stock" value="unavailable" />
+        <span class="checkbox-custom"></span>
+        <span class="option-label">No disponible</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Categoría -->
+  <div class="filter-section">
+    <h3 class="filter-section-title">
+      <span>Categoría</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </h3>
+    <div class="filter-options">
+      {categories.map((category) => (
+        <label class="filter-option">
+          <input 
+            type="radio" 
+            name="category" 
+            value={category.id}
+            checked={currentCategory === category.id}
+          />
+          <span class="radio-custom"></span>
+          <span class="option-label">
+            {category.name}
+            <span class="option-count">({category.count})</span>
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <!-- Marca -->
+  <div class="filter-section">
+    <h3 class="filter-section-title">
+      <span>Marca</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </h3>
+    <div class="filter-options">
+      {brands.map((brand) => (
+        <label class="filter-option">
+          <input type="checkbox" name="brand" value={brand.id} />
+          <span class="checkbox-custom"></span>
+          <span class="option-label">
+            {brand.name}
+            <span class="option-count">({brand.count})</span>
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <!-- Material -->
+  <div class="filter-section">
+    <h3 class="filter-section-title">
+      <span>Material</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </h3>
+    <div class="filter-options">
+      {materials.map((material) => (
+        <label class="filter-option">
+          <input type="checkbox" name="material" value={material.id} />
+          <span class="checkbox-custom"></span>
+          <span class="option-label">
+            {material.name}
+            <span class="option-count">({material.count})</span>
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+</aside>
+
+<style>
+  .filters-sidebar {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+
+  .filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .filters-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  .clear-filters {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+
+  .clear-filters:hover {
+    color: #111827;
+    background: #f3f4f6;
+  }
+
+  .filter-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .filter-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .filter-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .chevron {
+    color: #6b7280;
+    transition: transform 0.3s ease;
+  }
+
+  .filter-section.collapsed .chevron {
+    transform: rotate(-90deg);
+  }
+
+  .filter-section.collapsed .filter-options {
+    display: none;
+  }
+
+  .filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: all 0.2s ease;
+  }
+
+  .filter-option:hover {
+    padding-left: 4px;
+  }
+
+  .filter-option input[type="checkbox"],
+  .filter-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .checkbox-custom,
+  .radio-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .radio-custom {
+    border-radius: 50%;
+  }
+
+  .filter-option input:checked ~ .checkbox-custom,
+  .filter-option input:checked ~ .radio-custom {
+    background: #111827;
+    border-color: #111827;
+  }
+
+  .checkbox-custom::after {
+    content: '';
+    width: 5px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.2s ease;
+  }
+
+  .filter-option input:checked ~ .checkbox-custom::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .radio-custom::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+  }
+
+  .filter-option input:checked ~ .radio-custom::after {
+    transform: scale(1);
+  }
+
+  .option-label {
+    font-size: 0.875rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .filter-option:hover .option-label {
+    color: #111827;
+  }
+
+  .option-count {
+    color: #9ca3af;
+    font-size: 0.813rem;
+  }
+
+  /* Scrollbar personalizada */
+  .filters-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .filters-sidebar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+  }
+
+  .filters-sidebar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+
+  .filters-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  @media (max-width: 1024px) {
+    .filters-sidebar {
+      position: static;
+      max-height: none;
+    }
+  }
+</style>
+
+<script>
+  // Toggle filter sections
+  document.querySelectorAll('.filter-section-title').forEach(title => {
+    title.addEventListener('click', () => {
+      const section = title.parentElement;
+      section?.classList.toggle('collapsed');
+    });
+  });
+
+  // Clear all filters
+  document.getElementById('clearFilters')?.addEventListener('click', () => {
+    const form = document.querySelector('.filters-sidebar');
+    if (form) {
+      const inputs = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+      inputs.forEach(input => {
+        if (input instanceof HTMLInputElement) {
+          input.checked = false;
+        }
+      });
+      // Reset to "Todos" category
+      const todosRadio = form.querySelector('input[value="todos"]');
+      if (todosRadio instanceof HTMLInputElement) {
+        todosRadio.checked = true;
+      }
+    }
+  });
+</script>
