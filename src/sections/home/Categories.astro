@@ -6,25 +6,25 @@ const categories = [
     name: "Dormitorio",
     image:
       "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
-    link: "/productos?categoria=dormitorio",
+    link: "/categorias/dormitorio",
   },
   {
     name: "Montessori",
     image:
       "https://images.unsplash.com/photo-1631889993959-41b4e9c6e3c5?w=800&q=80",
-    link: "/productos?categoria=montessori",
+    link: "/categorias/montessori",
   },
   {
     name: "Comedor",
     image:
       "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=800&q=80",
-    link: "/productos?categoria=comedor",
+    link: "/categorias/comedor",
   },
   {
     name: "Exterior",
     image:
       "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
-    link: "/productos?categoria=exterior",
+    link: "/categorias/exterior",
   },
 ];
 ---
@@ -37,7 +37,7 @@ const categories = [
   <div class="categories-grid">
     {
       categories.map((category) => (
-        <article class="category-card">
+        <a href={category.link} class="category-card" style="text-decoration: none; color: inherit;">
           <img
             src={category.image}
             alt={category.name}
@@ -46,16 +46,14 @@ const categories = [
           />
           <div class="category-overlay">
             <h3 class="category-title">{category.name}</h3>
-            <a href={category.link} class="category-link">
-              Ver colección
-            </a>
+            <span class="category-link">Ver colección</span>
           </div>
-        </article>
+        </a>
       ))
     }
   </div>
   <div class="view-all">
-    <a href="/productos" class="view-all-link"> Ver todas las categorías </a>
+    <a href="/categorias" class="view-all-link"> Ver todas las categorías </a>
   </div>
 </SectionContainer>
 

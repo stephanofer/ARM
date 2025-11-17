@@ -6,23 +6,25 @@ import CatalogHeader from "@/components/CatalogHeader.astro";
 import ProductCard from "@/components/ProductCard.astro";
 import MobileFilterToggle from "@/components/MobileFilterToggle.astro";
 import productsData from "@/data/products.json";
-import catalogsData from "@/data/catalogs.json";
+import categoriesData from "@/data/categories.json";
 
-const { catalog } = Astro.params;
+const category = Astro.params.category || '';
 
-// Find catalog info
-const catalogInfo =
-  catalogsData.find((c) => c.slug === catalog) || catalogsData[0];
+// Find category info
+const categoryInfo = categoriesData.find((c) => c.slug === category);
 
-// Filter products by catalog
-let filteredProducts = productsData;
-if (catalog && catalog !== "todos") {
-  filteredProducts = productsData.filter((p) => p.category === catalog);
+if (!categoryInfo || !category) {
+  return Astro.redirect("/404");
 }
 
-const title = catalogInfo?.name || "Productos";
-const description =
-  "Explora nuestras colecciones de muebles de madera maciza diseñados con estilo y sostenibilidad.";
+// Filter products by category - show ALL products for this category
+let filteredProducts = productsData.filter((p) => p.category === category);
+
+// Get subcategories for this category
+const subcategories = categoryInfo.subcategories || [];
+
+const title = categoryInfo?.name || "Productos";
+const description = `Explora toda nuestra colección de ${categoryInfo?.name.toLowerCase()}.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -30,25 +32,22 @@ const description =
     <div class="breadcrumb">
       <a href="/">Inicio</a>
       <span class="separator">/</span>
-      <a href="/productos">Productos</a>
-      {
-        catalog && catalog !== "todos" && (
-          <>
-            <span class="separator">/</span>
-            <span class="current">{catalogInfo?.name}</span>
-          </>
-        )
-      }
+      <a href="/categorias">Categorías</a>
+      <span class="separator">/</span>
+      <span class="current">{categoryInfo?.name}</span>
     </div>
 
     <div class="catalog-layout">
       <div class="filters-column">
-        <ProductFilters currentCategory={catalog || "todos"} />
+        <ProductFilters 
+          currentCategory={category} 
+          subcategories={subcategories}
+        />
       </div>
 
       <div class="products-column">
         <CatalogHeader
-          title={catalogInfo?.name || "Todos los Productos"}
+          title={categoryInfo?.name || "Productos"}
           totalProducts={filteredProducts.length}
           currentView="grid"
         />
@@ -64,6 +63,8 @@ const description =
                 image={product.image}
                 images={product.images}
                 brand={product.brand}
+                category={category}
+                subcategory={product.subcategory}
               />
             ))
           }

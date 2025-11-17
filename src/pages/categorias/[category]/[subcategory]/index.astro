@@ -1,0 +1,255 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ProductFilters from "@/components/ProductFilters.astro";
+import CatalogHeader from "@/components/CatalogHeader.astro";
+import ProductCard from "@/components/ProductCard.astro";
+import MobileFilterToggle from "@/components/MobileFilterToggle.astro";
+import productsData from "@/data/products.json";
+import categoriesData from "@/data/categories.json";
+
+const category = Astro.params.category || '';
+const subcategory = Astro.params.subcategory || '';
+
+// Find category and subcategory info
+const categoryInfo = categoriesData.find((c) => c.slug === category);
+
+if (!categoryInfo || !category) {
+  return Astro.redirect("/404");
+}
+
+const subcategoryInfo = categoryInfo.subcategories?.find(
+  (s) => s.slug === subcategory
+);
+
+if (!subcategoryInfo || !subcategory) {
+  return Astro.redirect("/404");
+}
+
+// Filter products by category AND subcategory
+let filteredProducts = productsData.filter(
+  (p) => p.category === category && p.subcategory === subcategory
+);
+
+// Get all subcategories for the filter
+const subcategories = categoryInfo.subcategories || [];
+
+// Get dynamic filters for this subcategory
+const dynamicFilters = subcategoryInfo.dynamicFilters || [];
+
+const title = `${subcategoryInfo.name} - ${categoryInfo.name}`;
+const description = `Explora nuestra colección de ${subcategoryInfo.name.toLowerCase()} en ${categoryInfo.name.toLowerCase()}.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <section>
+    <div class="breadcrumb">
+      <a href="/">Inicio</a>
+      <span class="separator">/</span>
+      <a href="/categorias">Categorías</a>
+      <span class="separator">/</span>
+      <a href={`/categorias/${category}`}>{categoryInfo.name}</a>
+      <span class="separator">/</span>
+      <span class="current">{subcategoryInfo.name}</span>
+    </div>
+
+    <div class="catalog-layout">
+      <div class="filters-column">
+        <ProductFilters 
+          currentCategory={category} 
+          currentSubcategory={subcategory}
+          subcategories={subcategories}
+          dynamicFilters={dynamicFilters}
+        />
+      </div>
+
+      <div class="products-column">
+        <CatalogHeader
+          title={subcategoryInfo.name}
+          totalProducts={filteredProducts.length}
+          currentView="grid"
+        />
+
+        <div class="products-grid" data-view="grid">
+          {
+            filteredProducts.map((product) => (
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                description={product.description}
+                inStock={product.inStock}
+                image={product.image}
+                images={product.images}
+                brand={product.brand}
+                category={category}
+                subcategory={subcategory}
+              />
+            ))
+          }
+        </div>
+
+        {
+          filteredProducts.length === 0 && (
+            <div class="empty-state">
+              <svg
+                width="80"
+                height="80"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <h3>No se encontraron productos</h3>
+              <p>No hay productos disponibles en esta subcategoría actualmente</p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <MobileFilterToggle />
+  </section>
+</BaseLayout>
+
+<style>
+  section {
+    max-width: 1400px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin: auto;
+    margin-top: 2rem;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: #111827;
+  }
+
+  .breadcrumb .separator {
+    color: #d1d5db;
+  }
+
+  .breadcrumb .current {
+    color: #111827;
+    font-weight: 500;
+  }
+
+  .catalog-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .filters-column {
+    position: relative;
+  }
+
+  .products-column {
+    min-width: 0;
+  }
+
+  .products-grid {
+    display: grid;
+    gap: 24px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .products-grid[data-view="grid"] {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .products-grid[data-view="list"] {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+  }
+
+  .empty-state svg {
+    color: #d1d5db;
+    margin-bottom: 24px;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 8px 0;
+  }
+
+  .empty-state p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .catalog-layout {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .filters-column {
+      display: none;
+    }
+
+    .products-column {
+      order: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .products-grid[data-view="grid"] {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .catalog-layout {
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .products-grid[data-view="grid"] {
+      grid-template-columns: 1fr;
+    }
+
+    .breadcrumb {
+      margin-bottom: 24px;
+    }
+  }
+</style>

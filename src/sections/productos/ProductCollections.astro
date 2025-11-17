@@ -1,56 +1,9 @@
 ---
 import SectionContainer from "@/components/SectionContainer.astro";
+import categoriesData from "@/data/categories.json";
 
-const collections = [
-  {
-    id: "dormitorio",
-    title: "Dormitorio",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80"
-  },
-  {
-    id: "montessori",
-    title: "Montessori",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&q=80"
-  },
-  {
-    id: "comedor",
-    title: "Comedor",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80"
-  },
-  {
-    id: "estudios",
-    title: "Estudios",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80"
-  },
-  {
-    id: "a-medida",
-    title: "A medida",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&q=80"
-  },
-  {
-    id: "exterior",
-    title: "Exterior",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80"
-  },
-  {
-    id: "serie-80",
-    title: "Serie 80",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"
-  },
-  {
-    id: "serie-105",
-    title: "Serie 105",
-    subtitle: "Ver colección",
-    image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80"
-  }
-];
+// Use the first 8 categories for display
+const displayCategories = categoriesData.slice(0, 8);
 ---
 
 <SectionContainer class="collections-section" class="mt-4">
@@ -63,13 +16,13 @@ const collections = [
   </div>
 
   <div class="collections-grid">
-    {collections.map((collection) => (
-      <a href={`/productos/${collection.id}`} class="collection-card">
+    {displayCategories.map((category) => (
+      <a href={`/categorias/${category.slug}`} class="collection-card">
         <div class="collection-image-wrapper">
-          <img src={collection.image} alt={collection.title} class="collection-image" />
+          <img src={category.image} alt={category.name} class="collection-image" />
           <div class="collection-overlay">
-            <h3 class="collection-title">{collection.title}</h3>
-            <p class="collection-subtitle">{collection.subtitle}</p>
+            <h3 class="collection-title">{category.name}</h3>
+            <p class="collection-subtitle">Ver colección</p>
           </div>
         </div>
       </a>

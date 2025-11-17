@@ -1,31 +1,43 @@
 ---
-interface Props {
-  currentCategory?: string;
+interface DynamicFilter {
+  id: string;
+  name: string;
+  options: {
+    value: string;
+    label: string;
+  }[];
 }
 
-const { currentCategory = 'todos' } = Astro.props;
+interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  dynamicFilters?: DynamicFilter[];
+}
 
-const categories = [
-  { id: 'todos', name: 'Todos los Productos', count: 15 },
-  { id: 'dormitorio', name: 'Dormitorio', count: 5 },
-  { id: 'comedor', name: 'Comedor', count: 2 },
-  { id: 'estudio', name: 'Estudio y Oficina', count: 3 },
-  { id: 'infantil', name: 'Infantil', count: 3 },
-  { id: 'exterior', name: 'Exterior', count: 2 },
-];
+interface Props {
+  currentCategory: string;
+  currentSubcategory?: string;
+  subcategories?: Subcategory[];
+  dynamicFilters?: DynamicFilter[];
+}
 
+const { 
+  currentCategory, 
+  currentSubcategory,
+  subcategories = [],
+  dynamicFilters = []
+} = Astro.props;
+
+// Get unique brands from all products for this category
 const brands = [
+  { id: 'arm', name: 'ARM', count: 4 },
   { id: 'arm-classic', name: 'ARM Classic', count: 6 },
   { id: 'arm-kids', name: 'ARM Kids', count: 3 },
   { id: 'arm-modular', name: 'ARM Modular', count: 4 },
   { id: 'arm-outdoor', name: 'ARM Outdoor', count: 2 },
-];
-
-const materials = [
-  { id: 'roble', name: 'Roble', count: 5 },
-  { id: 'pino', name: 'Pino', count: 5 },
-  { id: 'nogal', name: 'Nogal', count: 4 },
-  { id: 'teca', name: 'Teca', count: 1 },
+  { id: 'arm-ergo', name: 'ARM Ergo', count: 1 },
+  { id: 'arm-industrial', name: 'ARM Industrial', count: 3 },
 ];
 ---
 
@@ -59,76 +71,80 @@ const materials = [
     </div>
   </div>
 
-  <!-- Categoría -->
-  <div class="filter-section">
-    <h3 class="filter-section-title">
-      <span>Categoría</span>
-      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </h3>
-    <div class="filter-options">
-      {categories.map((category) => (
-        <label class="filter-option">
-          <input 
-            type="radio" 
-            name="category" 
-            value={category.id}
-            checked={currentCategory === category.id}
-          />
-          <span class="radio-custom"></span>
-          <span class="option-label">
-            {category.name}
-            <span class="option-count">({category.count})</span>
-          </span>
-        </label>
-      ))}
+  <!-- Subcategorías -->
+  {subcategories.length > 0 && (
+    <div class="filter-section">
+      <h3 class="filter-section-title">
+        <span>Subcategorías</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </h3>
+      <div class="filter-options subcategories-list">
+        {subcategories.map((subcategory) => (
+          <a 
+            href={`/categorias/${currentCategory}/${subcategory.slug}`}
+            class:list={['subcategory-link', { active: currentSubcategory === subcategory.slug }]}
+          >
+            {subcategory.name}
+            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
+        ))}
+      </div>
     </div>
-  </div>
+  )}
 
-  <!-- Marca -->
-  <div class="filter-section">
-    <h3 class="filter-section-title">
-      <span>Marca</span>
-      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </h3>
-    <div class="filter-options">
-      {brands.map((brand) => (
-        <label class="filter-option">
-          <input type="checkbox" name="brand" value={brand.id} />
-          <span class="checkbox-custom"></span>
-          <span class="option-label">
-            {brand.name}
-            <span class="option-count">({brand.count})</span>
-          </span>
-        </label>
-      ))}
+  <!-- Filtros Dinámicos (solo si hay una subcategoría seleccionada) -->
+  {dynamicFilters.length > 0 && dynamicFilters.map((filter) => (
+    <div class="filter-section">
+      <h3 class="filter-section-title">
+        <span>{filter.name}</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </h3>
+      <div class="filter-options">
+        {filter.options.map((option) => (
+          <label class="filter-option">
+            <input 
+              type="checkbox" 
+              name={filter.id} 
+              value={option.value}
+              data-filter-type="dynamic"
+            />
+            <span class="checkbox-custom"></span>
+            <span class="option-label">{option.label}</span>
+          </label>
+        ))}
+      </div>
     </div>
-  </div>
+  ))}
 
-  <!-- Material -->
-  <div class="filter-section">
-    <h3 class="filter-section-title">
-      <span>Material</span>
-      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    </h3>
-    <div class="filter-options">
-      {materials.map((material) => (
-        <label class="filter-option">
-          <input type="checkbox" name="material" value={material.id} />
-          <span class="checkbox-custom"></span>
-          <span class="option-label">
-            {material.name}
-            <span class="option-count">({material.count})</span>
-          </span>
-        </label>
-      ))}
+  <!-- Marcas de ARM (solo cuando hay subcategoría seleccionada) -->
+  {currentSubcategory && (
+    <div class="filter-section">
+      <h3 class="filter-section-title">
+        <span>Filtrar por Marca ARM</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </h3>
+      <div class="filter-options">
+        {brands.map((brand) => (
+          <label class="filter-option">
+            <input type="checkbox" name="brand" value={brand.id} />
+            <span class="checkbox-custom"></span>
+            <span class="option-label">
+              {brand.name}
+              <span class="option-count">({brand.count})</span>
+            </span>
+          </label>
+        ))}
+      </div>
     </div>
-  </div>
+  )}
 </aside>
 
 <style>
@@ -219,6 +235,50 @@ const materials = [
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  /* Subcategories List Specific Styles */
+  .subcategories-list {
+    gap: 8px;
+  }
+
+  .subcategory-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .subcategory-link:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #e5e7eb;
+  }
+
+  .subcategory-link.active {
+    background: #111827;
+    color: white;
+    font-weight: 500;
+  }
+
+  .arrow-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .subcategory-link:hover .arrow-icon {
+    opacity: 0.5;
+  }
+
+  .subcategory-link.active .arrow-icon {
+    opacity: 1;
   }
 
   .filter-option {
@@ -350,17 +410,20 @@ const materials = [
   document.getElementById('clearFilters')?.addEventListener('click', () => {
     const form = document.querySelector('.filters-sidebar');
     if (form) {
-      const inputs = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+      const inputs = form.querySelectorAll('input[type="checkbox"]');
       inputs.forEach(input => {
         if (input instanceof HTMLInputElement) {
           input.checked = false;
         }
       });
-      // Reset to "Todos" category
-      const todosRadio = form.querySelector('input[value="todos"]');
-      if (todosRadio instanceof HTMLInputElement) {
-        todosRadio.checked = true;
-      }
     }
+  });
+
+  // Dynamic filtering logic (for future enhancement with JavaScript filtering)
+  document.querySelectorAll('input[data-filter-type="dynamic"]').forEach(input => {
+    input.addEventListener('change', () => {
+      // Future: Implement client-side filtering
+      console.log('Filter changed:', input);
+    });
   });
 </script>

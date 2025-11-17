@@ -7,14 +7,21 @@ interface Props {
   image: string;
   images: string[];
   brand: string;
+  category?: string;
+  subcategory?: string;
 }
 
-const { id, name, description, inStock, image, images, brand } = Astro.props;
+const { id, name, description, inStock, image, images, brand, category, subcategory } = Astro.props;
 const secondImage = images[1] || images[0];
+
+// Build the product URL
+const productUrl = category && subcategory 
+  ? `/categorias/${category}/${subcategory}/${id}`
+  : `/productos/${id}`;
 ---
 
 <article class="product-card">
-  <a href={`/productos/${id}`} class="product-link">
+  <a href={productUrl} class="product-link">
     <div class="product-image-wrapper">
       {!inStock && <span class="badge badge-discount">Agotado</span>}
       

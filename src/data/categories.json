@@ -1,0 +1,227 @@
+[
+  {
+    "id": "mobiliario-general",
+    "name": "Mobiliario en General",
+    "slug": "mobiliario-general",
+    "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "sillas",
+        "name": "Sillas",
+        "slug": "sillas",
+        "dynamicFilters": [
+          {
+            "id": "capacidad",
+            "name": "Capacidad",
+            "options": [
+              { "value": "1-persona", "label": "1 Persona" },
+              { "value": "2-personas", "label": "2 Personas" }
+            ]
+          },
+          {
+            "id": "material-silla",
+            "name": "Material",
+            "options": [
+              { "value": "madera", "label": "Madera" },
+              { "value": "plastico", "label": "Plástico" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mesas",
+        "name": "Mesas",
+        "slug": "mesas",
+        "dynamicFilters": [
+          {
+            "id": "tipo-mesa",
+            "name": "Tipo de Mesa",
+            "options": [
+              { "value": "comedor", "label": "Comedor" },
+              { "value": "centro", "label": "Centro" },
+              { "value": "auxiliar", "label": "Auxiliar" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "puertas",
+        "name": "Puertas",
+        "slug": "puertas",
+        "dynamicFilters": [
+          {
+            "id": "tipo-puerta",
+            "name": "Tipo de Puerta",
+            "options": [
+              { "value": "interior", "label": "Interior" },
+              { "value": "exterior", "label": "Exterior" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "comedores",
+        "name": "Comedores",
+        "slug": "comedores",
+        "dynamicFilters": [
+          {
+            "id": "capacidad-comedor",
+            "name": "Capacidad",
+            "options": [
+              { "value": "4-personas", "label": "4 Personas" },
+              { "value": "6-personas", "label": "6 Personas" },
+              { "value": "8-personas", "label": "8+ Personas" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tanques",
+    "name": "Tanques",
+    "slug": "tanques",
+    "image": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "tanques-agua",
+        "name": "Tanques de Agua",
+        "slug": "tanques-agua",
+        "dynamicFilters": [
+          {
+            "id": "capacidad-litros",
+            "name": "Capacidad",
+            "options": [
+              { "value": "20-litros", "label": "20 Litros" },
+              { "value": "50-litros", "label": "50 Litros" },
+              { "value": "100-litros", "label": "100 Litros" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dormitorio",
+    "name": "Dormitorio",
+    "slug": "dormitorio",
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "camas",
+        "name": "Camas",
+        "slug": "camas",
+        "dynamicFilters": [
+          {
+            "id": "tamano-cama",
+            "name": "Tamaño",
+            "options": [
+              { "value": "individual", "label": "Individual" },
+              { "value": "matrimonial", "label": "Matrimonial" },
+              { "value": "queen", "label": "Queen" },
+              { "value": "king", "label": "King" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "closets",
+        "name": "Closets",
+        "slug": "closets",
+        "dynamicFilters": []
+      },
+      {
+        "id": "mesas-noche",
+        "name": "Mesas de Noche",
+        "slug": "mesas-noche",
+        "dynamicFilters": []
+      }
+    ]
+  },
+  {
+    "id": "comedor",
+    "name": "Comedor",
+    "slug": "comedor",
+    "image": "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "mesas-comedor",
+        "name": "Mesas de Comedor",
+        "slug": "mesas-comedor",
+        "dynamicFilters": []
+      },
+      {
+        "id": "sillas-comedor",
+        "name": "Sillas de Comedor",
+        "slug": "sillas-comedor",
+        "dynamicFilters": []
+      }
+    ]
+  },
+  {
+    "id": "estudio",
+    "name": "Estudio y Oficina",
+    "slug": "estudio",
+    "image": "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "escritorios",
+        "name": "Escritorios",
+        "slug": "escritorios",
+        "dynamicFilters": []
+      },
+      {
+        "id": "libreros",
+        "name": "Libreros",
+        "slug": "libreros",
+        "dynamicFilters": []
+      },
+      {
+        "id": "sillas-oficina",
+        "name": "Sillas de Oficina",
+        "slug": "sillas-oficina",
+        "dynamicFilters": []
+      }
+    ]
+  },
+  {
+    "id": "infantil",
+    "name": "Infantil",
+    "slug": "infantil",
+    "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "camas-montessori",
+        "name": "Camas Montessori",
+        "slug": "camas-montessori",
+        "dynamicFilters": []
+      },
+      {
+        "id": "escritorios-infantiles",
+        "name": "Escritorios Infantiles",
+        "slug": "escritorios-infantiles",
+        "dynamicFilters": []
+      }
+    ]
+  },
+  {
+    "id": "exterior",
+    "name": "Exterior",
+    "slug": "exterior",
+    "image": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80",
+    "subcategories": [
+      {
+        "id": "mesas-exterior",
+        "name": "Mesas de Exterior",
+        "slug": "mesas-exterior",
+        "dynamicFilters": []
+      },
+      {
+        "id": "sillas-exterior",
+        "name": "Sillas de Exterior",
+        "slug": "sillas-exterior",
+        "dynamicFilters": []
+      }
+    ]
+  }
+]
