@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.10",
+    "@astrojs/vercel": "^9.0.1",
     "@nanostores/persistent": "^1.2.0",
     "@supabase/supabase-js": "^2.81.1",
     "astro": "^5.15.8",
