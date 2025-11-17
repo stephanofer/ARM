@@ -60,22 +60,6 @@ const products = [
             <p class="product-brand">{product.brand}</p>
             <h3 class="product-title">{product.name}</h3>
 
-            <div class="product-pricing">
-              <span class="product-price">S/. {product.price.toFixed(2)}</span>
-              <span class="product-old-price">S/. {product.oldPrice.toFixed(2)}</span>
-            </div>
-
-            <div class="product-reviews">
-              <div class="stars">
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-              </div>
-              <span class="review-count">{product.reviews} reseña</span>
-            </div>
-
             {product.available && (
               <div class="product-availability">
                 <span class="availability-dot"></span>
@@ -93,10 +77,10 @@ const products = [
 
 <style>
   .titles {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
-  h1 {
+  h2 {
     font-size: var(--fs-xl);
     font-family: "Clash";
     font-weight: 450;
@@ -199,46 +183,6 @@ const products = [
     overflow: hidden;
   }
 
-  .product-pricing {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.25rem;
-  }
-
-  .product-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #dc2626;
-  }
-
-  .product-old-price {
-    font-size: 1rem;
-    color: #999;
-    text-decoration: line-through;
-  }
-
-  .product-reviews {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .stars {
-    display: flex;
-    gap: 2px;
-  }
-
-  .star {
-    color: #d1d5db;
-    font-size: 1rem;
-  }
-
-  .review-count {
-    font-size: 0.875rem;
-    color: #666;
-  }
-
   .product-availability {
     display: flex;
     align-items: center;
@@ -300,9 +244,6 @@ const products = [
       min-height: 3rem;
     }
 
-    .product-price {
-      font-size: 1.25rem;
-    }
   }
 
   @media (max-width: 480px) {
