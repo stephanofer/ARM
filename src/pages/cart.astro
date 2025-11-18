@@ -1,4 +1,5 @@
 ---
+import { CartItems } from "@/components/CartItems/CartItems";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const title = "Carrito de Compras";
@@ -46,7 +47,8 @@ const cartItems = [
         </div>
 
         <div class="cart-items-list">
-          {cartItems.map((item) => (
+          <CartItems client:only="preact" />
+          <!-- {cartItems.map((item) => (
             <article class="cart-item-card">
               <div class="item-image">
                 <img src={item.image} alt={item.name} />
@@ -96,7 +98,7 @@ const cartItems = [
                 </div>
               </div>
             </article>
-          ))}
+          ))} -->
         </div>
       </div>
 
