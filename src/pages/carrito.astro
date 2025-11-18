@@ -1,9 +1,11 @@
 ---
 import { CartItems } from "@/components/CartItems/CartItems";
+import { PlaceOrderButton } from "@/components/PlaceOrderButton/PlaceOrderButton";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const title = "Carrito de Compras";
-const description = "Revisa los productos que has añadido a tu carrito de compras.";
+const description =
+  "Revisa los productos que has añadido a tu carrito de compras.";
 
 // Hardcoded cart items for demo
 const cartItems = [
@@ -12,27 +14,21 @@ const cartItems = [
     name: "BASO",
     subtitle: "cama individual 90",
     ref: "REF.: 441.19.0001",
-    specs: [
-      "Acabado: Madera pulida",
-      "Longitud: 190",
-      "Colchón: Sin colchón"
-    ],
-    image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80",
-    quantity: 1
+    specs: ["Acabado: Madera pulida", "Longitud: 190", "Colchón: Sin colchón"],
+    image:
+      "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80",
+    quantity: 1,
   },
   {
     id: "p07",
     name: "LORE",
     subtitle: "cama individual 105",
     ref: "REF.: 221.19.0001",
-    specs: [
-      "Acabado: Madera pulida",
-      "Longitud: 190",
-      "Colchón: Sin colchón"
-    ],
-    image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=400&q=80",
-    quantity: 1
-  }
+    specs: ["Acabado: Madera pulida", "Longitud: 190", "Colchón: Sin colchón"],
+    image:
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=400&q=80",
+    quantity: 1,
+  },
 ];
 ---
 
@@ -107,12 +103,21 @@ const cartItems = [
         <div class="summary-content">
           <div class="summary-row">
             <span class="summary-label">Total de artículos</span>
-            <span class="summary-value">{cartItems.reduce((sum, item) => sum + item.quantity, 0)} productos</span>
+            <span class="summary-value"
+              >{cartItems.reduce((sum, item) => sum + item.quantity, 0)} productos</span
+            >
           </div>
 
           <div class="summary-info">
             <p class="info-text">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -121,15 +126,10 @@ const cartItems = [
             </p>
           </div>
 
-          <button class="checkout-btn">
-            FINALIZAR COMPRA
-          </button>
+          <PlaceOrderButton client:only="preact" />
 
-          <button class="continue-shopping-btn">
-            Continuar comprando
-          </button>
+          <button class="continue-shopping-btn"> Continuar comprando </button>
         </div>
-
       </aside>
     </div>
   </div>
@@ -527,22 +527,22 @@ const cartItems = [
 <script>
   function initCartPage() {
     // Quantity controls
-    const qtyButtons = document.querySelectorAll('.qty-btn');
+    const qtyButtons = document.querySelectorAll(".qty-btn");
     qtyButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener("click", (e) => {
         const button = e.currentTarget as HTMLButtonElement;
-        const control = button.closest('.quantity-control');
-        const input = control?.querySelector('.qty-input') as HTMLInputElement;
-        
+        const control = button.closest(".quantity-control");
+        const input = control?.querySelector(".qty-input") as HTMLInputElement;
+
         if (input) {
           let currentQty = parseInt(input.value);
-          
-          if (button.classList.contains('increase')) {
+
+          if (button.classList.contains("increase")) {
             currentQty++;
-          } else if (button.classList.contains('decrease') && currentQty > 1) {
+          } else if (button.classList.contains("decrease") && currentQty > 1) {
             currentQty--;
           }
-          
+
           input.value = currentQty.toString();
           updateCartCount();
         }
@@ -550,14 +550,14 @@ const cartItems = [
     });
 
     // Delete buttons
-    const deleteButtons = document.querySelectorAll('.delete-btn');
+    const deleteButtons = document.querySelectorAll(".delete-btn");
     deleteButtons.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener("click", (e) => {
         const button = e.currentTarget as HTMLButtonElement;
-        const cartItem = button.closest('.cart-item-card');
-        
-        if (cartItem && confirm('¿Estás seguro de eliminar este producto?')) {
-          cartItem.style.animation = 'fadeOut 0.3s ease-out forwards';
+        const cartItem = button.closest(".cart-item-card");
+
+        if (cartItem && confirm("¿Estás seguro de eliminar este producto?")) {
+          cartItem.style.animation = "fadeOut 0.3s ease-out forwards";
           setTimeout(() => {
             cartItem.remove();
             updateCartCount();
@@ -568,52 +568,52 @@ const cartItems = [
     });
 
     // Continue shopping
-    const continueBtn = document.querySelector('.continue-shopping-btn');
-    continueBtn?.addEventListener('click', () => {
-      window.location.href = '/categorias';
+    const continueBtn = document.querySelector(".continue-shopping-btn");
+    continueBtn?.addEventListener("click", () => {
+      window.location.href = "/categorias";
     });
 
     // Checkout
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    checkoutBtn?.addEventListener('click', () => {
-      alert('Redirigiendo al proceso de pago...');
+    const checkoutBtn = document.querySelector(".checkout-btn");
+    checkoutBtn?.addEventListener("click", () => {
+      alert("Redirigiendo al proceso de pago...");
       // window.location.href = '/checkout';
     });
 
     // Show packages
-    const packageButtons = document.querySelectorAll('.show-packages-btn');
+    const packageButtons = document.querySelectorAll(".show-packages-btn");
     packageButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        alert('Mostrando listado de embalaje...');
+      btn.addEventListener("click", () => {
+        alert("Mostrando listado de embalaje...");
       });
     });
 
     function updateCartCount() {
-      const items = document.querySelectorAll('.cart-item-card');
-      const count = document.querySelector('.cart-count');
-      const summaryValue = document.querySelector('.summary-value');
-      
+      const items = document.querySelectorAll(".cart-item-card");
+      const count = document.querySelector(".cart-count");
+      const summaryValue = document.querySelector(".summary-value");
+
       let totalQty = 0;
       items.forEach((item) => {
-        const input = item.querySelector('.qty-input') as HTMLInputElement;
+        const input = item.querySelector(".qty-input") as HTMLInputElement;
         if (input) {
           totalQty += parseInt(input.value);
         }
       });
-      
+
       if (count) {
         count.textContent = `${items.length} artículos`;
       }
-      
+
       if (summaryValue) {
         summaryValue.textContent = `${totalQty} productos`;
       }
     }
 
     function checkEmptyCart() {
-      const items = document.querySelectorAll('.cart-item-card');
+      const items = document.querySelectorAll(".cart-item-card");
       if (items.length === 0) {
-        const itemsList = document.querySelector('.cart-items-list');
+        const itemsList = document.querySelector(".cart-items-list");
         if (itemsList) {
           itemsList.innerHTML = `
             <div style="text-align: center; padding: 4rem 2rem;">
@@ -632,7 +632,7 @@ const cartItems = [
     }
   }
 
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     @keyframes fadeOut {
       to {
@@ -643,5 +643,5 @@ const cartItems = [
   `;
   document.head.appendChild(style);
 
-  document.addEventListener('astro:page-load', initCartPage);
+  document.addEventListener("astro:page-load", initCartPage);
 </script>

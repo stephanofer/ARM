@@ -1,5 +1,6 @@
 ---
 import { CartItems } from "@/components/CartItems/CartItems";
+import { PlaceOrderButton } from "./PlaceOrderButton/PlaceOrderButton";
 
 // Cart items hardcoded for demo
 const cartItems = [
@@ -84,20 +85,7 @@ const cartItems = [
               </svg>
               Ver carrito completo
             </a>
-            <button class="cart-action-btn primary" id="checkoutBtn">
-              <span>Finalizar pedido</span>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
+            <PlaceOrderButton client:only="preact" />
           </div>
         </div>
       )
@@ -282,17 +270,6 @@ const cartItems = [
     text-decoration: none;
   }
 
-  .cart-action-btn.primary {
-    background: #111827;
-    color: white;
-  }
-
-  .cart-action-btn.primary:hover {
-    background: #1f2937;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
   .cart-action-btn.secondary {
     background: white;
     color: #111827;
@@ -369,10 +346,10 @@ const cartItems = [
     document.addEventListener("keydown", handleEscape);
 
     // Checkout button
-    checkoutBtn?.addEventListener("click", () => {
-      alert("Redirigiendo al checkout...");
+    // checkoutBtn?.addEventListener("click", () => {
+      // alert("Redirigiendo al checkout...");
       // window.location.href = "/checkout";
-    });
+    // });
 
     $cartCount.subscribe((count) => {
       if (summaryValue) {
