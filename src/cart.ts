@@ -19,7 +19,6 @@ export const $cart = persistentMap<Record<string, CartItem>>(
 );
 
 export function addToCart(product: CartItem) {
-  console.log(product);
   const currentCart = $cart.get();
   const productId = product.id;
   if (currentCart[productId]) {
@@ -34,6 +33,40 @@ export function addToCart(product: CartItem) {
     });
   }
 }
+
+export function increaseQuantity(productId: string) {
+    console.log(productId);
+
+  const currentCart = $cart.get();
+  if (currentCart[productId]) {
+    $cart.setKey(productId, {
+      ...currentCart[productId],
+      quantity: currentCart[productId].quantity + 1,
+    });
+  }
+}
+
+export function decreaseQuantity(productId: string) {
+  console.log(productId);
+  const currentCart = $cart.get();
+  if (currentCart[productId] && currentCart[productId].quantity > 1) {
+    $cart.setKey(productId, {
+      ...currentCart[productId],
+      quantity: currentCart[productId].quantity - 1,
+    });
+  }
+}
+
+export function setQuantity(productId: string, quantity: number) {
+  const currentCart = $cart.get();
+  if (currentCart[productId] && quantity > 0) {
+    $cart.setKey(productId, {
+      ...currentCart[productId],
+      quantity: quantity,
+    });
+  }
+}
+
 
 export function removeFromCart(productId: string) {
   $cart.setKey(productId, undefined);

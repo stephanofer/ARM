@@ -4,6 +4,7 @@ import Search from "@/assets/svg/Search.svg";
 import Cart from "@/assets/svg/Cart.svg";
 import MobileMenu from "@/islands/MobileMenu.astro";
 import CartDrawer from "@/islands/CartDrawer.astro";
+import { CartCounter } from "./CartCounter/CartCounter";
 
 const navLinks = [
   { name: "Categorias", href: "/categorias" },
@@ -45,10 +46,11 @@ const navLinks = [
     </ul>
 
     <div class="nav-actions">
-      <button class="icon-button cart-button" id="cartButton" aria-label="Carrito">
+      <CartCounter client:load/>
+      <!-- <button class="icon-button cart-button" >id="cartButton" aria-label="Carrito">
         <Cart />
         <span class="cart-badge"></span>
-      </button>
+      </button> -->
     </div>
   </div>
 </nav>
@@ -180,39 +182,11 @@ const navLinks = [
     margin-left: auto;
   }
 
-  .icon-button {
-    background: none;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    transition: color 0.2s;
-  }
 
-  .cart-button {
-    position: relative;
-  }
 
-  .cart-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #ff6b6b;
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ead9ca;
-  }
+
+
+
 
   @media (max-width: 1024px) {
     .nav-links {
@@ -265,12 +239,11 @@ const navLinks = [
       });
     }
 
-    $cartCount.subscribe((count) => {
-      if (cartBadge) {
-        cartBadge.textContent = count.toString();
-        // cartBadge.style.display = count > 0 ? "flex" : "none";
-      }
-    });
+    // $cartCount.subscribe((count) => {
+    //   if (cartBadge) {
+    //     cartBadge.textContent = count.toString();
+    //   }
+    // });
   }
 
   document.addEventListener("astro:page-load", initNavbar);
