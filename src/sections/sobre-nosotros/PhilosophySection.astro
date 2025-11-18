@@ -69,7 +69,7 @@ import SectionContainer from "@/components/SectionContainer.astro";
 
 <style>
   .philosophy-section {
-    max-width: 1200px;
+    max-width: 1150px;
     margin: 0;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -86,12 +86,16 @@ import SectionContainer from "@/components/SectionContainer.astro";
     margin: 0 0 4rem 0;
     color: #1a1a1a;
     max-width: 1000px;
+    text-wrap: pretty;
   }
 
   .columns-container {
     display: grid;
+    max-width: 1000px;
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .column {
@@ -161,15 +165,23 @@ import SectionContainer from "@/components/SectionContainer.astro";
 
   @media (max-width: 640px) {
     .philosophy-section {
-      padding: 3rem 1rem;
+      margin-top: 0rem;
+      padding: 1rem 2rem;
     }
 
     .main-title {
-      margin-bottom: 2rem;
+      font-size: clamp(1.4rem, 6vw, 1.8rem);
+      line-height: 1.35;
+      margin-bottom: 1.5rem;
     }
 
     .columns-container {
-      gap: 1.5rem;
+      gap: 1.25rem;
+    }
+
+    .paragraph {
+      font-size: clamp(0.85rem, 3.8vw, 1rem);
+      line-height: 1.55;
     }
 
     .column {

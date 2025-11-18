@@ -216,9 +216,41 @@ import SectionContainer from "@/components/SectionContainer.astro";
     }
 
     .lufe-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
     }
+    .content-block {
+      padding: 1.5rem 1rem;
+    }
+
+    .letter {
+      font-size: clamp(4rem, 15vw, 6rem);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .lufe-section {
+      /* padding: 2rem 1rem; */
+      margin-top: 2rem;
+    }
+
+    .intro-text {
+      font-size: var(--fs-sm);
+    }
+
+    .lufe-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .content-block {
+      padding: 1rem 0.5rem;
+    }
+
+    .description {
+      font-size: var(--fs-sm);
+    }
+
     .item-1 {
       grid-column: 1 / 2;
       grid-row: 1;
@@ -258,37 +290,6 @@ import SectionContainer from "@/components/SectionContainer.astro";
       grid-row: 6;
       order: 6;
       padding: 0;
-    }
-
-    .content-block {
-      padding: 1.5rem 1rem;
-    }
-
-    .letter {
-      font-size: clamp(4rem, 15vw, 6rem);
-    }
-  }
-
-  @media (max-width: 640px) {
-    .lufe-section {
-      /* padding: 2rem 1rem; */
-      margin-top: 2rem;
-    }
-
-    .intro-text {
-      font-size: var(--fs-sm);
-    }
-
-    .lufe-grid {
-      gap: 1.5rem;
-    }
-
-    .content-block {
-      padding: 1rem 0.5rem;
-    }
-
-    .description {
-      font-size: var(--fs-sm);
     }
   }
 </style>

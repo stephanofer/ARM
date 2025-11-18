@@ -78,7 +78,7 @@ import Email from "@/assets/svg/Email.svg";
 
 <style>
   .contact-wrapper {
-    max-width: 1200px;
+    max-width: 1100px;
     padding-left: 1rem;
     padding-right: 1rem;
     margin: auto;
@@ -136,7 +136,7 @@ import Email from "@/assets/svg/Email.svg";
 
   @media (min-width: 968px) {
     .contact-content {
-      grid-template-columns: 1.4fr 1fr;
+      grid-template-columns: 1.8fr 1fr;
       gap: 4rem;
     }
   }
@@ -216,12 +216,11 @@ import Email from "@/assets/svg/Email.svg";
   }
 
   .schedule-highlight {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e5e5;
-    font-weight: 500;
-    color: #333;
-    line-height: 1.6;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 0.5px solid #e5e5e5;
+    width: 100%; /* Asegura que la línea use todo el ancho disponible */
+    max-width: 150px; /* Aumenta este valor para hacerla más larga */
   }
 
   .info-extra {
@@ -244,26 +243,85 @@ import Email from "@/assets/svg/Email.svg";
       font-size: var(--fs-xl);
     }
 
-    .contact-subtitle{
-        font-size: var(--fs-sm);
+    .contact-subtitle {
+      font-size: var(--fs-sm);
     }
 
-    .contact-wrapper{
-        margin-top: 2rem;
+    .contact-wrapper {
+      margin-top: 2rem;
     }
-
 
     .map-container {
       height: 350px;
     }
 
-    .info-block {
-      gap: 1rem;
-    }
-
     .info-icon {
       width: 40px;
       height: 40px;
+    }
+
+    .contact-info {
+      gap: 1.8rem; /* antes 3rem → ahora más compacto */
+    }
+
+    .info-block {
+      gap: 0.8rem; /* menos espacio entre icono y texto */
+    }
+
+    .info-value {
+      margin-bottom: 0.2rem; /* antes 0.5rem → menos separación */
+    }
+
+    .info-schedule {
+      margin: 0.15rem 0; /* más pegado */
+    }
+
+    .schedule-highlight {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      max-width: 140px; /* un poco más corta para móvil */
+    }
+
+    .info-extra {
+      margin-top: 0.5rem;
+      margin-bottom: 0.1rem;
+    }
+  }
+
+  /* --- Estilos optimizados para iPad / Tablets --- */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .contact-content {
+      grid-template-columns: 1.5fr 1fr; /* Mapa un poco más grande */
+      gap: 3rem;
+    }
+
+    .map-container {
+      height: 500px; /* Más alto que móvil, menos que desktop */
+    }
+
+    .contact-title {
+      font-size: var(--fs-xl); /* Tamaño equilibrado en tablets */
+    }
+
+    .contact-subtitle {
+      font-size: var(--fs-base);
+      max-width: 80%; /* Evita que el texto se vea muy ancho */
+    }
+
+    .info-block {
+      gap: 1.2rem; /* Espaciado moderado */
+    }
+
+    .info-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    /* Línea del horario más lógica y proporcionada */
+    .schedule-highlight {
+      max-width: 250px; /* Más larga que móvil, menos que desktop */
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
     }
   }
 </style>
