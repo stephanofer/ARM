@@ -4,9 +4,10 @@ import { computed } from "nanostores";
 interface CartItem {
   id: string;
   name: string;
-  description: number;
+  description: string;
   image: string;
   quantity: number;
+  inStock: boolean;
 }
 
 export const $cart = persistentMap<Record<string, CartItem>>(

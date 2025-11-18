@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import categoriesData from "@/data/categories.json";
 import productsData from "@/data/products.json";
+import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
 
 const category = Astro.params.category || "";
 const subcategory = Astro.params.subcategory || "";
@@ -273,13 +274,14 @@ const trustFeatures = [
             </button>
           </div>
 
-          <button
-            class="add-to-cart-btn"
-            disabled={!productInfo.inStock}
-            data-product={JSON.stringify(productInfo)}
-          >
-            {productInfo.inStock ? "AÑADIR AL CARRITO" : "AGOTADO"}
-          </button>
+         <AddToCartButton product={{
+          description: productInfo.description,
+          id: productInfo.id,
+          name: productInfo.name,
+          image: productInfo.images[0],
+          inStock: productInfo.inStock,
+          quantity: 1,
+         }} client:load />
         </div>
 
         <!-- Product Meta -->
