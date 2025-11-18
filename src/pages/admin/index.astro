@@ -6,7 +6,7 @@ const accessToken = Astro.cookies.get("sb-access-token");
 const refreshToken = Astro.cookies.get("sb-refresh-token");
 
 if (!accessToken || !refreshToken) {
-  return Astro.redirect("/signin");
+  return Astro.redirect("/ingresar");
 }
 
 let session;
@@ -22,7 +22,7 @@ try {
     Astro.cookies.delete("sb-refresh-token", {
       path: "/",
     });
-    return Astro.redirect("/signin");
+    return Astro.redirect("/ingresar");
   }
 } catch (error) {
   Astro.cookies.delete("sb-access-token", {
@@ -31,7 +31,7 @@ try {
   Astro.cookies.delete("sb-refresh-token", {
     path: "/",
   });
-  return Astro.redirect("/signin");
+  return Astro.redirect("/ingresar");
 }
 
 const email = session.data.user?.email;

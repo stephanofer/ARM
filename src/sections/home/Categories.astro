@@ -37,7 +37,11 @@ const categories = [
   <div class="categories-grid">
     {
       categories.map((category) => (
-        <a href={category.link} class="category-card" style="text-decoration: none; color: inherit;">
+        <a
+          href={category.link}
+          class="category-card"
+          style="text-decoration: none; color: inherit;"
+        >
           <img
             src={category.image}
             alt={category.name}
@@ -58,7 +62,6 @@ const categories = [
 </SectionContainer>
 
 <style>
-
   .texts {
     margin-bottom: 2rem;
   }

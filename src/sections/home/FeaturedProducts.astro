@@ -6,35 +6,35 @@ const products = [
     id: 4,
     brand: "ATTACK SHARK",
     name: "TECLADO ATTACK SHARK X98 | INALAMBRICO | SW LINEAR BLUEBERRY | RGB | BLANCO - GRIS - GRIS OSCURO",
-    price: 289.00,
-    oldPrice: 329.00,
+    price: 289.0,
+    oldPrice: 329.0,
     discount: 12,
     image: "/favicon.svg",
     reviews: 0,
-    available: true
+    available: true,
   },
   {
     id: 5,
     brand: "ATTACK SHARK",
     name: "TECLADO ATTACK SHARK X82 PRO HE | INALAMBRICO | MAGNETICO | RGB | BLANCO - COMIC",
-    price: 339.00,
-    oldPrice: 359.00,
+    price: 339.0,
+    oldPrice: 359.0,
     discount: 6,
     image: "/favicon.svg",
     reviews: 0,
-    available: true
+    available: true,
   },
   {
     id: 6,
     brand: "ATTACK SHARK",
     name: "MOUSE ATTACK SHARK G3 PRO | BASE DE CARGA| INALAMBRICO | 25,000 DPI | BLANCO",
-    price: 129.00,
-    oldPrice: 149.00,
+    price: 129.0,
+    oldPrice: 149.0,
     discount: 13,
     image: "/favicon.svg",
     reviews: 0,
-    available: true
-  }
+    available: true,
+  },
 ];
 ---
 
@@ -45,32 +45,38 @@ const products = [
       <p>Los mejores productos seleccionados para ti</p>
     </div>
     <div class="products-grid">
-      {products.map((product) => (
-        <article class="product-card">
-          <div class="product-badge">
-            <span class="discount-badge">Ahorrar {product.discount}%</span>
-            <img src="/favicon.svg" alt="Attack Shark Logo" class="brand-logo-badge" />
-          </div>
+      {
+        products.map((product) => (
+          <article class="product-card">
+            <div class="product-badge">
+              <span class="discount-badge">Ahorrar {product.discount}%</span>
+              <img
+                src="/favicon.svg"
+                alt="Attack Shark Logo"
+                class="brand-logo-badge"
+              />
+            </div>
 
-          <div class="product-image">
-            <img src={product.image} alt={product.name} />
-          </div>
+            <div class="product-image">
+              <img src={product.image} alt={product.name} />
+            </div>
 
-          <div class="product-info">
-            <p class="product-brand">{product.brand}</p>
-            <h3 class="product-title">{product.name}</h3>
+            <div class="product-info">
+              <p class="product-brand">{product.brand}</p>
+              <h3 class="product-title">{product.name}</h3>
 
-            {product.available && (
-              <div class="product-availability">
-                <span class="availability-dot"></span>
-                <span class="availability-text">Disponible</span>
-              </div>
-            )}
+              {product.available && (
+                <div class="product-availability">
+                  <span class="availability-dot" />
+                  <span class="availability-text">Disponible</span>
+                </div>
+              )}
 
-            <button class="add-to-cart-btn">Añadir al carrito</button>
-          </div>
-        </article>
-      ))}
+              <button class="add-to-cart-btn">Añadir al carrito</button>
+            </div>
+          </article>
+        ))
+      }
     </div>
   </div>
 </SectionContainer>
@@ -243,7 +249,6 @@ const products = [
       font-size: 0.875rem;
       min-height: 3rem;
     }
-
   }
 
   @media (max-width: 480px) {
