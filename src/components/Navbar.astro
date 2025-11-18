@@ -3,6 +3,7 @@ import Hamburger from "@/assets/svg/Hamburger.svg";
 import Search from "@/assets/svg/Search.svg";
 import Cart from "@/assets/svg/Cart.svg";
 import MobileMenu from "@/islands/MobileMenu.astro";
+import CartDrawer from "@/islands/CartDrawer.astro";
 
 const navLinks = [
   { name: "Productos", href: "/productos" },
@@ -12,6 +13,7 @@ const navLinks = [
 ---
 
 <MobileMenu />
+<CartDrawer />
 
 <nav class="navbar">
   <div class="navbar-container">
@@ -43,9 +45,9 @@ const navLinks = [
     </ul>
 
     <div class="nav-actions">
-      <button class="icon-button cart-button" aria-label="Carrito">
+      <button class="icon-button cart-button" id="cartButton" aria-label="Carrito">
         <Cart />
-        <span class="cart-badge">0</span>
+        <span class="cart-badge">3</span>
       </button>
     </div>
   </div>
@@ -241,6 +243,8 @@ const navLinks = [
   function initNavbar() {
     const hamburgerButton = document.getElementById("hamburgerButton");
     const mobileMenu = document.querySelector(".mobile-menu-overlay");
+    const cartButton = document.getElementById("cartButton");
+    const cartDrawer = document.querySelector(".cart-drawer-overlay");
 
     if (!hamburgerButton || !mobileMenu) return;
 
@@ -248,6 +252,14 @@ const navLinks = [
       mobileMenu.classList.add("active");
       document.body.style.overflow = "hidden";
     });
+
+    // Cart button functionality
+    if (cartButton && cartDrawer) {
+      cartButton.addEventListener("click", () => {
+        cartDrawer.classList.add("active");
+        document.body.style.overflow = "hidden";
+      });
+    }
   }
 
   document.addEventListener("astro:page-load", initNavbar);
