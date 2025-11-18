@@ -3,13 +3,15 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import categoriesData from "@/data/categories.json";
 import productsData from "@/data/products.json";
 
-const category = Astro.params.category || '';
-const subcategory = Astro.params.subcategory || '';
-const productSlug = Astro.params.product || '';
+const category = Astro.params.category || "";
+const subcategory = Astro.params.subcategory || "";
+const productSlug = Astro.params.product || "";
 
 // Find category and subcategory info
 const categoryInfo = categoriesData.find((c) => c.slug === category);
-const subcategoryInfo = categoryInfo?.subcategories?.find((s) => s.slug === subcategory);
+const subcategoryInfo = categoryInfo?.subcategories?.find(
+  (s) => s.slug === subcategory
+);
 
 // Find product
 const productInfo = productsData.find((p) => p.id === productSlug);
@@ -23,40 +25,44 @@ const description = productInfo.description;
 
 // Product images and video
 const productMedia = [
-  ...productInfo.images.map((img: string) => ({ type: 'image', url: img })),
-  { type: 'video', url: 'https://www.w3schools.com/html/mov_bbb.mp4' } // Video de ejemplo
+  ...productInfo.images.map((img: string) => ({ type: "image", url: img })),
+  { type: "video", url: "https://www.w3schools.com/html/mov_bbb.mp4" }, // Video de ejemplo
 ];
 
 // Downloadable files
 const downloadableFiles = [
-  { name: 'Manual de Armado', type: 'PDF', size: '2.5 MB', url: '#' },
-  { name: 'Guía de Medidas', type: 'PDF', size: '1.8 MB', url: '#' },
-  { name: 'Certificado PEFC', type: 'PDF', size: '850 KB', url: '#' },
-  { name: 'Instrucciones de Cuidado', type: 'PDF', size: '1.2 MB', url: '#' },
+  { name: "Manual de Armado", type: "PDF", size: "2.5 MB", url: "#" },
+  { name: "Guía de Medidas", type: "PDF", size: "1.8 MB", url: "#" },
+  { name: "Certificado PEFC", type: "PDF", size: "850 KB", url: "#" },
+  { name: "Instrucciones de Cuidado", type: "PDF", size: "1.2 MB", url: "#" },
 ];
 
 // Trust features
 const trustFeatures = [
   {
-    icon: 'certificate',
-    title: 'Certificado PEFC',
-    description: 'Fabricamos nuestros muebles con madera sostenible con certificado PEFC.'
+    icon: "certificate",
+    title: "Certificado PEFC",
+    description:
+      "Fabricamos nuestros muebles con madera sostenible con certificado PEFC.",
   },
   {
-    icon: 'wood',
-    title: 'Madera de verdad',
-    description: 'Nuestros muebles tienen nudos y vetas porque son de madera de verdad. Madera que nos apasiona.'
+    icon: "wood",
+    title: "Madera de verdad",
+    description:
+      "Nuestros muebles tienen nudos y vetas porque son de madera de verdad. Madera que nos apasiona.",
   },
   {
-    icon: 'location',
-    title: 'Made in Gipuzkoa',
-    description: 'Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.'
+    icon: "location",
+    title: "Made in Gipuzkoa",
+    description:
+      "Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.",
   },
   {
-    icon: 'distance',
-    title: 'Creemos en la proximidad',
-    description: 'Creemos en la proximidad. Nuestro proveedor de colchones está a 8 kms de nuestra fábrica.'
-  }
+    icon: "distance",
+    title: "Creemos en la proximidad",
+    description:
+      "Creemos en la proximidad. Nuestro proveedor de colchones está a 8 kms de nuestra fábrica.",
+  },
 ];
 ---
 
@@ -71,7 +77,9 @@ const trustFeatures = [
         <span class="separator">/</span>
         <a href={`/categorias/${category}`}>{categoryInfo.name}</a>
         <span class="separator">/</span>
-        <a href={`/categorias/${category}/${subcategory}`}>{subcategoryInfo.name}</a>
+        <a href={`/categorias/${category}/${subcategory}`}
+          >{subcategoryInfo.name}</a
+        >
         <span class="separator">/</span>
         <span class="current">{productInfo.name}</span>
       </nav>
@@ -82,47 +90,68 @@ const trustFeatures = [
       <!-- Gallery Section -->
       <div class="gallery-section">
         <div class="gallery-thumbnails">
-          {productMedia.map((media, index) => (
-            <button 
-              class={`thumbnail ${index === 0 ? 'active' : ''}`}
-              data-index={index}
-              data-type={media.type}
-            >
-              {media.type === 'image' ? (
-                <img src={media.url} alt={`${productInfo.name} - Vista ${index + 1}`} />
-              ) : (
-                <div class="video-thumbnail">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                </div>
-              )}
-            </button>
-          ))}
+          {
+            productMedia.map((media, index) => (
+              <button
+                class={`thumbnail ${index === 0 ? "active" : ""}`}
+                data-index={index}
+                data-type={media.type}
+              >
+                {media.type === "image" ? (
+                  <img
+                    src={media.url}
+                    alt={`${productInfo.name} - Vista ${index + 1}`}
+                  />
+                ) : (
+                  <div class="video-thumbnail">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            ))
+          }
         </div>
 
         <div class="gallery-main">
-          {productMedia.map((media, index) => (
-            <div class={`media-item ${index === 0 ? 'active' : ''}`} data-index={index}>
-              {media.type === 'image' ? (
-                <img src={media.url} alt={productInfo.name} />
-              ) : (
-                <video controls preload="metadata">
-                  <source src={media.url} type="video/mp4" />
-                  Tu navegador no soporta el elemento de video.
-                </video>
-              )}
-            </div>
-          ))}
-          
+          {
+            productMedia.map((media, index) => (
+              <div
+                class={`media-item ${index === 0 ? "active" : ""}`}
+                data-index={index}
+              >
+                {media.type === "image" ? (
+                  <img src={media.url} alt={productInfo.name} />
+                ) : (
+                  <video controls preload="metadata">
+                    <source src={media.url} type="video/mp4" />
+                    Tu navegador no soporta el elemento de video.
+                  </video>
+                )}
+              </div>
+            ))
+          }
+
           <!-- Badges -->
           <div class="product-badges">
-            {productInfo.inStock && (
-              <span class="badge badge-new">NOVEDAD</span>
-            )}
-            {!productInfo.inStock && (
-              <span class="badge badge-sold">AGOTADO</span>
-            )}
+            {
+              productInfo.inStock && (
+                <span class="badge badge-new">NOVEDAD</span>
+              )
+            }
+            {
+              !productInfo.inStock && (
+                <span class="badge badge-sold">AGOTADO</span>
+              )
+            }
           </div>
         </div>
       </div>
@@ -135,14 +164,29 @@ const trustFeatures = [
         <!-- Quick Actions Links -->
         <div class="quick-links">
           <a href="#detalles" class="quick-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M12 2v20M2 12h20"></path>
             </svg>
             Detalles del producto y medidas
           </a>
           <a href="#ejemplos" class="quick-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"
+              ></rect>
               <line x1="7" y1="2" x2="7" y2="22"></line>
               <line x1="17" y1="2" x2="17" y2="22"></line>
               <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -154,7 +198,14 @@ const trustFeatures = [
             Ejemplos de uso en videos e imágenes
           </a>
           <a href="#descargas" class="quick-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -162,7 +213,14 @@ const trustFeatures = [
             Archivos descargables
           </a>
           <a href="#confianza" class="quick-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
             Madera ecológica, fabricación local
@@ -172,22 +230,55 @@ const trustFeatures = [
         <!-- Add to Cart -->
         <div class="add-to-cart-section">
           <div class="quantity-selector">
-            <button class="quantity-btn" id="decreaseQty" aria-label="Disminuir cantidad">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button
+              class="quantity-btn"
+              id="decreaseQty"
+              aria-label="Disminuir cantidad"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
-            <input type="number" id="quantity" value="1" min="1" max="10" readonly />
-            <button class="quantity-btn" id="increaseQty" aria-label="Aumentar cantidad">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <input
+              type="number"
+              id="quantity"
+              value="1"
+              min="1"
+              max="10"
+              readonly
+            />
+            <button
+              class="quantity-btn"
+              id="increaseQty"
+              aria-label="Aumentar cantidad"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
           </div>
-          
-          <button class="add-to-cart-btn" disabled={!productInfo.inStock}>
-            {productInfo.inStock ? 'AÑADIR AL CARRITO' : 'AGOTADO'}
+
+          <button
+            class="add-to-cart-btn"
+            disabled={!productInfo.inStock}
+            data-product={JSON.stringify(productInfo)}
+          >
+            {productInfo.inStock ? "AÑADIR AL CARRITO" : "AGOTADO"}
           </button>
         </div>
 
@@ -203,8 +294,10 @@ const trustFeatures = [
           </div>
           <div class="meta-item">
             <span class="meta-label">Disponibilidad:</span>
-            <span class={`meta-value ${productInfo.inStock ? 'in-stock' : 'out-stock'}`}>
-              {productInfo.inStock ? 'En stock' : 'Agotado'}
+            <span
+              class={`meta-value ${productInfo.inStock ? "in-stock" : "out-stock"}`}
+            >
+              {productInfo.inStock ? "En stock" : "Agotado"}
             </span>
           </div>
         </div>
@@ -214,9 +307,13 @@ const trustFeatures = [
     <!-- Product Details Section -->
     <section id="detalles" class="content-section">
       <div class="section-tabs">
-        <button class="tab-button active" data-tab="detalles-tab">Detalles del producto</button>
+        <button class="tab-button active" data-tab="detalles-tab"
+          >Detalles del producto</button
+        >
         <button class="tab-button" data-tab="medidas-tab">Medidas</button>
-        <button class="tab-button" data-tab="caracteristicas-tab">Características</button>
+        <button class="tab-button" data-tab="caracteristicas-tab"
+          >Características</button
+        >
         <button class="tab-button" data-tab="acabados-tab">Acabados</button>
         <button class="tab-button" data-tab="montaje-tab">Montaje</button>
         <button class="tab-button" data-tab="envio-tab">Envío</button>
@@ -228,9 +325,11 @@ const trustFeatures = [
             <h2>Detalles del producto</h2>
             <p>{productInfo.description}</p>
             <p>
-              Cama individual para colchón de 90 cm. Una cama con cabecero y dos cajones de almacenaje
-              que llevan ruedas ocultas en la parte inferior, fabricada con madera ecológica natural y
-              disponible en dos largos: para colchón de 190 y 200 cm. Muy práctica para guardar ropa de cama.
+              Cama individual para colchón de 90 cm. Una cama con cabecero y dos
+              cajones de almacenaje que llevan ruedas ocultas en la parte
+              inferior, fabricada con madera ecológica natural y disponible en
+              dos largos: para colchón de 190 y 200 cm. Muy práctica para
+              guardar ropa de cama.
             </p>
 
             <div class="details-list">
@@ -247,7 +346,9 @@ const trustFeatures = [
             <div class="important-info">
               <h3>Importante</h3>
               <ul>
-                <li>Esta cama no incluye los textiles ni los cojines decorativos.</li>
+                <li>
+                  Esta cama no incluye los textiles ni los cojines decorativos.
+                </li>
                 <li>Los cajones llevan ruedas para poder deslizarse.</li>
                 <li>Compatible con nuestra barrera de protección.</li>
               </ul>
@@ -258,9 +359,9 @@ const trustFeatures = [
         <div id="medidas-tab" class="tab-pane">
           <div class="measurements-content">
             <div class="measurements-diagram">
-              <img 
-                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80" 
-                alt="Diagrama de medidas" 
+              <img
+                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
+                alt="Diagrama de medidas"
               />
             </div>
             <div class="measurements-specs">
@@ -276,7 +377,9 @@ const trustFeatures = [
                 </div>
                 <div class="spec-item">
                   <span class="spec-label">Longitud</span>
-                  <span class="spec-value">Total 190: 197,5 cm<br/>Total 200: 207,5 cm</span>
+                  <span class="spec-value"
+                    >Total 190: 197,5 cm<br />Total 200: 207,5 cm</span
+                  >
                 </div>
               </div>
             </div>
@@ -289,11 +392,15 @@ const trustFeatures = [
             <div class="specs-table">
               <div class="spec-row">
                 <span class="spec-name">Material principal</span>
-                <span class="spec-detail">{productInfo.material} macizo certificado PEFC</span>
+                <span class="spec-detail"
+                  >{productInfo.material} macizo certificado PEFC</span
+                >
               </div>
               <div class="spec-row">
                 <span class="spec-name">Acabado</span>
-                <span class="spec-detail">Aceite natural incoloro, protección UV</span>
+                <span class="spec-detail"
+                  >Aceite natural incoloro, protección UV</span
+                >
               </div>
               <div class="spec-row">
                 <span class="spec-name">Peso aproximado</span>
@@ -318,8 +425,11 @@ const trustFeatures = [
         <div id="acabados-tab" class="tab-pane">
           <div class="details-content">
             <h2>Acabados disponibles</h2>
-            <p>Todos nuestros muebles están acabados con aceites naturales que protegen la madera y realzan su belleza natural.</p>
-            
+            <p>
+              Todos nuestros muebles están acabados con aceites naturales que
+              protegen la madera y realzan su belleza natural.
+            </p>
+
             <div class="finishes-grid">
               <div class="finish-option">
                 <div class="finish-swatch" style="background: #d4b896;"></div>
@@ -348,28 +458,40 @@ const trustFeatures = [
         <div id="montaje-tab" class="tab-pane">
           <div class="details-content">
             <h2>Montaje</h2>
-            <p>Todos nuestros muebles vienen con instrucciones detalladas de montaje y las herramientas necesarias incluidas.</p>
-            
+            <p>
+              Todos nuestros muebles vienen con instrucciones detalladas de
+              montaje y las herramientas necesarias incluidas.
+            </p>
+
             <div class="assembly-steps">
               <div class="step">
                 <div class="step-number">1</div>
                 <div class="step-content">
                   <h4>Preparación</h4>
-                  <p>Verifica que tienes todas las piezas según la lista incluida. Tiempo estimado: 5 min</p>
+                  <p>
+                    Verifica que tienes todas las piezas según la lista
+                    incluida. Tiempo estimado: 5 min
+                  </p>
                 </div>
               </div>
               <div class="step">
                 <div class="step-number">2</div>
                 <div class="step-content">
                   <h4>Estructura base</h4>
-                  <p>Ensambla el marco principal siguiendo el diagrama. Tiempo estimado: 20 min</p>
+                  <p>
+                    Ensambla el marco principal siguiendo el diagrama. Tiempo
+                    estimado: 20 min
+                  </p>
                 </div>
               </div>
               <div class="step">
                 <div class="step-number">3</div>
                 <div class="step-content">
                   <h4>Montaje final</h4>
-                  <p>Ajusta todos los tornillos y verifica la estabilidad. Tiempo estimado: 15 min</p>
+                  <p>
+                    Ajusta todos los tornillos y verifica la estabilidad. Tiempo
+                    estimado: 15 min
+                  </p>
                 </div>
               </div>
             </div>
@@ -388,10 +510,17 @@ const trustFeatures = [
         <div id="envio-tab" class="tab-pane">
           <div class="details-content">
             <h2>Envío y devoluciones</h2>
-            
+
             <div class="shipping-info">
               <div class="info-card">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
                   <rect x="1" y="3" width="15" height="13"></rect>
                   <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
                   <circle cx="5.5" cy="18.5" r="2.5"></circle>
@@ -400,20 +529,36 @@ const trustFeatures = [
                 <h4>Envío gratuito</h4>
                 <p>En pedidos superiores a 200€ en península</p>
               </div>
-              
+
               <div class="info-card">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
                 <h4>Entrega en 5-7 días</h4>
                 <p>Plazo estimado para península, 10-15 días para islas</p>
               </div>
-              
+
               <div class="info-card">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
                   <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
                 </svg>
                 <h4>Devoluciones fáciles</h4>
                 <p>30 días para devoluciones sin compromiso</p>
@@ -421,7 +566,11 @@ const trustFeatures = [
             </div>
 
             <h3 style="margin-top: 2rem;">Política de devoluciones</h3>
-            <p>Tienes 30 días desde la recepción del producto para realizar una devolución. El producto debe estar en perfecto estado, sin uso y en su embalaje original.</p>
+            <p>
+              Tienes 30 días desde la recepción del producto para realizar una
+              devolución. El producto debe estar en perfecto estado, sin uso y
+              en su embalaje original.
+            </p>
           </div>
         </div>
       </div>
@@ -430,24 +579,48 @@ const trustFeatures = [
     <!-- Examples Section -->
     <section id="ejemplos" class="examples-section">
       <h2>Inspírate con imágenes reales</h2>
-      <p class="section-subtitle">Mira cómo luce este producto en espacios reales</p>
-      
+      <p class="section-subtitle">
+        Mira cómo luce este producto en espacios reales
+      </p>
+
       <div class="examples-grid">
         <div class="example-item large">
-          <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80" alt="Ejemplo de uso 1" />
+          <img
+            src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80"
+            alt="Ejemplo de uso 1"
+          />
         </div>
         <div class="example-item">
-          <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80" alt="Ejemplo de uso 2" />
+          <img
+            src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80"
+            alt="Ejemplo de uso 2"
+          />
         </div>
         <div class="example-item">
-          <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" alt="Ejemplo de uso 3" />
+          <img
+            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80"
+            alt="Ejemplo de uso 3"
+          />
         </div>
         <div class="example-item video-item">
-          <video controls poster="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=600&q=80">
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+          <video
+            controls
+            poster="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=600&q=80"
+          >
+            <source
+              src="https://www.w3schools.com/html/mov_bbb.mp4"
+              type="video/mp4"
+            />
           </video>
           <div class="video-overlay">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="white"
+              stroke="white"
+              stroke-width="2"
+            >
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </div>
@@ -459,34 +632,50 @@ const trustFeatures = [
     <section id="descargas" class="downloads-section">
       <h2>Archivos descargables</h2>
       <p class="section-subtitle">Descarga manuales, guías y certificados</p>
-      
+
       <div class="downloads-grid">
-        {downloadableFiles.map((file) => (
-          <a href={file.url} class="download-card" download>
-            <div class="download-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="12" y1="18" x2="12" y2="12"></line>
-                <polyline points="9 15 12 18 15 15"></polyline>
-              </svg>
-            </div>
-            <div class="download-info">
-              <h3>{file.name}</h3>
-              <div class="download-meta">
-                <span class="file-type">{file.type}</span>
-                <span class="file-size">{file.size}</span>
+        {
+          downloadableFiles.map((file) => (
+            <a href={file.url} class="download-card" download>
+              <div class="download-icon">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <polyline points="9 15 12 18 15 15" />
+                </svg>
               </div>
-            </div>
-            <div class="download-action">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </div>
-          </a>
-        ))}
+              <div class="download-info">
+                <h3>{file.name}</h3>
+                <div class="download-meta">
+                  <span class="file-type">{file.type}</span>
+                  <span class="file-size">{file.size}</span>
+                </div>
+              </div>
+              <div class="download-action">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </div>
+            </a>
+          ))
+        }
       </div>
     </section>
 
@@ -495,24 +684,42 @@ const trustFeatures = [
       <div class="trust-header">
         <h2>Madera ecológica, fabricación local</h2>
       </div>
-      
+
       <div class="trust-grid-horizontal">
         <div class="trust-card-horizontal">
           <div class="trust-icon-horizontal">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
               <circle cx="12" cy="8" r="7"></circle>
-              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"
+              ></polyline>
             </svg>
           </div>
           <div class="trust-content">
             <h3>Certificado PEFC</h3>
-            <p>Fabricamos nuestros muebles con madera sostenible con certificado PEFC.</p>
+            <p>
+              Fabricamos nuestros muebles con madera sostenible con certificado
+              PEFC.
+            </p>
           </div>
         </div>
 
         <div class="trust-card-horizontal">
           <div class="trust-icon-horizontal">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <circle cx="12" cy="12" r="6"></circle>
               <circle cx="12" cy="12" r="2"></circle>
@@ -520,26 +727,45 @@ const trustFeatures = [
           </div>
           <div class="trust-content">
             <h3>Madera de verdad</h3>
-            <p>Nuestros muebles tienen nudos y vetas porque son de madera de verdad. Madera que nos apasiona.</p>
+            <p>
+              Nuestros muebles tienen nudos y vetas porque son de madera de
+              verdad. Madera que nos apasiona.
+            </p>
           </div>
         </div>
 
         <div class="trust-card-horizontal">
           <div class="trust-icon-horizontal">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
           </div>
           <div class="trust-content">
             <h3>Made in Gipuzkoa</h3>
-            <p>Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.</p>
+            <p>
+              Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.
+            </p>
           </div>
         </div>
 
         <div class="trust-card-horizontal">
           <div class="trust-icon-horizontal">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
               <line x1="18" y1="20" x2="18" y2="10"></line>
               <line x1="12" y1="20" x2="12" y2="4"></line>
               <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -547,7 +773,10 @@ const trustFeatures = [
           </div>
           <div class="trust-content">
             <h3>Creemos en la proximidad</h3>
-            <p>Creemos en la proximidad. Nuestro proveedor de colchones está a 8 kms de nuestra fábrica.</p>
+            <p>
+              Creemos en la proximidad. Nuestro proveedor de colchones está a 8
+              kms de nuestra fábrica.
+            </p>
           </div>
         </div>
       </div>
@@ -955,7 +1184,7 @@ const trustFeatures = [
   }
 
   .details-list li::before {
-    content: '✓';
+    content: "✓";
     position: absolute;
     left: 0;
     color: #10b981;
@@ -963,7 +1192,7 @@ const trustFeatures = [
   }
 
   .important-info li::before {
-    content: '−';
+    content: "−";
     position: absolute;
     left: 0;
     color: #f59e0b;
@@ -1524,35 +1753,51 @@ const trustFeatures = [
 </style>
 
 <script>
+
+  import { addToCart } from "@/cart.ts";
   // Gallery functionality
-  const thumbnails = document.querySelectorAll('.thumbnail');
-  const mediaItems = document.querySelectorAll('.media-item');
+  const thumbnails = document.querySelectorAll(".thumbnail");
+  const mediaItems = document.querySelectorAll(".media-item");
+  const addToCartBtn = document.querySelector(".add-to-cart-btn");
+
+
+
+  addToCartBtn?.addEventListener("click", (e) => {
+    if (!addToCartBtn.hasAttribute("disabled")) {
+      const product = JSON.parse(e.target.dataset.product);
+      product.quantity = parseInt(
+        (document.getElementById("quantity") as HTMLInputElement).value
+      );
+      console.log(product);
+      addToCart(product );
+    }
+  });
 
   thumbnails.forEach((thumb, index) => {
-    thumb.addEventListener('click', () => {
+    thumb.addEventListener("click", () => {
       // Remove active class from all
-      thumbnails.forEach(t => t.classList.remove('active'));
-      mediaItems.forEach(m => m.classList.remove('active'));
-      
+      thumbnails.forEach((t) => t.classList.remove("active"));
+      mediaItems.forEach((m) => m.classList.remove("active"));
+
       // Add active class to clicked
-      thumb.classList.add('active');
-      mediaItems[index].classList.add('active');
+      thumb.classList.add("active");
+      mediaItems[index].classList.add("active");
     });
   });
 
   // Quantity selector
-  const decreaseBtn = document.getElementById('decreaseQty');
-  const increaseBtn = document.getElementById('increaseQty');
-  const quantityInput = document.getElementById('quantity') as HTMLInputElement;
+  const decreaseBtn = document.getElementById("decreaseQty");
+  const increaseBtn = document.getElementById("increaseQty");
+  const quantityInput = document.getElementById("quantity") as HTMLInputElement;
 
-  decreaseBtn?.addEventListener('click', () => {
+  decreaseBtn?.addEventListener("click", () => {
     const currentValue = parseInt(quantityInput.value);
     if (currentValue > 1) {
       quantityInput.value = (currentValue - 1).toString();
     }
   });
 
-  increaseBtn?.addEventListener('click', () => {
+  increaseBtn?.addEventListener("click", () => {
     const currentValue = parseInt(quantityInput.value);
     const maxValue = parseInt(quantityInput.max);
     if (currentValue < maxValue) {
@@ -1561,44 +1806,34 @@ const trustFeatures = [
   });
 
   // Tabs functionality
-  const tabButtons = document.querySelectorAll('.tab-button');
-  const tabPanes = document.querySelectorAll('.tab-pane');
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabPanes = document.querySelectorAll(".tab-pane");
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetTab = button.getAttribute('data-tab');
-      
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetTab = button.getAttribute("data-tab");
+
       // Remove active class from all
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      tabPanes.forEach(pane => pane.classList.remove('active'));
-      
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabPanes.forEach((pane) => pane.classList.remove("active"));
+
       // Add active class to clicked
-      button.classList.add('active');
-      document.getElementById(targetTab!)?.classList.add('active');
+      button.classList.add("active");
+      document.getElementById(targetTab!)?.classList.add("active");
     });
   });
 
   // Smooth scroll for quick links
-  document.querySelectorAll('.quick-link').forEach(link => {
-    link.addEventListener('click', (e) => {
+  document.querySelectorAll(".quick-link").forEach((link) => {
+    link.addEventListener("click", (e) => {
       e.preventDefault();
-      const targetId = link.getAttribute('href')?.substring(1);
+      const targetId = link.getAttribute("href")?.substring(1);
       const targetElement = document.getElementById(targetId!);
-      
+
       if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
   });
 
-  // Add to cart functionality
-  const addToCartBtn = document.querySelector('.add-to-cart-btn');
-  addToCartBtn?.addEventListener('click', () => {
-    if (!addToCartBtn.hasAttribute('disabled')) {
-      const quantity = quantityInput.value;
-      console.log(`Añadido ${quantity} producto(s) al carrito`);
-      // Aquí puedes agregar la lógica del carrito
-      alert(`Se añadieron ${quantity} producto(s) al carrito`);
-    }
-  });
 </script>

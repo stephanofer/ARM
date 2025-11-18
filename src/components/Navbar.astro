@@ -6,8 +6,8 @@ import MobileMenu from "@/islands/MobileMenu.astro";
 import CartDrawer from "@/islands/CartDrawer.astro";
 
 const navLinks = [
-  { name: "Productos", href: "/productos" },
-  { name: "Filosofía ARM", href: "/sobre-nosotros" },
+  { name: "Categorias", href: "/categorias" },
+  { name: "Filosofía ARM", href: "/filosofia" },
   { name: "Contacto", href: "/contacto" },
 ];
 ---
@@ -47,7 +47,7 @@ const navLinks = [
     <div class="nav-actions">
       <button class="icon-button cart-button" id="cartButton" aria-label="Carrito">
         <Cart />
-        <span class="cart-badge">3</span>
+        <span class="cart-badge"></span>
       </button>
     </div>
   </div>
@@ -240,11 +240,15 @@ const navLinks = [
 </style>
 
 <script>
+
+  import {$cartCount} from '@/cart'
+  
   function initNavbar() {
     const hamburgerButton = document.getElementById("hamburgerButton");
     const mobileMenu = document.querySelector(".mobile-menu-overlay");
     const cartButton = document.getElementById("cartButton");
     const cartDrawer = document.querySelector(".cart-drawer-overlay");
+    const cartBadge = document.querySelector(".cart-badge");
 
     if (!hamburgerButton || !mobileMenu) return;
 
@@ -260,6 +264,13 @@ const navLinks = [
         document.body.style.overflow = "hidden";
       });
     }
+
+    $cartCount.subscribe((count) => {
+      if (cartBadge) {
+        cartBadge.textContent = count.toString();
+        // cartBadge.style.display = count > 0 ? "flex" : "none";
+      }
+    });
   }
 
   document.addEventListener("astro:page-load", initNavbar);
