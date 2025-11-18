@@ -8,7 +8,7 @@ const description = "Explora todas nuestras categorías de productos - muebles d
 ---
 
 <BaseLayout title={title} description={description}>
-  <SectionContainer class="categories-page">
+  <SectionContainer class="categories-page mt-4">
     <div class="page-header">
       <h1>Nuestras Categorías</h1>
       <p>Explora toda nuestra colección de productos organizados por categoría</p>
@@ -71,6 +71,7 @@ const description = "Explora todas nuestras categorías de productos - muebles d
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
+    padding-bottom: 2rem;
   }
 
   @media (max-width: 768px) {

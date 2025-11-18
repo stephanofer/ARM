@@ -23,16 +23,24 @@ const {
   <body>
     <Alert message="Este es un mensaje de alerta generico" />
     <Navbar />
-    <slot />
-    <Footer />
+    <main>
+      <slot />
+    </main>
+    <div class="Footer-bg">
+      <Footer />
+    </div>
   </body>
 </html>
 
 <style>
-  /* html,
-  body {
+  body{
+    background-color: var(--bg-color);
+  }
+  main {
     margin: 0;
     width: 100%;
-    height: 100%;
-  } */
+  }
+  .Footer-bg {
+    background-color: var(--color-secondary-light);
+  }
 </style>
