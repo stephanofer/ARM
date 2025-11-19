@@ -575,8 +575,6 @@ const formatRelativeTime = (date: Date | null) => {
         logoutBtn.textContent = "Cerrar Sesión";
         return;
       }
-
-      window.location.href = "/login";
     } catch (error) {
       console.error(error);
       alert("Error inesperado al cerrar sesión");
