@@ -35,7 +35,14 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       );
     }
 
-    return redirect("/admin");
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: "Sesión iniciada correctamente",
+        redirect: "/admin"
+      }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error en login:", error);
     return new Response(

@@ -17,7 +17,13 @@ export const POST: APIRoute = async ({ request, cookies, redirect}) => {
       );
     }
 
-    return redirect("/ingresar");
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: "Sesión cerrada",
+      }),
+      { status: 200,},
+    );
   } catch (error) {
     console.error("Error en logout:", error);
     return new Response(

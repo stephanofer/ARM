@@ -575,9 +575,11 @@ const formatRelativeTime = (date: Date | null) => {
         logoutBtn.textContent = "Cerrar Sesión";
         return;
       }
+
+      window.location.href = "/ingresar";
     } catch (error) {
       console.error(error);
-      // alert("Error inesperado al cerrar sesión");
+      alert("Error inesperado al cerrar sesión");
       logoutBtn.disabled = false;
       logoutBtn.textContent = "Cerrar Sesión";
     }
