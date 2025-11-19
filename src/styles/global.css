@@ -83,3 +83,10 @@ ul {
 a {
   color: white;
 }
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}

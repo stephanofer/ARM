@@ -4,7 +4,7 @@ import Search from "@/assets/svg/Search.svg";
 import Cart from "@/assets/svg/Cart.svg";
 import MobileMenu from "@/components/MobileMenu.astro";
 import CartDrawer from "@/components/CartDrawer.astro";
-import { CartCounter } from "./CartCounter/CartCounter";
+import { CartCounter } from "@/components/CartCounter/CartCounter";
 
 const navLinks = [
   { name: "Categorias", href: "/categorias" },
@@ -46,16 +46,52 @@ const navLinks = [
     </ul>
 
     <div class="nav-actions">
-      <CartCounter client:load/>
-      <!-- <button class="icon-button cart-button" >id="cartButton" aria-label="Carrito">
-        <Cart />
-        <span class="cart-badge"></span>
-      </button> -->
+      <CartCounter client:only="preact">
+        <button slot="fallback" class="cart-placeholder" aria-label="Carrito">
+          <Cart />
+          <span class="cart-badge-placeholder">0</span>
+        </button>
+      </CartCounter>
     </div>
   </div>
 </nav>
 
 <style>
+  .cart-placeholder {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  .cart-placeholder {
+    position: relative;
+  }
+
+  .cart-badge-placeholder {
+    position: absolute;
+    padding: 0.6rem;
+    top: 0;
+    right: 0;
+    background-color: #ff6b6b;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ead9ca;
+  }
+
   .navbar {
     background-color: var(--color-primary-light);
     padding: 0.75rem 1rem;
@@ -182,12 +218,6 @@ const navLinks = [
     margin-left: auto;
   }
 
-
-
-
-
-
-
   @media (max-width: 1024px) {
     .nav-links {
       display: none;
@@ -214,15 +244,9 @@ const navLinks = [
 </style>
 
 <script>
-
-  import {$cartCount} from '@/cart'
-  
   function initNavbar() {
     const hamburgerButton = document.getElementById("hamburgerButton");
     const mobileMenu = document.querySelector(".mobile-menu-overlay");
-    const cartButton = document.getElementById("cartButton");
-    const cartDrawer = document.querySelector(".cart-drawer-overlay");
-    const cartBadge = document.querySelector(".cart-badge");
 
     if (!hamburgerButton || !mobileMenu) return;
 
@@ -230,21 +254,9 @@ const navLinks = [
       mobileMenu.classList.add("active");
       document.body.style.overflow = "hidden";
     });
-
-    // Cart button functionality
-    if (cartButton && cartDrawer) {
-      cartButton.addEventListener("click", () => {
-        cartDrawer.classList.add("active");
-        document.body.style.overflow = "hidden";
-      });
-    }
-
-    // $cartCount.subscribe((count) => {
-    //   if (cartBadge) {
-    //     cartBadge.textContent = count.toString();
-    //   }
-    // });
   }
 
-  document.addEventListener("astro:page-load", initNavbar);
+  document.addEventListener("astro:page-load", () => {
+    initNavbar();
+  });
 </script>

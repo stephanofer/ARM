@@ -1766,7 +1766,7 @@ const trustFeatures = [
 
   addToCartBtn?.addEventListener("click", (e) => {
     if (!addToCartBtn.hasAttribute("disabled")) {
-      const product = JSON.parse(e.target.dataset.product);
+      const product = JSON.parse((e.target as HTMLElement).dataset.product!);
       product.quantity = parseInt(
         (document.getElementById("quantity") as HTMLInputElement).value
       );

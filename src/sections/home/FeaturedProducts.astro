@@ -1,4 +1,5 @@
 ---
+import ProductCard from "@/components/ProductCard.astro";
 import SectionContainer from "@/components/SectionContainer.astro";
 
 const products = [
@@ -47,34 +48,45 @@ const products = [
     <div class="products-grid">
       {
         products.map((product) => (
-          <article class="product-card">
-            <div class="product-badge">
-              <span class="discount-badge">Ahorrar {product.discount}%</span>
-              <img
-                src="/favicon.svg"
-                alt="Attack Shark Logo"
-                class="brand-logo-badge"
-              />
-            </div>
+          // <article class="product-card">
+          //   <div class="product-badge">
+          //     <span class="discount-badge">Ahorrar {product.discount}%</span>
+          //     <img
+          //       src="/favicon.svg"
+          //       alt="Attack Shark Logo"
+          //       class="brand-logo-badge"
+          //     />
+          //   </div>
 
-            <div class="product-image">
-              <img src={product.image} alt={product.name} />
-            </div>
+          //   <div class="product-image">
+          //     <img src={product.image} alt={product.name} />
+          //   </div>
 
-            <div class="product-info">
-              <p class="product-brand">{product.brand}</p>
-              <h3 class="product-title">{product.name}</h3>
+          //   <div class="product-info">
+          //     <p class="product-brand">{product.brand}</p>
+          //     <h3 class="product-title">{product.name}</h3>
 
-              {product.available && (
-                <div class="product-availability">
-                  <span class="availability-dot" />
-                  <span class="availability-text">Disponible</span>
-                </div>
-              )}
+          //     {product.available && (
+          //       <div class="product-availability">
+          //         <span class="availability-dot" />
+          //         <span class="availability-text">Disponible</span>
+          //       </div>
+          //     )}
 
-              <button class="add-to-cart-btn">Añadir al carrito</button>
-            </div>
-          </article>
+          //     <button class="add-to-cart-btn">Añadir al carrito</button>
+          //   </div>
+          // </article>
+          <ProductCard
+            id={product.id.toString()}
+            name={product.name}
+            description='test'
+            inStock={true}
+            image={product.image}
+            images={Object.values({1: product.image})}
+            brand={product.brand}
+            category="test-category"
+            subcategory="test-subcategory"
+          />
         ))
       }
     </div>

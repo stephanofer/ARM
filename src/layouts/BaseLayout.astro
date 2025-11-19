@@ -13,6 +13,8 @@ const {
   title = "Titulo por defecto",
   description = "descripcion por defecto",
 } = Astro.props;
+
+const alertMessage = "Este es un mensaje de alerta generico";
 ---
 
 <!doctype html>
@@ -21,7 +23,7 @@ const {
     <MainHead title={title} description={description} />
   </head>
   <body>
-    <Alert message="Este es un mensaje de alerta generico" />
+    <Alert message={alertMessage} />
     <Navbar />
     <main>
       <slot />

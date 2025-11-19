@@ -9,9 +9,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
     if (!email || !password) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: "Email y contraseña son requeridos" 
+        JSON.stringify({
+          success: false,
+          message: "Email y contraseña son requeridos",
         }),
         { status: 400 }
       );
@@ -24,31 +24,30 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       password,
     });
 
-
     if (error) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: error.message 
+        JSON.stringify({
+          success: false,
+          message: error.message,
         }),
         { status: 400 }
       );
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Sesión iniciada correctamente",
-        redirect: "/admin"
+        redirect: "/admin",
       }),
       { status: 200 }
     );
   } catch (error) {
     console.error("Error en login:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Error inesperado" 
+      JSON.stringify({
+        success: false,
+        message: "Error inesperado",
       }),
       { status: 500 }
     );

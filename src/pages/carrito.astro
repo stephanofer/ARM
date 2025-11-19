@@ -2,12 +2,12 @@
 import { CartItems } from "@/components/CartItems/CartItems";
 import { PlaceOrderButton } from "@/components/PlaceOrderButton/PlaceOrderButton";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import Info from "@/assets/svg/Info.svg";
 
 const title = "Carrito de Compras";
 const description =
   "Revisa los productos que has añadido a tu carrito de compras.";
 
-// Hardcoded cart items for demo
 const cartItems = [
   {
     id: "p01",
@@ -35,7 +35,6 @@ const cartItems = [
 <BaseLayout title={title} description={description}>
   <div class="cart-page">
     <div class="cart-container">
-      <!-- Left Section: Cart Items -->
       <div class="cart-items-section">
         <div class="cart-header">
           <h1 class="cart-title">Carrito</h1>
@@ -44,89 +43,24 @@ const cartItems = [
 
         <div class="cart-items-list">
           <CartItems client:only="preact" />
-          <!-- {cartItems.map((item) => (
-            <article class="cart-item-card">
-              <div class="item-image">
-                <img src={item.image} alt={item.name} />
-              </div>
-
-              <div class="item-details">
-                <div class="item-header">
-                  <div class="item-title-section">
-                    <h2 class="item-name">{item.name}</h2>
-                    <p class="item-subtitle">{item.subtitle}</p>
-                    <p class="item-ref">{item.ref}</p>
-                  </div>
-                </div>
-
-                <div class="item-specs">
-                  {item.specs.map((spec) => (
-                    <p class="spec-line">{spec}</p>
-                  ))}
-                </div>
-
-                <button class="show-packages-btn">
-                  Mostrar listado embalaje
-                </button>
-
-                <div class="item-actions">
-                  <div class="quantity-control">
-                    <button class="qty-btn decrease" aria-label="Disminuir cantidad">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                    </button>
-                    <input type="number" class="qty-input" value={item.quantity} min="1" readonly />
-                    <button class="qty-btn increase" aria-label="Aumentar cantidad">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <button class="delete-btn" aria-label="Eliminar producto">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))} -->
         </div>
       </div>
 
-      <!-- Right Section: Summary -->
       <aside class="cart-summary">
         <div class="summary-content">
           <div class="summary-row">
             <span class="summary-label">Total de artículos</span>
-            <span class="summary-value"
-              >{cartItems.reduce((sum, item) => sum + item.quantity, 0)} productos</span
-            >
+            <span class="summary-value">0 productos</span>
           </div>
 
           <div class="summary-info">
             <p class="info-text">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
+              <Info />
               Los detalles del pedido se confirmarán en el siguiente paso
             </p>
           </div>
 
-          <PlaceOrderButton client:only="preact" />
+          <PlaceOrderButton client:load />
 
           <button class="continue-shopping-btn"> Continuar comprando </button>
         </div>
@@ -151,7 +85,6 @@ const cartItems = [
     align-items: start;
   }
 
-  /* Cart Items Section */
   .cart-items-section {
     background: white;
     border-radius: 8px;
@@ -180,7 +113,6 @@ const cartItems = [
     padding: 1.5rem;
   }
 
-  /* Cart Item Card */
   .cart-item-card {
     display: grid;
     grid-template-columns: 160px 1fr;
@@ -338,7 +270,6 @@ const cartItems = [
     color: #ef4444;
   }
 
-  /* Cart Summary */
   .cart-summary {
     position: sticky;
     top: 2rem;
@@ -455,7 +386,6 @@ const cartItems = [
     flex-shrink: 0;
   }
 
-  /* Responsive */
   @media (max-width: 1024px) {
     .cart-container {
       grid-template-columns: 1fr;
@@ -525,123 +455,21 @@ const cartItems = [
 </style>
 
 <script>
+  import { $cartCount } from "@/cart";
   function initCartPage() {
-    // Quantity controls
-    const qtyButtons = document.querySelectorAll(".qty-btn");
-    qtyButtons.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        const button = e.currentTarget as HTMLButtonElement;
-        const control = button.closest(".quantity-control");
-        const input = control?.querySelector(".qty-input") as HTMLInputElement;
-
-        if (input) {
-          let currentQty = parseInt(input.value);
-
-          if (button.classList.contains("increase")) {
-            currentQty++;
-          } else if (button.classList.contains("decrease") && currentQty > 1) {
-            currentQty--;
-          }
-
-          input.value = currentQty.toString();
-          updateCartCount();
-        }
-      });
-    });
-
-    // Delete buttons
-    const deleteButtons = document.querySelectorAll(".delete-btn");
-    deleteButtons.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        const button = e.currentTarget as HTMLButtonElement;
-        const cartItem = button.closest(".cart-item-card");
-
-        if (cartItem && confirm("¿Estás seguro de eliminar este producto?")) {
-          cartItem.style.animation = "fadeOut 0.3s ease-out forwards";
-          setTimeout(() => {
-            cartItem.remove();
-            updateCartCount();
-            checkEmptyCart();
-          }, 300);
-        }
-      });
-    });
-
-    // Continue shopping
     const continueBtn = document.querySelector(".continue-shopping-btn");
+    const summaryValue = document.querySelector(".cart-page .summary-value");
+
     continueBtn?.addEventListener("click", () => {
       window.location.href = "/categorias";
     });
 
-    // Checkout
-    const checkoutBtn = document.querySelector(".checkout-btn");
-    checkoutBtn?.addEventListener("click", () => {
-      alert("Redirigiendo al proceso de pago...");
-      // window.location.href = '/checkout';
-    });
-
-    // Show packages
-    const packageButtons = document.querySelectorAll(".show-packages-btn");
-    packageButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        alert("Mostrando listado de embalaje...");
-      });
-    });
-
-    function updateCartCount() {
-      const items = document.querySelectorAll(".cart-item-card");
-      const count = document.querySelector(".cart-count");
-      const summaryValue = document.querySelector(".summary-value");
-
-      let totalQty = 0;
-      items.forEach((item) => {
-        const input = item.querySelector(".qty-input") as HTMLInputElement;
-        if (input) {
-          totalQty += parseInt(input.value);
-        }
-      });
-
-      if (count) {
-        count.textContent = `${items.length} artículos`;
-      }
-
+    $cartCount.subscribe((count) => {
       if (summaryValue) {
-        summaryValue.textContent = `${totalQty} productos`;
+        summaryValue.textContent = `${count} productos`;
       }
-    }
-
-    function checkEmptyCart() {
-      const items = document.querySelectorAll(".cart-item-card");
-      if (items.length === 0) {
-        const itemsList = document.querySelector(".cart-items-list");
-        if (itemsList) {
-          itemsList.innerHTML = `
-            <div style="text-align: center; padding: 4rem 2rem;">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" style="margin: 0 auto 1.5rem;">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-              <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0 0 0.5rem 0;">Tu carrito está vacío</h3>
-              <p style="color: #6b7280; margin: 0 0 2rem 0;">Agrega productos para comenzar tu pedido</p>
-              <a href="/categorias" style="display: inline-block; padding: 0.75rem 1.5rem; background: #111827; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Explorar productos</a>
-            </div>
-          `;
-        }
-      }
-    }
+    });
   }
-
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-    }
-  `;
-  document.head.appendChild(style);
 
   document.addEventListener("astro:page-load", initCartPage);
 </script>

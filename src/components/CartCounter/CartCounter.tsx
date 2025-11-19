@@ -1,16 +1,25 @@
 import Cart from "@/assets/svg/Cart.svg";
 import { $cartCount } from "@/cart";
 import { useStore } from "@nanostores/preact";
-import styles from './CartCounter.module.css'
+import styles from "./CartCounter.module.css";
 
 export function CartCounter() {
-    const itemCount = useStore($cartCount); 
+  const handleCLick = () => {
+    const cartDrawer = document.querySelector(".cart-drawer-overlay");
+    console.log("Cart button clicked");
+    if (!cartDrawer) return;
+    cartDrawer.classList.add("active");
+    document.body.style.overflow = "hidden";
+  };
+
+  const itemCount = useStore($cartCount);
 
   return (
     <button
       className={`${styles["icon-button"]} ${styles["cart-button"]}`}
       id="cartButton"
       aria-label="Carrito"
+      onClick={handleCLick}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

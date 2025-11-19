@@ -4,37 +4,46 @@ import SectionContainer from "@/components/SectionContainer.astro";
 import categoriesData from "@/data/categories.json";
 
 const title = "Categorías de Productos";
-const description = "Explora todas nuestras categorías de productos - muebles de madera maciza diseñados con estilo y sostenibilidad.";
+const description =
+  "Explora todas nuestras categorías de productos - muebles de madera maciza diseñados con estilo y sostenibilidad.";
 ---
 
 <BaseLayout title={title} description={description}>
   <SectionContainer class="categories-page mt-4">
     <div class="page-header">
       <h1>Nuestras Categorías</h1>
-      <p>Explora toda nuestra colección de productos organizados por categoría</p>
+      <p>
+        Explora toda nuestra colección de productos organizados por categoría
+      </p>
     </div>
 
     <div class="categories-grid">
-      {categoriesData.map((category) => (
-        <a href={`/categorias/${category.slug}`} class="category-card">
-          <div class="category-image-wrapper">
-            <img 
-              src={category.image} 
-              alt={category.name} 
-              class="category-image" 
-            />
-            <div class="category-overlay">
-              <h3 class="category-title">{category.name}</h3>
-              <p class="category-subtitle">Ver productos</p>
-              {category.subcategories && category.subcategories.length > 0 && (
-                <span class="subcategories-count">
-                  {category.subcategories.length} {category.subcategories.length === 1 ? 'subcategoría' : 'subcategorías'}
-                </span>
-              )}
+      {
+        categoriesData.map((category) => (
+          <a href={`/categorias/${category.slug}`} class="category-card">
+            <div class="category-image-wrapper">
+              <img
+                src={category.image}
+                alt={category.name}
+                class="category-image"
+              />
+              <div class="category-overlay">
+                <h3 class="category-title">{category.name}</h3>
+                <p class="category-subtitle">Ver productos</p>
+                {category.subcategories &&
+                  category.subcategories.length > 0 && (
+                    <span class="subcategories-count">
+                      {category.subcategories.length}{" "}
+                      {category.subcategories.length === 1
+                        ? "subcategoría"
+                        : "subcategorías"}
+                    </span>
+                  )}
+              </div>
             </div>
-          </div>
-        </a>
-      ))}
+          </a>
+        ))
+      }
     </div>
   </SectionContainer>
 </BaseLayout>
@@ -97,7 +106,9 @@ const description = "Explora todas nuestras categorías de productos - muebles d
     aspect-ratio: 4 / 5;
     background-color: #f5f5f5;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
   }
 
   .category-card:hover {
