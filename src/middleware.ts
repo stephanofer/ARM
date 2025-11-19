@@ -11,7 +11,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         cookies: context.cookies,
     });
 
-    if (pathname === "/admin") {
+    if (pathname.startsWith("/admin")) {
         // console.log("Checking auth for protected route");
 
         const { data } = await supabase.auth.getUser();
