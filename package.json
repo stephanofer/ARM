@@ -13,6 +13,7 @@
     "@astrojs/vercel": "^9.0.1",
     "@nanostores/persistent": "^1.2.0",
     "@nanostores/preact": "^1.0.0",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
     "astro": "^5.15.8",
     "nanostores": "^1.0.1",
