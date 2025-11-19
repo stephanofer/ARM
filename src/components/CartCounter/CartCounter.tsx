@@ -6,7 +6,6 @@ import styles from './CartCounter.module.css'
 export function CartCounter() {
     const itemCount = useStore($cartCount); 
 
-    console.log(itemCount);
   return (
     <button
       className={`${styles["icon-button"]} ${styles["cart-button"]}`}

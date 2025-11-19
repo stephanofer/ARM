@@ -1,38 +1,56 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
+import { createClient } from "../../../lib/supabase";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const formData = await request.formData();
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  try {
+    const formData = await request.formData();
+    const email = formData.get("email")?.toString();
+    const password = formData.get("password")?.toString();
 
-  if (!email || !password) {
-    return new Response("Email and password are required", { status: 400 });
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: "Email y contraseña son requeridos" 
+        }),
+        { status: 400 }
+      );
+    }
+
+    const supabase = createClient({ request, cookies });
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+
+    if (error) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: error.message 
+        }),
+        { status: 400 }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: "Sesión iniciada correctamente",
+        redirect: "/admin"
+      }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error en login:", error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        message: "Error inesperado" 
+      }),
+      { status: 500 }
+    );
   }
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return new Response(error.message, { status: 401 });
-  }
-
-  const { access_token, refresh_token } = data.session;
-  cookies.set("sb-access-token", access_token, {
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 días
-  });
-  cookies.set("sb-refresh-token", refresh_token, {
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 30, // 30 días
-  });
-  return redirect("/admin");
 };

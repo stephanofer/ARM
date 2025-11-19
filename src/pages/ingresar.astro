@@ -1,13 +1,18 @@
 ---
 import Layout from "@/layouts/BaseLayout.astro";
+import { createClient } from "@/lib/supabase";
 
 const { cookies, redirect } = Astro;
 
-const accessToken = cookies.get("sb-access-token");
-const refreshToken = cookies.get("sb-refresh-token");
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 
-if (accessToken && refreshToken) {
-  return redirect("/admin");
+const { data } = await supabase.auth.getUser();
+
+if (data.user) {
+  return Astro.redirect("/admin");
 }
 ---
 
@@ -21,11 +26,13 @@ if (accessToken && refreshToken) {
 
       <form id="signinForm" class="signin-form">
         <div class="form-group">
-          <label for="email" class="form-label">Dirección de correo electrónico</label>
-          <input 
-            type="email" 
-            name="email" 
-            id="email" 
+          <label for="email" class="form-label"
+            >Dirección de correo electrónico</label
+          >
+          <input
+            type="email"
+            name="email"
+            id="email"
             class="form-input"
             placeholder="Dirección de correo electrónico"
             autocomplete="email"
@@ -37,28 +44,52 @@ if (accessToken && refreshToken) {
         <div class="form-group">
           <label for="password" class="form-label">Contraseña</label>
           <div class="password-input-wrapper">
-            <input 
-              type="password" 
-              name="password" 
-              id="password" 
+            <input
+              type="password"
+              name="password"
+              id="password"
               class="form-input"
               placeholder="Contraseña"
               autocomplete="current-password"
               required
               minlength="6"
             />
-            <button 
-              type="button" 
-              class="password-toggle" 
+            <button
+              type="button"
+              class="password-toggle"
               id="togglePassword"
               aria-label="Mostrar contraseña"
             >
-              <svg class="eye-icon" id="eyeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                class="eye-icon"
+                id="eyeIcon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
-              <svg class="eye-off-icon hidden" id="eyeOffIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <svg
+                class="eye-off-icon hidden"
+                id="eyeOffIcon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                ></path>
                 <line x1="1" y1="1" x2="23" y2="23"></line>
               </svg>
             </button>
@@ -71,7 +102,15 @@ if (accessToken && refreshToken) {
         <button type="submit" class="submit-button" id="submitButton">
           <span class="button-text">INICIAR SESIÓN</span>
           <span class="button-loader hidden" id="buttonLoader">
-            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="spinner"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
               <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"></path>
             </svg>
@@ -94,7 +133,9 @@ if (accessToken && refreshToken) {
     .signin-card {
       background: white;
       border-radius: 16px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 12px 24px rgba(0, 0, 0, 0.06);
+      box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.02),
+        0 12px 24px rgba(0, 0, 0, 0.06);
       padding: 3rem 2rem;
       width: 100%;
       max-width: 480px;
@@ -262,12 +303,19 @@ if (accessToken && refreshToken) {
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-10px);
+      }
+      75% {
+        transform: translateX(10px);
+      }
     }
 
-      .submit-button {
+    .submit-button {
       width: 100%;
       padding: 1rem;
       font-size: 0.875rem;
@@ -305,8 +353,12 @@ if (accessToken && refreshToken) {
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @media (max-width: 640px) {
@@ -326,26 +378,43 @@ if (accessToken && refreshToken) {
 
   <script>
     // Elementos del DOM
-    const form = document.getElementById('signinForm') as HTMLFormElement;
-    const emailInput = document.getElementById('email') as HTMLInputElement;
-    const passwordInput = document.getElementById('password') as HTMLInputElement;
-    const emailError = document.getElementById('emailError') as HTMLSpanElement;
-    const passwordError = document.getElementById('passwordError') as HTMLSpanElement;
-    const formErrorMessage = document.getElementById('formErrorMessage') as HTMLDivElement;
-    const submitButton = document.getElementById('submitButton') as HTMLButtonElement;
-    const buttonText = submitButton.querySelector('.button-text') as HTMLSpanElement;
-    const buttonLoader = document.getElementById('buttonLoader') as HTMLSpanElement;
-    const togglePassword = document.getElementById('togglePassword') as HTMLButtonElement;
-    const eyeIcon = document.getElementById('eyeIcon') as SVGElement;
-    const eyeOffIcon = document.getElementById('eyeOffIcon') as SVGElement;
+    const form = document.getElementById("signinForm") as HTMLFormElement;
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const passwordInput = document.getElementById(
+      "password"
+    ) as HTMLInputElement;
+    const emailError = document.getElementById("emailError") as HTMLSpanElement;
+    const passwordError = document.getElementById(
+      "passwordError"
+    ) as HTMLSpanElement;
+    const formErrorMessage = document.getElementById(
+      "formErrorMessage"
+    ) as HTMLDivElement;
+    const submitButton = document.getElementById(
+      "submitButton"
+    ) as HTMLButtonElement;
+    const buttonText = submitButton.querySelector(
+      ".button-text"
+    ) as HTMLSpanElement;
+    const buttonLoader = document.getElementById(
+      "buttonLoader"
+    ) as HTMLSpanElement;
+    const togglePassword = document.getElementById(
+      "togglePassword"
+    ) as HTMLButtonElement;
+    const eyeIcon = document.getElementById("eyeIcon") as SVGElement;
+    const eyeOffIcon = document.getElementById("eyeOffIcon") as SVGElement;
 
     // Toggle mostrar/ocultar contraseña
-    togglePassword.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      eyeIcon.classList.toggle('hidden');
-      eyeOffIcon.classList.toggle('hidden');
-      togglePassword.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeIcon.classList.toggle("hidden");
+      eyeOffIcon.classList.toggle("hidden");
+      togglePassword.setAttribute(
+        "aria-label",
+        isPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+      );
     });
 
     // Validación de email
@@ -355,45 +424,47 @@ if (accessToken && refreshToken) {
     }
 
     // Limpiar error al escribir
-    emailInput.addEventListener('input', () => {
-      emailError.textContent = '';
-      emailInput.classList.remove('error');
-      formErrorMessage.classList.remove('visible');
+    emailInput.addEventListener("input", () => {
+      emailError.textContent = "";
+      emailInput.classList.remove("error");
+      formErrorMessage.classList.remove("visible");
     });
 
-    passwordInput.addEventListener('input', () => {
-      passwordError.textContent = '';
-      passwordInput.classList.remove('error');
-      formErrorMessage.classList.remove('visible');
+    passwordInput.addEventListener("input", () => {
+      passwordError.textContent = "";
+      passwordInput.classList.remove("error");
+      formErrorMessage.classList.remove("visible");
     });
 
     // Validación en blur
-    emailInput.addEventListener('blur', () => {
+    emailInput.addEventListener("blur", () => {
       const email = emailInput.value.trim();
       if (email && !validateEmail(email)) {
-        emailError.textContent = 'Por favor, ingresa un correo electrónico válido';
-        emailInput.classList.add('error');
+        emailError.textContent =
+          "Por favor, ingresa un correo electrónico válido";
+        emailInput.classList.add("error");
       }
     });
 
-    passwordInput.addEventListener('blur', () => {
+    passwordInput.addEventListener("blur", () => {
       const password = passwordInput.value;
       if (password && password.length < 6) {
-        passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-        passwordInput.classList.add('error');
+        passwordError.textContent =
+          "La contraseña debe tener al menos 6 caracteres";
+        passwordInput.classList.add("error");
       }
     });
 
     // Manejo del submit
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       // Limpiar errores previos
-      emailError.textContent = '';
-      passwordError.textContent = '';
-      formErrorMessage.classList.remove('visible');
-      emailInput.classList.remove('error');
-      passwordInput.classList.remove('error');
+      emailError.textContent = "";
+      passwordError.textContent = "";
+      formErrorMessage.classList.remove("visible");
+      emailInput.classList.remove("error");
+      passwordInput.classList.remove("error");
 
       // Obtener valores
       const email = emailInput.value.trim();
@@ -403,30 +474,32 @@ if (accessToken && refreshToken) {
       let hasError = false;
 
       if (!email) {
-        emailError.textContent = 'El correo electrónico es requerido';
-        emailInput.classList.add('error');
+        emailError.textContent = "El correo electrónico es requerido";
+        emailInput.classList.add("error");
         hasError = true;
       } else if (!validateEmail(email)) {
-        emailError.textContent = 'Por favor, ingresa un correo electrónico válido';
-        emailInput.classList.add('error');
+        emailError.textContent =
+          "Por favor, ingresa un correo electrónico válido";
+        emailInput.classList.add("error");
         hasError = true;
       }
 
       if (!password) {
-        passwordError.textContent = 'La contraseña es requerida';
-        passwordInput.classList.add('error');
+        passwordError.textContent = "La contraseña es requerida";
+        passwordInput.classList.add("error");
         hasError = true;
       } else if (password.length < 6) {
-        passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-        passwordInput.classList.add('error');
+        passwordError.textContent =
+          "La contraseña debe tener al menos 6 caracteres";
+        passwordInput.classList.add("error");
         hasError = true;
       }
 
       if (hasError) {
         // Focus en el primer campo con error
-        if (emailInput.classList.contains('error')) {
+        if (emailInput.classList.contains("error")) {
           emailInput.focus();
-        } else if (passwordInput.classList.contains('error')) {
+        } else if (passwordInput.classList.contains("error")) {
           passwordInput.focus();
         }
         return;
@@ -434,53 +507,57 @@ if (accessToken && refreshToken) {
 
       // Deshabilitar botón y mostrar loader
       submitButton.disabled = true;
-      buttonText.classList.add('hidden');
-      buttonLoader.classList.remove('hidden');
+      buttonText.classList.add("hidden");
+      buttonLoader.classList.remove("hidden");
 
       try {
         const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
+        formData.append("email", email);
+        formData.append("password", password);
 
-        const response = await fetch('/api/auth/signin', {
-          method: 'POST',
+        const response = await fetch("/api/auth/signin", {
+          method: "POST",
           body: formData,
         });
 
         if (response.ok) {
           // Redirección exitosa
-          window.location.href = '/admin';
+          window.location.href = "/admin";
         } else {
           // Error de autenticación
           const errorText = await response.text();
-          let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu correo y contraseña.';
-          
+          let errorMessage =
+            "Credenciales incorrectas. Por favor, verifica tu correo y contraseña.";
+
           // Personalizar mensajes de error
-          if (errorText.toLowerCase().includes('invalid')) {
-            errorMessage = 'Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.';
-          } else if (errorText.toLowerCase().includes('not found')) {
-            errorMessage = 'No existe una cuenta con este correo electrónico.';
-          } else if (errorText.toLowerCase().includes('rate limit')) {
-            errorMessage = 'Demasiados intentos. Por favor, espera un momento antes de intentar de nuevo.';
+          if (errorText.toLowerCase().includes("invalid")) {
+            errorMessage =
+              "Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.";
+          } else if (errorText.toLowerCase().includes("not found")) {
+            errorMessage = "No existe una cuenta con este correo electrónico.";
+          } else if (errorText.toLowerCase().includes("rate limit")) {
+            errorMessage =
+              "Demasiados intentos. Por favor, espera un momento antes de intentar de nuevo.";
           }
 
           formErrorMessage.textContent = errorMessage;
-          formErrorMessage.classList.add('visible');
-          
+          formErrorMessage.classList.add("visible");
+
           // Añadir efecto de error a los inputs
-          emailInput.classList.add('error');
-          passwordInput.classList.add('error');
+          emailInput.classList.add("error");
+          passwordInput.classList.add("error");
           passwordInput.select();
         }
       } catch (error) {
-        console.error('Error al iniciar sesión:', error);
-        formErrorMessage.textContent = 'Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.';
-        formErrorMessage.classList.add('visible');
+        console.error("Error al iniciar sesión:", error);
+        formErrorMessage.textContent =
+          "Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.";
+        formErrorMessage.classList.add("visible");
       } finally {
         // Restaurar botón
         submitButton.disabled = false;
-        buttonText.classList.remove('hidden');
-        buttonLoader.classList.add('hidden');
+        buttonText.classList.remove("hidden");
+        buttonLoader.classList.add("hidden");
       }
     });
   </script>

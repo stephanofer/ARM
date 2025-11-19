@@ -11,7 +11,6 @@ export function CartItems() {
   const cartItems = Object.values(useStore($cart));
 
   const handleDelete = (id: string) => {
-    console.log(`Eliminar item con id: ${id}`);
     removeFromCart(id);
   };
 

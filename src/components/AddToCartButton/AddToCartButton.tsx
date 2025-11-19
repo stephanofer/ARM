@@ -14,7 +14,6 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
   const handleAddToCart = (product: AddToCartButtonProps["product"]) => {
-    console.log(`Agregar al carrito: ${product.name}`);
     addToCart(product);
   };
   return (
