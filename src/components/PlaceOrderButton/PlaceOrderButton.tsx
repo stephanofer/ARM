@@ -1,33 +1,52 @@
 import { useStore } from "@nanostores/preact";
+import { $cart } from "@/cart.ts";
 import styles from "./PlaceOrderButton.module.css";
-import { $cart } from "@/cart";
-export function PlaceOrderButton() {
-  const cartItems = Object.values(useStore($cart));
+
+export const PlaceOrderButton = () => {
+  const cartItems = useStore($cart); // <-- tus productos desde nanostores
+
+  const phone = "51981314610"; // tu número
 
   const handleClick = () => {
-    console.log(cartItems);
+    const items = Object.values(cartItems || {});
+
+    if (items.length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+
+    let message = `Hola, quiero hacer un pedido:%0A%0A`;
+
+    items.forEach((item, i) => {
+      message += `${i + 1}. ${item.name} - Cantidad: ${item.quantity}%0A`;
+    });
+
+    const url = `https://wa.me/${phone}?text=${message}`;
+    window.open(url, "_blank");
   };
 
   return (
-    <>
-      <button
-        class={styles["cart-action-btn"] + " " + styles.primary}
-        id="checkoutBtn"
-        onClick={() => handleClick()}
+    <button
+      className={styles["whatsapp-btn"]}
+      aria-label="Realizar pedido por WhatsApp"
+      onClick={handleClick}
+    >
+      <span>Realizar pedido por WhatsApp</span>
+
+      <svg xmlns="http://www.w3.org/2000/svg"
+        width="24" height="24" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        <span>Finalizar pedido</span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <line x1="5" y1="12" x2="19" y2="12" />
-          <polyline points="12 5 19 12 12 19" />
-        </svg>
-      </button>
-    </>
+        <path stroke="none" d="M0 0h24v24H0z" />
+        <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
+        <path d="M9 10a.5 .5 0 0 0 1 0v-1
+      a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1
+      a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
+      </svg>
+    </button>
+
   );
-}
+};
+
