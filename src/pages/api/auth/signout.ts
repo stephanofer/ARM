@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "../../../lib/supabase";
 
-export const POST: APIRoute = async ({ request, cookies, redirect}) => {
+export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   try {
     const supabase = createClient({ request, cookies });
 
@@ -9,27 +9,27 @@ export const POST: APIRoute = async ({ request, cookies, redirect}) => {
 
     if (error) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: error.message 
+        JSON.stringify({
+          success: false,
+          message: error.message,
         }),
-        { status: 400}
+        { status: 400 }
       );
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: "Sesión cerrada",
       }),
-      { status: 200,},
+      { status: 200 }
     );
   } catch (error) {
     console.error("Error en logout:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: "Error inesperado" 
+      JSON.stringify({
+        success: false,
+        message: "Error inesperado",
       }),
       { status: 500 }
     );

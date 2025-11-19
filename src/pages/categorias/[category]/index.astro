@@ -8,7 +8,7 @@ import MobileFilterToggle from "@/components/MobileFilterToggle.astro";
 import productsData from "@/data/products.json";
 import categoriesData from "@/data/categories.json";
 
-const category = Astro.params.category || '';
+const category = Astro.params.category || "";
 
 // Find category info
 const categoryInfo = categoriesData.find((c) => c.slug === category);
@@ -39,8 +39,8 @@ const description = `Explora toda nuestra colección de ${categoryInfo?.name.toL
 
     <div class="catalog-layout">
       <div class="filters-column">
-        <ProductFilters 
-          currentCategory={category} 
+        <ProductFilters
+          currentCategory={category}
           subcategories={subcategories}
         />
       </div>
