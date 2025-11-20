@@ -1,7 +1,26 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SectionContainer from "@/components/SectionContainer.astro";
-import categoriesData from "@/data/categories.json";
+import { createClient } from "@/lib/supabase";
+import { getAllCategories } from "@/lib/api";
+
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+// ⏱️ Medir tiempo antes
+const start = performance.now();
+
+const categoriesData = await getAllCategories(supabase);
+
+// ⏱️ Medir tiempo después
+const end = performance.now();
+
+// ⏱️ Tiempo total redondeado a ms
+const queryTimeMs = (end - start).toFixed(2);
+
+console.log("⏱️ Query categories:", queryTimeMs, "ms");
 
 const title = "Categorías de Productos";
 const description =
@@ -15,6 +34,9 @@ const description =
       <p>
         Explora toda nuestra colección de productos organizados por categoría
       </p>
+      <p style="text-align:center; font-size:14px; color:#888;">
+        Tiempo de carga: {queryTimeMs} ms
+      </p>
     </div>
 
     <div class="categories-grid">
@@ -23,22 +45,13 @@ const description =
           <a href={`/categorias/${category.slug}`} class="category-card">
             <div class="category-image-wrapper">
               <img
-                src={category.image}
+                src={category.image_url}
                 alt={category.name}
                 class="category-image"
               />
               <div class="category-overlay">
                 <h3 class="category-title">{category.name}</h3>
                 <p class="category-subtitle">Ver productos</p>
-                {category.subcategories &&
-                  category.subcategories.length > 0 && (
-                    <span class="subcategories-count">
-                      {category.subcategories.length}{" "}
-                      {category.subcategories.length === 1
-                        ? "subcategoría"
-                        : "subcategorías"}
-                    </span>
-                  )}
               </div>
             </div>
           </a>
@@ -159,7 +172,8 @@ const description =
 
   .category-title {
     font-size: clamp(1.5rem, 2.5vw, 2rem);
-    font-weight: 600;
+    font-family: var(--font-primary);
+    font-weight: 500;
     margin: 0 0 0.5rem 0;
     letter-spacing: 0.02em;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
@@ -171,6 +185,8 @@ const description =
     opacity: 0.95;
     font-weight: 400;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid #fff;
+    padding-bottom: 0.25rem;
   }
 
   .subcategories-count {
