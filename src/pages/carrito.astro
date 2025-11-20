@@ -38,9 +38,7 @@ const cartItems = [
       <div class="cart-items-section">
         <div class="cart-header">
           <h1 class="cart-title">Carrito</h1>
-          <span class="cart-count">{cartItems.length} artículos</span>
         </div>
-
         <div class="cart-items-list">
           <CartItems client:only="preact" />
         </div>
@@ -86,7 +84,7 @@ const cartItems = [
   }
 
   .cart-items-section {
-    background: white;
+    background: var(--bg-color);
     border-radius: 8px;
     padding: 0;
   }

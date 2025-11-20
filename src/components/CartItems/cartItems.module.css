@@ -8,7 +8,7 @@
   display: flex;
   gap: 1rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--color-secondary-light);
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   opacity: 0;

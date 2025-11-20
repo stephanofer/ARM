@@ -1,92 +1,94 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
-const title = "404 - Página no encontrada";
+const title = "404 – Página no encontrada";
 const description = "La página que buscas no existe o ha sido movida.";
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="error-container">
-    <div class="error-content">
-      <p class="error-label">ERROR 404</p>
-      <h1 class="error-title">Página no encontrada</h1>
-      <p class="error-description">
-        La página que buscas debe de estar descansando en una de nuestras camas
-        o literas
+  <section class="error-wrapper">
+    <div class="error-box">
+      <p class="tag">404</p>
+      <h1 class="title">Página no encontrada</h1>
+
+      <p class="desc">
+        Parece que esta página está tomando una siesta en alguna de nuestras camas.  
+        ¿Volvemos al inicio?
       </p>
-      <p class="error-link-text">
-        Puedes verlas volviendo a la <a href="/" class="error-link"
-          >Página de Inicio</a
-        >
-      </p>
+
+      <a href="/" class="btn-home">Volver al inicio</a>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .error-container {
+  .error-wrapper {
     min-height: calc(100vh - 80px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    background: var(--color-bg);
   }
 
-  .error-content {
+  .error-box {
     text-align: center;
     max-width: 600px;
-    width: 100%;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.7);
   }
 
-  .error-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
+  .tag {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #888;
+    margin-bottom: 1.5rem;
     text-transform: uppercase;
-    color: #666;
-    margin: 0 0 1.5rem 0;
   }
 
-  .error-title {
+  .title {
     font-size: clamp(2.5rem, 6vw, 4rem);
-    font-weight: 400;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
     line-height: 1.1;
-    margin: 0 0 1.5rem 0;
-    color: #1a1a1a;
   }
 
-  .error-description {
-    font-size: clamp(1rem, 2vw, 1.125rem);
-    line-height: 1.6;
-    color: #4a4a4a;
-    margin: 0 0 1.5rem 0;
+  .desc {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 2rem;
+    text-wrap: pretty;
   }
 
-  .error-link-text {
-    font-size: clamp(1rem, 2vw, 1.125rem);
-    line-height: 1.6;
-    color: #4a4a4a;
-    margin: 0;
+  .btn-home {
+    display: inline-block;
+    padding: 0.85rem 1.75rem;
+    background: #1a1a1a;
+    color: white;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: 0.25s ease;
   }
 
-  .error-link {
-    color: #1a1a1a;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    transition: color 0.2s ease;
-  }
-
-  .error-link:hover {
-    color: #666;
+  .btn-home:hover {
+    background: #333;
+    transform: translateY(-2px);
   }
 
   @media (max-width: 640px) {
-    .error-container {
-      padding: 1.5rem;
+    .error-box {
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
     }
 
-    .error-content {
-      padding: 0 1rem;
+    .desc {
+      font-size: 0.95rem;
     }
   }
 </style>
