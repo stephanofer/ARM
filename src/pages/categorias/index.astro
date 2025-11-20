@@ -9,6 +9,14 @@ const supabase = createClient({
   cookies: Astro.cookies,
 });
 
+// Cache-Control para Vercel/CDN
+// s-maxage=3600: Cache en CDN por 1 hora
+// stale-while-revalidate=86400: Servir contenido "viejo" mientras se actualiza en background (SWR)
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400"
+);
+
 // ⏱️ Medir tiempo antes
 const start = performance.now();
 
