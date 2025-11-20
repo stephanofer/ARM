@@ -4,74 +4,59 @@ import ProductFilters from "@/components/ProductFilters.astro";
 import CatalogHeader from "@/components/CatalogHeader.astro";
 import ProductCard from "@/components/ProductCard.astro";
 import MobileFilterToggle from "@/components/MobileFilterToggle.astro";
-import productsData from "@/data/products.json";
-import categoriesData from "@/data/categories.json";
+import { getProductsBySubcategory, getSubcategoriesByCategory } from "@/lib/api";
+import { createClient } from "@/lib/supabase";
 
-const category = Astro.params.category || '';
-const subcategory = Astro.params.subcategory || '';
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 
-// Find category and subcategory info
-const categoryInfo = categoriesData.find((c) => c.slug === category);
+const category = Astro.params.category || "";
+const subcategory = Astro.params.subcategory || "";
 
-if (!categoryInfo || !category) {
-  return Astro.redirect("/404");
-}
+// find productos by category
+const subcategories = await getSubcategoriesByCategory(supabase, category);
+const products = await getProductsBySubcategory(supabase, subcategory, {});
 
-const subcategoryInfo = categoryInfo.subcategories?.find(
-  (s) => s.slug === subcategory
-);
+console.log(subcategories[0]["filter_config"]);
 
-if (!subcategoryInfo || !subcategory) {
-  return Astro.redirect("/404");
-}
+// console.log("subcategoria");
 
-// Filter products by category AND subcategory
-let filteredProducts = productsData.filter(
-  (p) => p.category === category && p.subcategory === subcategory
-);
-
-// Get all subcategories for the filter
-const subcategories = categoryInfo.subcategories || [];
-
-// Get dynamic filters for this subcategory
-const dynamicFilters = subcategoryInfo.dynamicFilters || [];
-
-const title = `${subcategoryInfo.name} - ${categoryInfo.name}`;
-const description = `Explora nuestra colección de ${subcategoryInfo.name.toLowerCase()} en ${categoryInfo.name.toLowerCase()}.`;
+// // const title = `${subcategoryInfo.name} - ${categoryInfo.name}`;
+// const description = `Explora nuestra colección de ${subcategoryInfo.name.toLowerCase()} en ${categoryInfo.name.toLowerCase()}.`;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout>
   <section>
     <div class="breadcrumb">
       <a href="/">Inicio</a>
       <span class="separator">/</span>
       <a href="/categorias">Categorías</a>
       <span class="separator">/</span>
-      <a href={`/categorias/${category}`}>{categoryInfo.name}</a>
+      <a href={`/categorias/${category}`}>{category}</a>
       <span class="separator">/</span>
-      <span class="current">{subcategoryInfo.name}</span>
+      <span class="current">{subcategory}</span>
     </div>
 
     <div class="catalog-layout">
       <div class="filters-column">
-        <ProductFilters 
-          currentCategory={category} 
+        <ProductFilters
+          currentCategory={category}
           currentSubcategory={subcategory}
           subcategories={subcategories}
-          dynamicFilters={dynamicFilters}
         />
       </div>
 
       <div class="products-column">
         <CatalogHeader
-          title={subcategoryInfo.name}
-          totalProducts={filteredProducts.length}
-          currentView="grid"
+          title={subcategory}
+          totalProducts={products.length}
         />
 
         <div class="products-grid" data-view="grid">
           {
-            filteredProducts.map((product) => (
+            products.map((product) => (
               <ProductCard
                 id={product.id}
                 name={product.name}
@@ -88,7 +73,7 @@ const description = `Explora nuestra colección de ${subcategoryInfo.name.toLowe
         </div>
 
         {
-          filteredProducts.length === 0 && (
+          products.length === 0 && (
             <div class="empty-state">
               <svg
                 width="80"
@@ -102,7 +87,9 @@ const description = `Explora nuestra colección de ${subcategoryInfo.name.toLowe
                 <path d="m21 21-4.35-4.35" />
               </svg>
               <h3>No se encontraron productos</h3>
-              <p>No hay productos disponibles en esta subcategoría actualmente</p>
+              <p>
+                No hay productos disponibles en esta subcategoría actualmente
+              </p>
             </div>
           )
         }

@@ -3,68 +3,27 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import categoriesData from "@/data/categories.json";
 import productsData from "@/data/products.json";
 import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
+import { getProductById } from "@/lib/api";
 
+
+import { createClient } from "@/lib/supabase";
+console.log("producto");
+
+const title = Astro.params.product || '';
+const description = Astro.params.category || '';
+
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 const category = Astro.params.category || "";
 const subcategory = Astro.params.subcategory || "";
-const productSlug = Astro.params.product || "";
+const productId = Astro.params.product || "";
 
-// Find category and subcategory info
-const categoryInfo = categoriesData.find((c) => c.slug === category);
-const subcategoryInfo = categoryInfo?.subcategories?.find(
-  (s) => s.slug === subcategory
-);
+const productInfo = await getProductById(supabase, productId);
+console.log(productInfo);
 
-// Find product
-const productInfo = productsData.find((p) => p.id === productSlug);
 
-if (!categoryInfo || !subcategoryInfo || !productInfo) {
-  return Astro.redirect("/404");
-}
-
-const title = `${productInfo.name} - ${subcategoryInfo.name}`;
-const description = productInfo.description;
-
-// Product images and video
-const productMedia = [
-  ...productInfo.images.map((img: string) => ({ type: "image", url: img })),
-  { type: "video", url: "https://www.w3schools.com/html/mov_bbb.mp4" }, // Video de ejemplo
-];
-
-// Downloadable files
-const downloadableFiles = [
-  { name: "Manual de Armado", type: "PDF", size: "2.5 MB", url: "#" },
-  { name: "Guía de Medidas", type: "PDF", size: "1.8 MB", url: "#" },
-  { name: "Certificado PEFC", type: "PDF", size: "850 KB", url: "#" },
-  { name: "Instrucciones de Cuidado", type: "PDF", size: "1.2 MB", url: "#" },
-];
-
-// Trust features
-const trustFeatures = [
-  {
-    icon: "certificate",
-    title: "Certificado PEFC",
-    description:
-      "Fabricamos nuestros muebles con madera sostenible con certificado PEFC.",
-  },
-  {
-    icon: "wood",
-    title: "Madera de verdad",
-    description:
-      "Nuestros muebles tienen nudos y vetas porque son de madera de verdad. Madera que nos apasiona.",
-  },
-  {
-    icon: "location",
-    title: "Made in Gipuzkoa",
-    description:
-      "Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.",
-  },
-  {
-    icon: "distance",
-    title: "Creemos en la proximidad",
-    description:
-      "Creemos en la proximidad. Nuestro proveedor de colchones está a 8 kms de nuestra fábrica.",
-  },
-];
 ---
 
 <BaseLayout title={title} description={description}>
@@ -76,10 +35,10 @@ const trustFeatures = [
         <span class="separator">/</span>
         <a href="/categorias">Categorías</a>
         <span class="separator">/</span>
-        <a href={`/categorias/${category}`}>{categoryInfo.name}</a>
+        <a href={`/categorias/${category}`}>{category}</a>
         <span class="separator">/</span>
         <a href={`/categorias/${category}/${subcategory}`}
-          >{subcategoryInfo.name}</a
+          >{subcategory}</a
         >
         <span class="separator">/</span>
         <span class="current">{productInfo.name}</span>
@@ -92,7 +51,7 @@ const trustFeatures = [
       <div class="gallery-section">
         <div class="gallery-thumbnails">
           {
-            productMedia.map((media, index) => (
+            productInfo.images.map((media, index) => (
               <button
                 class={`thumbnail ${index === 0 ? "active" : ""}`}
                 data-index={index}
@@ -124,7 +83,7 @@ const trustFeatures = [
 
         <div class="gallery-main">
           {
-            productMedia.map((media, index) => (
+            productInfo.images.map((media, index) => (
               <div
                 class={`media-item ${index === 0 ? "active" : ""}`}
                 data-index={index}
@@ -160,7 +119,7 @@ const trustFeatures = [
       <!-- Product Info Section -->
       <div class="product-info">
         <h1 class="product-title">{productInfo.name}</h1>
-        <p class="product-subtitle">{subcategoryInfo.name}</p>
+        <p class="product-subtitle">{subcategory}</p>
 
         <!-- Quick Actions Links -->
         <div class="quick-links">
@@ -637,46 +596,46 @@ const trustFeatures = [
 
       <div class="downloads-grid">
         {
-          downloadableFiles.map((file) => (
-            <a href={file.url} class="download-card" download>
-              <div class="download-icon">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <polyline points="9 15 12 18 15 15" />
-                </svg>
-              </div>
-              <div class="download-info">
-                <h3>{file.name}</h3>
-                <div class="download-meta">
-                  <span class="file-type">{file.type}</span>
-                  <span class="file-size">{file.size}</span>
-                </div>
-              </div>
-              <div class="download-action">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              </div>
-            </a>
-          ))
+          // downloadableFiles.map((file) => (
+          //   <a href={file.url} class="download-card" download>
+          //     <div class="download-icon">
+          //       <svg
+          //         width="32"
+          //         height="32"
+          //         viewBox="0 0 24 24"
+          //         fill="none"
+          //         stroke="currentColor"
+          //         stroke-width="2"
+          //       >
+          //         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          //         <polyline points="14 2 14 8 20 8" />
+          //         <line x1="12" y1="18" x2="12" y2="12" />
+          //         <polyline points="9 15 12 18 15 15" />
+          //       </svg>
+          //     </div>
+          //     <div class="download-info">
+          //       <h3>{file.name}</h3>
+          //       <div class="download-meta">
+          //         <span class="file-type">{file.type}</span>
+          //         <span class="file-size">{file.size}</span>
+          //       </div>
+          //     </div>
+          //     <div class="download-action">
+          //       <svg
+          //         width="20"
+          //         height="20"
+          //         viewBox="0 0 24 24"
+          //         fill="none"
+          //         stroke="currentColor"
+          //         stroke-width="2"
+          //       >
+          //         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          //         <polyline points="7 10 12 15 17 10" />
+          //         <line x1="12" y1="15" x2="12" y2="3" />
+          //       </svg>
+          //     </div>
+          //   </a>
+          // ))
         }
       </div>
     </section>

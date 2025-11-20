@@ -1,40 +1,43 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import SectionContainer from "@/components/SectionContainer.astro";
+import { createClient } from "@/lib/supabase";
+import { getProductsByCategory, getSubcategoriesByCategory } from "@/lib/api";
+
 import ProductFilters from "@/components/ProductFilters.astro";
 import CatalogHeader from "@/components/CatalogHeader.astro";
 import ProductCard from "@/components/ProductCard.astro";
 import MobileFilterToggle from "@/components/MobileFilterToggle.astro";
-import productsData from "@/data/products.json";
-import categoriesData from "@/data/categories.json";
+import { callSafely } from "astro:actions";
 
-const category = Astro.params.category || "";
+const { category } = Astro.params;
 
-// Find category info
-const categoryInfo = categoriesData.find((c) => c.slug === category);
-
-if (!categoryInfo || !category) {
-  return Astro.redirect("/404");
+if (!category) {
+  throw new Error("Categoría no especificada");
 }
 
-// Filter products by category - show ALL products for this category
-let filteredProducts = productsData.filter((p) => p.category === category);
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 
-// Get subcategories for this category
-const subcategories = categoryInfo.subcategories || [];
+const products = await getProductsByCategory(supabase, category);
+const subcategories = await getSubcategoriesByCategory(supabase, category);
 
-const title = categoryInfo?.name || "Productos";
-const description = `Explora toda nuestra colección de ${categoryInfo?.name.toLowerCase()}.`;
+// console.log("products", products);
+
+
+// console.log("subcategories", subcategories);
+// console.log(products[0].subcategories["categories"]);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout>
   <section>
     <div class="breadcrumb">
       <a href="/">Inicio</a>
       <span class="separator">/</span>
       <a href="/categorias">Categorías</a>
       <span class="separator">/</span>
-      <span class="current">{categoryInfo?.name}</span>
+      <span class="current">{category}</span>
     </div>
 
     <div class="catalog-layout">
@@ -47,31 +50,30 @@ const description = `Explora toda nuestra colección de ${categoryInfo?.name.toL
 
       <div class="products-column">
         <CatalogHeader
-          title={categoryInfo?.name || "Productos"}
-          totalProducts={filteredProducts.length}
-          currentView="grid"
+          title={category}
+          totalProducts={products.length}
         />
 
         <div class="products-grid" data-view="grid">
           {
-            filteredProducts.map((product) => (
+            products.map((product) => (
               <ProductCard
-                id={product.id}
+                id={product.id.toString()}
                 name={product.name}
                 description={product.description}
-                inStock={product.inStock}
-                image={product.image}
+                inStock={true}
+                image={product.images[0]}
                 images={product.images}
                 brand={product.brand}
                 category={category}
-                subcategory={product.subcategory}
+                subcategory={product.subcategories.slug}
               />
             ))
           }
         </div>
 
         {
-          filteredProducts.length === 0 && (
+          products.length === 0 && (
             <div class="empty-state">
               <svg
                 width="80"

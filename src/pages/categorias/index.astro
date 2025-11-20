@@ -12,23 +12,13 @@ const supabase = createClient({
 // Cache-Control para Vercel/CDN
 // s-maxage=3600: Cache en CDN por 1 hora
 // stale-while-revalidate=86400: Servir contenido "viejo" mientras se actualiza en background (SWR)
-Astro.response.headers.set(
-  "Cache-Control",
-  "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400"
-);
-
-// ⏱️ Medir tiempo antes
-const start = performance.now();
+// Astro.response.headers.set(
+//   "Cache-Control",
+//   "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400"
+// );
 
 const categoriesData = await getAllCategories(supabase);
-
-// ⏱️ Medir tiempo después
-const end = performance.now();
-
-// ⏱️ Tiempo total redondeado a ms
-const queryTimeMs = (end - start).toFixed(2);
-
-console.log("⏱️ Query categories:", queryTimeMs, "ms");
+console.log(categoriesData);
 
 const title = "Categorías de Productos";
 const description =
@@ -41,9 +31,6 @@ const description =
       <h1>Nuestras Categorías</h1>
       <p>
         Explora toda nuestra colección de productos organizados por categoría
-      </p>
-      <p style="text-align:center; font-size:14px; color:#888;">
-        Tiempo de carga: {queryTimeMs} ms
       </p>
     </div>
 

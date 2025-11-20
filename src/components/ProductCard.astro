@@ -1,5 +1,5 @@
 ---
-import { AddToCartButton } from './AddToCartButton/AddToCartButton';
+import { AddToCartButton } from "./AddToCartButton/AddToCartButton";
 
 interface Props {
   id: string;
@@ -13,29 +13,40 @@ interface Props {
   subcategory?: string;
 }
 
-const { id, name, description, inStock, image, images, brand, category, subcategory } = Astro.props;
+const {
+  id,
+  name,
+  description,
+  inStock,
+  image,
+  images,
+  brand,
+  category,
+  subcategory,
+} = Astro.props;
 const secondImage = images[1] || images[0];
 
 // Build the product URL
-const productUrl = category && subcategory 
-  ? `/categorias/${category}/${subcategory}/${id}`
-  : `/productos/${id}`;
+const productUrl =
+  category && subcategory
+    ? `/categorias/${category}/${subcategory}/${id}`
+    : `/productos/${id}`;
 ---
 
 <article class="product-card">
   <a href={productUrl} class="product-link">
     <div class="product-image-wrapper">
       {!inStock && <span class="badge badge-discount">Agotado</span>}
-      
+
       <div class="image-container">
-        <img 
-          src={image} 
+        <img
+          src={image}
           alt={name}
           class="product-image primary-image"
           loading="lazy"
         />
-        <img 
-          src={secondImage} 
+        <img
+          src={secondImage}
           alt={`${name} - vista alternativa`}
           class="product-image secondary-image"
           loading="lazy"
@@ -47,25 +58,25 @@ const productUrl = category && subcategory
       <span class="product-brand">{brand}</span>
       <h3 class="product-name">{name}</h3>
       <p class="product-description">{description}</p>
-      
+
       <div class="product-footer">
         <span class="stock-status" data-in-stock={inStock}>
-          {inStock ? 'Disponible' : 'No disponible'}
+          {inStock ? "Disponible" : "No disponible"}
         </span>
       </div>
     </div>
   </a>
-  
+
   <div class="product-actions">
-    <AddToCartButton 
+    <AddToCartButton
       product={{
         id,
         name,
         description,
         image,
         quantity: 1,
-        inStock
-      }} 
+        inStock,
+      }}
       client:load
     />
   </div>
@@ -112,8 +123,9 @@ const productUrl = category && subcategory
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .primary-image {
@@ -218,7 +230,7 @@ const productUrl = category && subcategory
   }
 
   .stock-status::before {
-    content: '';
+    content: "";
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -245,17 +257,16 @@ const productUrl = category && subcategory
   .product-actions {
     padding: 0 16px 16px;
   }
-
 </style>
 
 <script>
-  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-    button.addEventListener('click', (e) => {
+  document.querySelectorAll(".add-to-cart-btn").forEach((button) => {
+    button.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
-      const productId = button.getAttribute('data-product-id');
-      
+
+      const productId = button.getAttribute("data-product-id");
+
       // Efecto visual de agregado
       const originalText = button.innerHTML;
       button.innerHTML = `
@@ -264,11 +275,11 @@ const productUrl = category && subcategory
         </svg>
         <span>¡Agregado!</span>
       `;
-      
+
       setTimeout(() => {
         button.innerHTML = originalText;
       }, 2000);
-      
+
       // Aquí implementarías la lógica real del carrito
       // Por ejemplo, con nanostores:
       // import { cartStore } from '@/stores/cart';

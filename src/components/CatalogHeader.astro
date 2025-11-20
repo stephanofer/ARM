@@ -2,10 +2,9 @@
 interface Props {
   title: string;
   totalProducts: number;
-  currentView?: 'grid' | 'list';
 }
 
-const { title, totalProducts, currentView = 'grid' } = Astro.props;
+const { title, totalProducts } = Astro.props;
 ---
 
 <div class="catalog-header">
