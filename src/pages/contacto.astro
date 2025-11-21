@@ -3,7 +3,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContactInfo from "@/sections/contacto/ContactInfo.astro";
 
 const title = "Contacto - Muebles Life";
-const description = "Contáctanos para cualquier consulta. Encuentra nuestra ubicación, horarios de atención y canales de comunicación.";
+const description =
+  "Contáctanos para cualquier consulta. Encuentra nuestra ubicación, horarios de atención y canales de comunicación.";
+export const prerender = true;
 ---
 
 <BaseLayout title={title} description={description}>

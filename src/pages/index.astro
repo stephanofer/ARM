@@ -8,8 +8,12 @@ import FeaturedProducts from "@/sections/home/FeaturedProducts.astro";
 import Hero from "@/sections/home/Hero.astro";
 import WhyUs from "@/sections/home/WhyUs.astro";
 
+
 const title = "Página de Inicio";
 const description = "Bienvenido a la página de inicio de mi sitio web.";
+export const prerender = true;
+
+
 ---
 
 <BaseLayout title={title} description={description}>

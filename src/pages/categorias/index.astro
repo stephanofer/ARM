@@ -2,23 +2,14 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SectionContainer from "@/components/SectionContainer.astro";
 import { createClient } from "@/lib/supabase";
-import { getAllCategories } from "@/lib/api";
+import { getAllCategories } from "@/lib/products";
 
 const supabase = createClient({
   request: Astro.request,
   cookies: Astro.cookies,
 });
 
-// Cache-Control para Vercel/CDN
-// s-maxage=3600: Cache en CDN por 1 hora
-// stale-while-revalidate=86400: Servir contenido "viejo" mientras se actualiza en background (SWR)
-// Astro.response.headers.set(
-//   "Cache-Control",
-//   "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400"
-// );
-
 const categoriesData = await getAllCategories(supabase);
-console.log(categoriesData);
 
 const title = "Categorías de Productos";
 const description =

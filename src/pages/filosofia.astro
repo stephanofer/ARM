@@ -3,8 +3,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ARMSection from "@/sections/sobre-nosotros/ARMSection.astro";
 import PhilosophySection from "@/sections/sobre-nosotros/PhilosophySection.astro";
 
+
 const title = "Sobre nosotros - LUFE";
 const description = "Diseñamos y fabricamos muebles con el objetivo de mejorar nuestra naturaleza y nuestro entorno. Local, Universal y Funcional.";
+export const prerender = true;
+
 ---
 
 <BaseLayout title={title} description={description}>

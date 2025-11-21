@@ -5,7 +5,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
   if (!pathname.startsWith("/admin")) {
-    console.log("pase");
     return next();
   }
 

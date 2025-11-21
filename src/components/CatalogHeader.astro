@@ -10,7 +10,10 @@ const { title, totalProducts } = Astro.props;
 <div class="catalog-header">
   <div class="header-left">
     <h1 class="catalog-title">{title}</h1>
-    <p class="catalog-count">Mostrando 1-{totalProducts} de {totalProducts} productos</p>
+    {/* Agregamos un ID para poder cambiar este texto con JS */}
+    <p class="catalog-count" id="catalog-count-label">
+      {totalProducts} productos encontrados
+    </p>
   </div>
 
   <div class="header-right">
@@ -28,17 +31,6 @@ const { title, totalProducts } = Astro.props;
       </svg>
       <span>Filtros</span>
     </button>
-
-    <div class="sort-controls">
-      <label for="sortBy" class="sort-label">Ordenar por:</label>
-      <select id="sortBy" class="sort-select">
-        <option value="featured">Destacados</option>
-        <option value="name-asc">Nombre: A-Z</option>
-        <option value="name-desc">Nombre: Z-A</option>
-        <option value="newest">Más recientes</option>
-        <option value="availability">Disponibilidad</option>
-      </select>
-    </div>
   </div>
 </div>
 
@@ -71,6 +63,7 @@ const { title, totalProducts } = Astro.props;
     font-size: 0.875rem;
     color: #6b7280;
     margin: 0;
+    transition: color 0.3s ease;
   }
 
   .header-right {
@@ -78,46 +71,6 @@ const { title, totalProducts } = Astro.props;
     align-items: center;
     gap: 24px;
     flex-wrap: wrap;
-  }
-
-  .sort-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .sort-label {
-    font-size: 0.875rem;
-    color: #374151;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .sort-select {
-    padding: 8px 36px 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    color: #111827;
-    background-color: white;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    cursor: pointer;
-    appearance: none;
-    transition: all 0.2s ease;
-    min-width: 180px;
-  }
-
-  .sort-select:hover {
-    border-color: #9ca3af;
-  }
-
-  .sort-select:focus {
-    outline: none;
-    border-color: #111827;
-    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
   }
 
   .mobile-filter-btn {
@@ -171,16 +124,6 @@ const { title, totalProducts } = Astro.props;
       gap: 12px;
     }
 
-    .sort-controls {
-      justify-content: space-between;
-      width: 100%;
-    }
-
-    .sort-select {
-      flex: 1;
-      min-width: auto;
-    }
-
     .catalog-title {
       font-size: 1.5rem;
     }
@@ -189,40 +132,32 @@ const { title, totalProducts } = Astro.props;
       order: -1;
     }
   }
-
-  @media (max-width: 480px) {
-    .sort-label {
-      display: none;
-    }
-
-    .sort-select {
-      width: 100%;
-    }
-  }
 </style>
 
 <script>
-  // Sort functionality
-  const sortSelect = document.getElementById('sortBy') as HTMLSelectElement;
-  
-  sortSelect?.addEventListener('change', (e) => {
-    const target = e.target as HTMLSelectElement;
-    const sortValue = target.value;
-    
-    // Here you would implement actual sorting logic
-    
-    // For SSR, you might want to update URL params and reload
-    // const url = new URL(window.location.href);
-    // url.searchParams.set('sort', sortValue);
-    // window.location.href = url.toString();
+  // Importamos el store para escuchar cambios en vivo
+  import { $totalProducts } from "@/shopStore";
+
+  // Elementos del DOM
+  const countLabel = document.getElementById("catalog-count-label");
+  const headerFilterBtn = document.getElementById('headerFilterBtn');
+
+  // 1. LÓGICA REACTIVA: Escuchar cambios en el total
+  $totalProducts.subscribe((total) => {
+    if (countLabel) {
+      countLabel.textContent = `${total} productos encontrados`;
+    }
   });
 
-  // Open filters from header button
-  const headerFilterBtn = document.getElementById('headerFilterBtn');
+  // 2. LÓGICA UI: Abrir filtros en móvil
   headerFilterBtn?.addEventListener('click', () => {
-    const mobileFilterToggle = document.getElementById('mobileFilterToggle') as HTMLButtonElement;
+    // Asumimos que tu Sidebar/Drawer tiene un botón oculto o una función para abrirse
+    // Ajusta este ID según tu implementación del menú móvil
+    const mobileFilterToggle = document.getElementById('mobileFilterToggle'); 
     if (mobileFilterToggle) {
       mobileFilterToggle.click();
+    } else {
+      console.warn("No se encontró el botón 'mobileFilterToggle'");
     }
   });
 </script>

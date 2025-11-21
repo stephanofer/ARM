@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const title = "404 – Página no encontrada";
 const description = "La página que buscas no existe o ha sido movida.";
+export const prerender = true;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -12,8 +13,8 @@ const description = "La página que buscas no existe o ha sido movida.";
       <h1 class="title">Página no encontrada</h1>
 
       <p class="desc">
-        Parece que esta página está tomando una siesta en alguna de nuestras camas.  
-        ¿Volvemos al inicio?
+        Parece que esta página está tomando una siesta en alguna de nuestras
+        camas. ¿Volvemos al inicio?
       </p>
 
       <a href="/" class="btn-home">Volver al inicio</a>

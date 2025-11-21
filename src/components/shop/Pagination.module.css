@@ -1,0 +1,61 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  padding-top: 24px;
+  border-top: 1px solid #f3f4f6; /* Línea sutil separadora arriba */
+}
+
+.pagination button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.pagination button:active:not(:disabled) {
+  background-color: #f3f4f6;
+  transform: translateY(1px); /* Efecto de presionar */
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+  box-shadow: none;
+}
+
+.pagination span {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums; /* Para que los números no salten al cambiar */
+}
+
+/* Responsive: En móviles muy pequeños */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 12px;
+  }
+  
+  .pagination button {
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+  }
+}

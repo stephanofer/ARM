@@ -1,25 +1,11 @@
 ---
-interface DynamicFilter {
-  id: string;
-  name: string;
-  options: {
-    value: string;
-    label: string;
-  }[];
-}
-
-interface Subcategory {
-  id: string;
-  name: string;
-  slug: string;
-  dynamicFilters?: DynamicFilter[];
-}
+import type { FilterConfig, SubcategorySimple } from '@/types';
 
 interface Props {
   currentCategory: string;
-  currentSubcategory?: string;
-  subcategories?: Subcategory[];
-  dynamicFilters?: DynamicFilter[];
+  currentSubcategory: string | null;
+  subcategories?: SubcategorySimple[];
+  dynamicFilters?: FilterConfig[];
 }
 
 const { 
@@ -29,16 +15,6 @@ const {
   dynamicFilters = []
 } = Astro.props;
 
-// Get unique brands from all products for this category
-const brands = [
-  { id: 'arm', name: 'ARM', count: 4 },
-  { id: 'arm-classic', name: 'ARM Classic', count: 6 },
-  { id: 'arm-kids', name: 'ARM Kids', count: 3 },
-  { id: 'arm-modular', name: 'ARM Modular', count: 4 },
-  { id: 'arm-outdoor', name: 'ARM Outdoor', count: 2 },
-  { id: 'arm-ergo', name: 'ARM Ergo', count: 1 },
-  { id: 'arm-industrial', name: 'ARM Industrial', count: 3 },
-];
 ---
 
 <aside class="filters-sidebar">
@@ -97,7 +73,7 @@ const brands = [
   )}
 
   <!-- Filtros Dinámicos (solo si hay una subcategoría seleccionada) -->
-  {dynamicFilters.length > 0 && dynamicFilters.map((filter) => (
+  <!-- {dynamicFilters.length > 0 && dynamicFilters.map((filter) => (
     <div class="filter-section">
       <h3 class="filter-section-title">
         <span>{filter.name}</span>
@@ -120,31 +96,8 @@ const brands = [
         ))}
       </div>
     </div>
-  ))}
+  ))} -->
 
-  <!-- Marcas de ARM (solo cuando hay subcategoría seleccionada) -->
-  {currentSubcategory && (
-    <div class="filter-section">
-      <h3 class="filter-section-title">
-        <span>Filtrar por Marca ARM</span>
-        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </h3>
-      <div class="filter-options">
-        {brands.map((brand) => (
-          <label class="filter-option">
-            <input type="checkbox" name="brand" value={brand.id} />
-            <span class="checkbox-custom"></span>
-            <span class="option-label">
-              {brand.name}
-              <span class="option-count">({brand.count})</span>
-            </span>
-          </label>
-        ))}
-      </div>
-    </div>
-  )}
 </aside>
 
 <style>

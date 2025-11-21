@@ -1,34 +1,58 @@
-export type Category = {
-    id: string;
-    name: string;
-    description?: string;
-};
+// src/types/database.ts
 
-export type SubCategory = {
-    id: string;
-    categoryId: string;
-    name: string;
-    description?: string;
-};
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  image_url: string | null;
+}
 
-export type Product = {
-    id: string;
-    subCategoryId: string;
-    name: string;
-    price: number;
-    description?: string;
-    inStock: boolean;
-};
+export interface Subcategory {
+  id: number;
+  category_id: number;
+  name: string;
+  slug: string;
+  filter_config: FilterConfig[];
+  display_order: number;
+  created_at: string;
+}
 
-export type User = {
-    id: string;
-    username: string;
-    email: string;
-    passwordHash: string;
-    isAdmin: boolean;
-};
+export interface FilterConfig {
+  key: string;
+  type: "select" | "range" | "checkbox" | "boolean";
+  label: string;
+  options?: string[];
+}
 
-export type CartItem = {
-    productId: string;
-    quantity: number;
-};
+export interface Product {
+  id: number;
+  subcategory_id: number;
+  category_id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  stock: number;
+  images: string[];
+  brand: string | null;
+  attributes: Record<string, any>;
+  created_at: string;
+}
+
+// src/types/database.ts
+
+export interface SubcategoryWithFilters {
+  id: number;
+  category_id: number;
+  name: string;
+  slug: string;
+  filter_config: FilterConfig[];
+  display_order: number;
+}
+
+export interface SubcategorySimple {
+  id: number;
+  name: string;
+  slug: string;
+  display_order: number;
+  category_id: number;
+}
