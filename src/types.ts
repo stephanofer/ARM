@@ -1,5 +1,3 @@
-// src/types/database.ts
-
 export interface Category {
   id: number;
   name: string;
