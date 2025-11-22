@@ -26,3 +26,8 @@ pnpm-debug.log*
 .vercel
 
 .dev.vars
+
+api.rest
+
+*.sql
+

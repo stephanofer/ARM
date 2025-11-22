@@ -36,7 +36,6 @@ export function addToCart(product: CartItem) {
 }
 
 export function increaseQuantity(productId: string) {
-
   const currentCart = $cart.get();
   if (currentCart[productId]) {
     $cart.setKey(productId, {
@@ -65,7 +64,6 @@ export function setQuantity(productId: string, quantity: number) {
     });
   }
 }
-
 
 export function removeFromCart(productId: string) {
   $cart.setKey(productId, undefined);

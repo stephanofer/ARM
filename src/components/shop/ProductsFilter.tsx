@@ -1,25 +1,42 @@
 import { useState, useEffect } from "preact/hooks";
 import { useStore } from "@nanostores/preact";
-import { $isLoading, $products, $totalProducts } from "@/shopStore";
-import type { SubcategoryWithFilters, FilterConfig } from "@/types";
+import {
+  $isLoading,
+  $products,
+  $totalProducts,
+  $requestCache,
+} from "@/shopStore";
+import type {
+  SubcategoryWithFilters,
+  FilterConfig,
+  Product,
+} from "@/types";
 import styles from "./ProductsFilter.module.css";
 
 interface ProductsFilterProps {
   subCategories: SubcategoryWithFilters[];
   categoryId: number;
   initialFilters: Record<string, any>;
+  // Props para la caché inicial
+  initialProducts: Product[];
+  initialTotal: number;
 }
 
 export function ProductsFilter({
   subCategories,
   categoryId,
   initialFilters,
+  initialProducts,
+  initialTotal,
 }: ProductsFilterProps) {
+  
+  // 1. Helper para obtener estado inicial
   const getInitialSub = () => {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get("subcategory");
   };
 
+  // 2. Estados
   const [activeSubSlug, setActiveSubSlug] = useState<string | null>(
     getInitialSub()
   );
@@ -27,36 +44,65 @@ export function ProductsFilter({
     useState<Record<string, any>>(initialFilters);
   const [dynamicFilters, setDynamicFilters] = useState<FilterConfig[]>([]);
 
+  // 3. Efecto para actualizar configuración de filtros dinámicos
   useEffect(() => {
     const activeSub = subCategories.find((s) => s.slug === activeSubSlug);
-
     setDynamicFilters(activeSub?.filter_config || []);
   }, [activeSubSlug, subCategories]);
 
+  // 4. EFECTO: CACHÉ INICIAL (Prime)
+  // Guardamos lo que vino del servidor para que el botón "Atrás" sea instantáneo
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams();
+
+    params.set("categoryId", categoryId.toString());
+    params.set("page", url.searchParams.get("page") || "1");
+
+    const subSlug = url.searchParams.get("subcategory");
+    const activeSub = subCategories.find((s) => s.slug === subSlug);
+    if (activeSub) params.set("subcategoryId", activeSub.id.toString());
+
+    url.searchParams.forEach((val, key) => {
+      if (!["subcategory", "page", "categoryId"].includes(key)) {
+        params.set(key, val);
+      }
+    });
+
+    const cacheKey = params.toString();
+    const currentCache = $requestCache.get();
+
+    if (!currentCache[cacheKey]) {
+      $requestCache.setKey(cacheKey, {
+        products: initialProducts,
+        total: initialTotal,
+      });
+      // console.log("🧠 Caché inicial guardada:", cacheKey);
+    }
+  }, []);
+
+  // 5. LÓGICA CENTRAL: URL -> Caché -> API -> Store
   const syncStateWithUrl = async (url: URL, shouldFetch: boolean = true) => {
     const subSlug = url.searchParams.get("subcategory");
     const page = Number(url.searchParams.get("page")) || 1;
 
     const currentFilters: Record<string, any> = {};
+    // Importante: Excluir 'page' para que no rompa la query de Supabase
     url.searchParams.forEach((val, key) => {
       if (!["subcategory", "page", "categoryId"].includes(key)) {
         currentFilters[key] = val;
       }
     });
 
+    // Actualizar UI
     setActiveSubSlug(subSlug);
     setSelectedFilters(currentFilters);
-
-    const activeSub = subCategories.find((s) => s.slug === subSlug);
-    console.log("🖥️ CLIENTE INTENTA FETCH:", {
-      buscandoSlug: subSlug,
-      encontrada: activeSub ? "SÍ" : "NO",
-      idQueSeEnviara: activeSub?.id,
-    });
+    
+    // Nota: dynamicFilters se actualiza via el useEffect de arriba
 
     if (shouldFetch) {
-      $isLoading.set(true);
-
+      // Preparar parámetros para la API / Caché
+      const activeSub = subCategories.find((s) => s.slug === subSlug);
       const apiParams = new URLSearchParams();
       apiParams.set("categoryId", categoryId.toString());
       apiParams.set("page", page.toString());
@@ -66,12 +112,32 @@ export function ProductsFilter({
         apiParams.set(k, v as string)
       );
 
+      const cacheKey = apiParams.toString();
+
+      // A) REVISAR CACHÉ
+      const cachedData = $requestCache.get()[cacheKey];
+      if (cachedData) {
+        // console.log("⚡ Usando caché:", cacheKey);
+        $products.set(cachedData.products);
+        $totalProducts.set(cachedData.total);
+        return; // Salimos, no hacemos fetch
+      }
+
+      // B) FETCH API (Si no hay caché)
+      $isLoading.set(true);
       try {
         const res = await fetch(`/api/shop?${apiParams.toString()}`);
         const result = await res.json();
 
+        // Actualizar Stores
         $products.set(result.products);
         $totalProducts.set(result.total);
+
+        // Guardar en Caché
+        $requestCache.setKey(cacheKey, {
+          products: result.products,
+          total: result.total,
+        });
       } catch (e) {
         console.error("Error fetching products:", e);
       } finally {
@@ -80,6 +146,7 @@ export function ProductsFilter({
     }
   };
 
+  // 6. Escuchar navegación del navegador
   useEffect(() => {
     const handlePopState = () => {
       syncStateWithUrl(new URL(window.location.href), true);
@@ -88,7 +155,7 @@ export function ProductsFilter({
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-
+  // 7. Helpers de actualización de URL
   const updateUrlAndSync = (url: URL) => {
     window.history.pushState({}, "", url);
     syncStateWithUrl(url, true);
@@ -96,35 +163,38 @@ export function ProductsFilter({
 
   const handleSubcategoryClick = (slug: string) => {
     const url = new URL(window.location.href);
-
     if (url.searchParams.get("subcategory") === slug) return;
 
-    url.search = "";
+    url.search = ""; // Limpiar filtros anteriores
     url.searchParams.set("subcategory", slug);
-    url.searchParams.set("page", "1");
+    url.searchParams.set("page", "1"); // Reset página
 
     updateUrlAndSync(url);
   };
 
-  const handleFilterChange = (key: string, value: string, checked: boolean) => {
+  const handleFilterChange = (
+    key: string,
+    value: string,
+    checked: boolean
+  ) => {
     const url = new URL(window.location.href);
-
     if (checked) {
       url.searchParams.set(key, value);
     } else {
       url.searchParams.delete(key);
     }
-    url.searchParams.set("page", "1");
+    url.searchParams.set("page", "1"); // Reset página
 
     updateUrlAndSync(url);
   };
 
   const handleClearFilters = () => {
     const url = new URL(window.location.href);
-    url.search = ""; 
+    url.search = "";
     updateUrlAndSync(url);
   };
 
+  // 8. Renderizado
   return (
     <aside className={styles["products-filter"]}>
       <div className={styles["filters-header"]}>
@@ -138,7 +208,7 @@ export function ProductsFilter({
         </button>
       </div>
 
-      {/* Filtro Estático: Disponibilidad */}
+      {/* Disponibilidad */}
       <div className={styles["filter-section"]}>
         <h3 className={styles["filter-section-title"]}>
           <span>Disponibilidad</span>
