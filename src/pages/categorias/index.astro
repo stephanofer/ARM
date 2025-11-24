@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SectionContainer from "@/components/SectionContainer.astro";
 import { createClient } from "@/lib/supabase";
-import { getAllCategories } from "@/lib/products";
+import { getAllCategories } from "@/lib/product";
 
 const supabase = createClient({
   request: Astro.request,
@@ -14,6 +14,8 @@ const categoriesData = await getAllCategories(supabase);
 const title = "Categorías de Productos";
 const description =
   "Explora todas nuestras categorías de productos - muebles de madera maciza diseñados con estilo y sostenibilidad.";
+
+export const prerender = true;
 ---
 
 <BaseLayout title={title} description={description}>

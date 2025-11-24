@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createClient } from '../../lib/supabase';
+import { getProductBySlug } from '../../lib/data';
+
+// Obtener slug del producto
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+// Crear cliente de Supabase
+const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+
+// Obtener producto con relaciones
+const productData = await getProductBySlug(supabase, slug);
+
+if (!productData) {
+  return Astro.redirect('/404');
+}
+
+const { product, category, subcategory } = productData;
+
+// Título y descripción
+const pageTitle = `${product.name} | ARM`;
+const pageDescription = product.description || `${product.name} en ${category.name}`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div style="padding: 2rem 1rem; max-width: 1400px; margin: 0 auto;">
+    {/* Breadcrumb */}
+    <nav style="margin-bottom: 2rem; font-size: 0.9rem; color: #666;">
+      <a href="/" style="text-decoration: none; color: #666;">Inicio</a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <a href="/categorias" style="text-decoration: none; color: #666;">Categorías</a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <a
+        href={`/categorias/${category.slug}`}
+        style="text-decoration: none; color: #666;"
+      >
+        {category.name}
+      </a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <a
+        href={`/categorias/${category.slug}?subcategoria=${subcategory.slug}`}
+        style="text-decoration: none; color: #666;"
+      >
+        {subcategory.name}
+      </a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <span style="color: #333; font-weight: 500;">{product.name}</span>
+    </nav>
+
+    {/* Contenido del producto */}
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-bottom: 3rem;">
+      {/* Galería de imágenes */}
+      <div>
+        {product.images && product.images.length > 0 ? (
+          <div style="border-radius: 12px; overflow: hidden; background: #f5f5f5;">
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              style="width: 100%; height: auto; display: block;"
+            />
+          </div>
+        ) : (
+          <div
+            style="
+              aspect-ratio: 1;
+              background: #f5f5f5;
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #999;
+              font-size: 1.25rem;
+            "
+          >
+            Sin imagen disponible
+          </div>
+        )}
+
+        {/* Miniaturas (si hay más imágenes) */}
+        {product.images && product.images.length > 1 && (
+          <div style="display: flex; gap: 1rem; margin-top: 1rem; overflow-x: auto;">
+            {product.images.slice(1).map((img) => (
+              <img
+                src={img}
+                alt={product.name}
+                style="
+                  width: 100px;
+                  height: 100px;
+                  object-fit: cover;
+                  border-radius: 8px;
+                  cursor: pointer;
+                "
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Información del producto */}
+      <div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #1a1a1a;">
+          {product.name}
+        </h1>
+
+        {product.brand && (
+          <p style="font-size: 1.125rem; color: #666; margin-bottom: 1rem;">
+            Marca: <strong>{product.brand}</strong>
+          </p>
+        )}
+
+        {product.price !== null && (
+          <p style="font-size: 2rem; font-weight: 600; color: #2d5f3f; margin-bottom: 1.5rem;">
+            ${product.price.toFixed(2)}
+          </p>
+        )}
+
+        {/* Estado de stock */}
+        {product.stock > 0 ? (
+          <p style="color: #2d5f3f; font-weight: 500; margin-bottom: 2rem;">
+            ✓ En stock ({product.stock} disponibles)
+          </p>
+        ) : (
+          <p style="color: #d32f2f; font-weight: 500; margin-bottom: 2rem;">
+            × Agotado
+          </p>
+        )}
+
+        {/* Descripción */}
+        {product.description && (
+          <div style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: #333;">
+              Descripción
+            </h2>
+            <p style="line-height: 1.7; color: #666;">
+              {product.description}
+            </p>
+          </div>
+        )}
+
+        {/* Atributos */}
+        {product.attributes && Object.keys(product.attributes).length > 0 && (
+          <div style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: #333;">
+              Especificaciones
+            </h2>
+            <ul style="list-style: none; padding: 0;">
+              {Object.entries(product.attributes).map(([key, value]) => (
+                <li
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0.75rem 0;
+                    border-bottom: 1px solid #e5e5e5;
+                  "
+                >
+                  <span style="color: #666; text-transform: capitalize;">{key}:</span>
+                  <span style="color: #333; font-weight: 500;">{value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Botones de acción */}
+        <div style="display: flex; gap: 1rem;">
+          <button
+            style="
+              flex: 1;
+              padding: 1rem 2rem;
+              background: #2d5f3f;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              font-size: 1rem;
+              font-weight: 500;
+              cursor: pointer;
+              transition: background 0.2s;
+            "
+            disabled={product.stock === 0}
+          >
+            {product.stock > 0 ? 'Agregar al carrito' : 'Agotado'}
+          </button>
+        </div>
+
+        {/* Link para ver más productos de esta subcategoría */}
+        <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e5e5e5;">
+          <a
+            href={`/categorias/${category.slug}?subcategoria=${subcategory.slug}`}
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 0.5rem;
+              color: #2d5f3f;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            ← Ver más productos de {subcategory.name}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+      gap: 2rem !important;
+    }
+  }
+
+  button:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
