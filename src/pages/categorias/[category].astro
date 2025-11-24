@@ -61,7 +61,7 @@ const { data: initialProducts, total: initialTotal } =
     subCategoryId,
     ssrFilters,
     page,
-    PAGE_SIZE
+    PAGE_SIZE,
   );
 
 const papeTitle = `Categoría: ${categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)}`;
@@ -86,7 +86,7 @@ const pageDescription = `Explora nuestra selección de productos en la categorí
           initialFilters={ssrFilters}
           initialProducts={initialProducts}
           initialTotal={initialTotal}
-          client:load
+          client:only="preact"
         />
       </div>
 
@@ -96,9 +96,9 @@ const pageDescription = `Explora nuestra selección de productos en la categorí
         <ProductsGrid
           initialProducts={initialProducts}
           initialTotal={initialTotal}
-          client:load
+          client:only="preact"
         />
-        <Pagination initialTotal={initialTotal} client:load />
+        <Pagination initialTotal={initialTotal} client:only="preact" />
 
         <!-- {
           initialProducts.length === 0 && (
