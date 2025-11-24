@@ -7,6 +7,7 @@ import {
   getProductsBySubcategory,
 } from '../../lib/data';
 import type { ProductFilters, AttributeFilters } from '../../lib/data';
+import { PAGE_SIZE } from '@/config';
 
 /**
  * API endpoint para obtener productos con filtros, paginación y orden
@@ -28,7 +29,7 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
     const categorySlug = url.searchParams.get('categorySlug');
     const subcategorySlug = url.searchParams.get('subcategoria');
     const page = parseInt(url.searchParams.get('page') || '1');
-    const pageSize = parseInt(url.searchParams.get('pageSize') || '2'); // 2 para testear paginación
+    const pageSize = parseInt(url.searchParams.get('pageSize') || PAGE_SIZE.toString()); 
     const sort = url.searchParams.get('sort') || undefined;
     const minPrice = url.searchParams.get('minPrice');
     const maxPrice = url.searchParams.get('maxPrice');

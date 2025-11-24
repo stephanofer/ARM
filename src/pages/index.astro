@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getAllCategories } from "@/lib/data";
+import { createClient } from "@/lib/supabase";
 import Brands from "@/sections/home/Brands.astro";
 import Categories from "@/sections/home/Categories.astro";
 import CustomersTestimonials from "@/sections/home/CustomersTestimonials.astro";
@@ -8,17 +10,21 @@ import FeaturedProducts from "@/sections/home/FeaturedProducts.astro";
 import Hero from "@/sections/home/Hero.astro";
 import WhyUs from "@/sections/home/WhyUs.astro";
 
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+const categoriesData = await getAllCategories(supabase);
 
 const title = "Página de Inicio";
 const description = "Bienvenido a la página de inicio de mi sitio web.";
 export const prerender = true;
-
-
 ---
 
 <BaseLayout title={title} description={description}>
   <Hero />
-  <Categories />
+  <Categories categories={categoriesData} limit={4}/>
   <Brands />
   <FeaturedProducts />
   <WhyUs />

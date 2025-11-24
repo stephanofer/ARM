@@ -1,32 +1,12 @@
 ---
 import SectionContainer from "@/components/SectionContainer.astro";
-
-const categories = [
-  {
-    name: "Dormitorio",
-    image:
-      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80",
-    link: "/categorias/dormitorio",
-  },
-  {
-    name: "Montessori",
-    image:
-      "https://images.unsplash.com/photo-1631889993959-41b4e9c6e3c5?w=800&q=80",
-    link: "/categorias/montessori",
-  },
-  {
-    name: "Comedor",
-    image:
-      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?w=800&q=80",
-    link: "/categorias/comedor",
-  },
-  {
-    name: "Exterior",
-    image:
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
-    link: "/categorias/exterior",
-  },
-];
+import type { Category } from "@/lib/data/types";
+type Props = {
+  categories: Category[];
+  limit?: number;
+};
+const { categories: allCategories, limit } = Astro.props;
+const categories = limit ? allCategories.slice(0, limit) : allCategories;
 ---
 
 <SectionContainer id="categories" class="mt-4">
@@ -38,12 +18,12 @@ const categories = [
     {
       categories.map((category) => (
         <a
-          href={category.link}
+          href={`/categorias/${category.slug}`}
           class="category-card"
           style="text-decoration: none; color: inherit;"
         >
           <img
-            src={category.image}
+            src={category.image_url}
             alt={category.name}
             class="category-image"
             loading="lazy"
