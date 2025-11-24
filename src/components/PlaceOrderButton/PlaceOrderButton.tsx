@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/preact";
 import { $cart } from "@/cart.ts";
 import styles from "./PlaceOrderButton.module.css";
+import { object } from "astro:schema";
 
 export const PlaceOrderButton = () => {
   const cartItems = useStore($cart); // <-- tus productos desde nanostores
@@ -9,11 +10,6 @@ export const PlaceOrderButton = () => {
 
   const handleClick = () => {
     const items = Object.values(cartItems || {});
-
-    if (items.length === 0) {
-      alert("Tu carrito está vacío.");
-      return;
-    }
 
     let message = `Hola, quiero hacer un pedido:%0A%0A`;
 
@@ -30,6 +26,7 @@ export const PlaceOrderButton = () => {
       className={styles["whatsapp-btn"]}
       aria-label="Realizar pedido por WhatsApp"
       onClick={handleClick}
+      disabled={Object.keys(cartItems).length === 0}
     >
       <span>Realizar pedido por WhatsApp</span>
 
