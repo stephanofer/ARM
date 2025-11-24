@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  min-height: 400px;
+}
+
+.content {
+  text-align: center;
+  max-width: 480px;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1rem 0;
+}
+
+.message {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.button {
+  padding: 0.875rem 2rem;
+  background: #2d5f3f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: #1a4429;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 95, 63, 0.3);
+}

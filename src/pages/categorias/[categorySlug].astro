@@ -1,0 +1,186 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { createClient } from '@/lib/supabase';
+import {
+  getCategoryAndSubcategories,
+  getSubcategoryBySlugWithinCategory,
+  getProductsByCategory,
+  getProductsBySubcategory,
+  type ProductFilters,
+  type AttributeFilters,
+} from '@/lib/data';
+import { CategoryPageShell } from '@/components/catalog/CategoryPageShell';
+
+// Obtener parámetros
+const { categorySlug } = Astro.params;
+
+if (!categorySlug) {
+  return Astro.redirect('/404');
+}
+
+// Crear cliente de Supabase
+const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+
+// Leer query params
+const url = new URL(Astro.request.url);
+const subcategorySlug = url.searchParams.get('subcategoria');
+const page = parseInt(url.searchParams.get('page') || '1');
+const pageSize = parseInt(url.searchParams.get('pageSize') || '2'); // 2 para testear paginación
+const sort = url.searchParams.get('sort') || null;
+const minPrice = url.searchParams.get('minPrice');
+const maxPrice = url.searchParams.get('maxPrice');
+const inStock = url.searchParams.get('inStock') === 'true';
+
+// Construir filtros de atributos
+const attributeFilters: AttributeFilters = {};
+const reservedParams = [
+  'subcategoria',
+  'page',
+  'pageSize',
+  'sort',
+  'minPrice',
+  'maxPrice',
+  'inStock',
+];
+
+url.searchParams.forEach((value, key) => {
+  if (!reservedParams.includes(key) && value) {
+    if (attributeFilters[key]) {
+      if (Array.isArray(attributeFilters[key])) {
+        (attributeFilters[key] as string[]).push(value);
+      } else {
+        attributeFilters[key] = [attributeFilters[key] as string, value];
+      }
+    } else {
+      attributeFilters[key] = value;
+    }
+  }
+});
+
+// Obtener categoría y subcategorías
+const categoryData = await getCategoryAndSubcategories(supabase, categorySlug);
+
+if (!categoryData) {
+  return Astro.redirect('/404');
+}
+
+const { category, subcategories } = categoryData;
+
+// Validar y obtener subcategoría si se especificó
+let currentSubcategory = null;
+let filterConfig: any[] = [];
+
+if (subcategorySlug) {
+  const subcategoryData = await getSubcategoryBySlugWithinCategory(
+    supabase,
+    categorySlug,
+    subcategorySlug
+  );
+
+  if (!subcategoryData) {
+    return Astro.redirect(`/categorias/${categorySlug}`);
+  }
+
+  currentSubcategory = subcategoryData.subcategory;
+  filterConfig = currentSubcategory.filter_config || [];
+}
+
+// Construir objeto de filtros
+const filters: ProductFilters = {
+  attributeFilters,
+  minPrice: minPrice ? parseFloat(minPrice) : undefined,
+  maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+  inStock: inStock || undefined,
+  sort: sort as any,
+};
+
+// Obtener productos
+let productsResponse;
+
+if (currentSubcategory) {
+  productsResponse = await getProductsBySubcategory(
+    supabase,
+    currentSubcategory.id,
+    filters,
+    { page, pageSize }
+  );
+} else {
+  productsResponse = await getProductsByCategory(
+    supabase,
+    category.id,
+    filters,
+    { page, pageSize }
+  );
+}
+
+// Props para la isla de Preact
+const initialFilters = {
+  subcategorySlug: subcategorySlug || null,
+  page: productsResponse.page,
+  pageSize: productsResponse.pageSize,
+  sort: sort || null,
+  attributeFilters,
+  minPrice: filters.minPrice,
+  maxPrice: filters.maxPrice,
+  inStock: inStock,
+};
+
+const initialPagination = {
+  page: productsResponse.page,
+  pageSize: productsResponse.pageSize,
+  total: productsResponse.total,
+  totalPages: productsResponse.totalPages,
+};
+
+// Título dinámico
+const pageTitle = currentSubcategory
+  ? `${currentSubcategory.name} - ${category.name} | ARM`
+  : `${category.name} | ARM`;
+
+const pageDescription = currentSubcategory
+  ? `Explora nuestra selección de ${currentSubcategory.name} en ${category.name}`
+  : `Explora nuestra categoría de ${category.name}`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div style="padding: 2rem 1rem; max-width: 1600px; margin: 0 auto;">
+    {/* Breadcrumb */}
+    <nav style="margin-bottom: 2rem; font-size: 0.9rem; color: #666;">
+      <a href="/" style="text-decoration: none; color: #666;">Inicio</a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <a href="/categorias" style="text-decoration: none; color: #666;">Categorías</a>
+      <span style="margin: 0 0.5rem;">/</span>
+      <span style="color: #333; font-weight: 500;">{category.name}</span>
+      {currentSubcategory && (
+        <>
+          <span style="margin: 0 0.5rem;">/</span>
+          <span style="color: #333; font-weight: 500;">{currentSubcategory.name}</span>
+        </>
+      )}
+    </nav>
+
+    {/* Header */}
+    <header style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #1a1a1a;">
+        {currentSubcategory ? currentSubcategory.name : category.name}
+      </h1>
+      {currentSubcategory && (
+        <p style="font-size: 1.125rem; color: #666;">
+          en {category.name}
+        </p>
+      )}
+    </header>
+
+    {/* Componente Preact (isla) */}
+    <CategoryPageShell
+      client:idle
+      category={JSON.parse(JSON.stringify(category))}
+      subcategories={JSON.parse(JSON.stringify(subcategories))}
+      currentSubcategory={currentSubcategory ? JSON.parse(JSON.stringify(currentSubcategory)) : null}
+      filterConfig={JSON.parse(JSON.stringify(filterConfig))}
+      initialProducts={JSON.parse(JSON.stringify(productsResponse.items))}
+      initialFilters={JSON.parse(JSON.stringify(initialFilters))}
+      initialPagination={JSON.parse(JSON.stringify(initialPagination))}
+    />
+  </div>
+</BaseLayout>
