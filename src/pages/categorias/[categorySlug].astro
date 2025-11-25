@@ -11,6 +11,7 @@ import {
 } from "@/lib/data";
 import { CategoryPageShell } from "@/components/catalog/CategoryPageShell";
 import { PAGE_SIZE } from "@/config";
+import Breadcrumb from "@/components/Breadcrumb.astro";
 
 const { categorySlug } = Astro.params;
 
@@ -26,7 +27,9 @@ const supabase = createClient({
 const url = new URL(Astro.request.url);
 const subcategorySlug = url.searchParams.get("subcategoria");
 const page = parseInt(url.searchParams.get("page") || "1");
-const pageSize = parseInt(url.searchParams.get("pageSize") || PAGE_SIZE.toString());
+const pageSize = parseInt(
+  url.searchParams.get("pageSize") || PAGE_SIZE.toString()
+);
 const sort = url.searchParams.get("sort") || null;
 const minPrice = url.searchParams.get("minPrice");
 const maxPrice = url.searchParams.get("maxPrice");
@@ -139,28 +142,13 @@ const pageDescription = currentSubcategory
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-  <div style="padding: 2rem 1rem; max-width: 1600px; margin: 0 auto;">
+  <div class="container">
     {/* Breadcrumb */}
-    <nav style="margin-bottom: 2rem; font-size: 0.9rem; color: #666;">
-      <a href="/" style="text-decoration: none; color: #666;">Inicio</a>
-      <span style="margin: 0 0.5rem;">/</span>
-      <a href="/categorias" style="text-decoration: none; color: #666;"
-        >Categorías</a
-      >
-      <span style="margin: 0 0.5rem;">/</span>
-      <span style="color: #333; font-weight: 500;">{category.name}</span>
-      {
-        currentSubcategory && (
-          <>
-            <span style="margin: 0 0.5rem;">/</span>
-            <span style="color: #333; font-weight: 500;">
-              {currentSubcategory.name}
-            </span>
-          </>
-        )
-      }
-    </nav>
 
+    <Breadcrumb
+      category={category}
+      currentSubcategorySlug={currentSubcategory?.slug}
+    />
     {/* Header */}
     <header style="margin-bottom: 2rem;">
       <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #1a1a1a;">
@@ -188,3 +176,11 @@ const pageDescription = currentSubcategory
     />
   </div>
 </BaseLayout>
+
+<style>
+  .container {
+    padding: 2rem 1rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+</style>

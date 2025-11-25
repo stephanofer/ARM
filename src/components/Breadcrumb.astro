@@ -1,0 +1,59 @@
+---
+type Props = {
+  category: {
+    name: string;
+    slug: string;
+    subcategories?: { name: string; slug: string }[];
+  };
+  currentSubcategorySlug?: string;
+};
+
+const { category, currentSubcategorySlug } = Astro.props;
+
+const currentSubcategory = category.subcategories?.find(
+  (sub) => sub.slug === currentSubcategorySlug
+);
+---
+
+<nav>
+  <a href="/">Inicio</a>
+  <span>/</span>
+  <a href="/categorias">Categorías</a>
+  <span>/</span>
+  <span class="category-name">{category.name}</span>
+  {
+    currentSubcategory && (
+      <>
+        <span>/</span>
+        <span class="subcategory-name">{currentSubcategory.name}</span>
+      </>
+    )
+  }
+</nav>
+
+<style>
+  nav {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  a {
+    text-decoration: none;
+    color: #666;
+  }
+
+  span {
+    margin: 0 0.5rem;
+  }
+
+  .category-name {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .subcategory-name {
+    font-weight: 500;
+    color: #333;
+  }
+</style>
