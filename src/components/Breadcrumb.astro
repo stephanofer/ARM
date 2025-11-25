@@ -8,34 +8,24 @@ type Props = {
   currentSubcategorySlug?: string;
 };
 
-const { category, currentSubcategorySlug } = Astro.props;
-
-const currentSubcategory = category.subcategories?.find(
-  (sub) => sub.slug === currentSubcategorySlug
-);
+const { category } = Astro.props;
 ---
 
 <nav>
   <a href="/">Inicio</a>
-  <span>/</span>
+  <span class="deco">/</span>
   <a href="/categorias">Categorías</a>
-  <span>/</span>
+  <span class="deco">/</span>
   <span class="category-name">{category.name}</span>
-  {
-    currentSubcategory && (
-      <>
-        <span>/</span>
-        <span class="subcategory-name">{currentSubcategory.name}</span>
-      </>
-    )
-  }
 </nav>
 
 <style>
   nav {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     font-size: 0.9rem;
     color: #666;
+    font-family: var(--font-primary);
+    font-weight: 400;
   }
 
   a {
@@ -43,17 +33,12 @@ const currentSubcategory = category.subcategories?.find(
     color: #666;
   }
 
-  span {
-    margin: 0 0.5rem;
+  .deco {
+    margin: 0 0.3rem;
   }
 
   .category-name {
-    font-weight: 500;
     color: #333;
-  }
-
-  .subcategory-name {
-    font-weight: 500;
-    color: #333;
+    font-weight: 450;
   }
 </style>

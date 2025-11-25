@@ -143,22 +143,14 @@ const pageDescription = currentSubcategory
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <div class="container">
-    {/* Breadcrumb */}
-
     <Breadcrumb
       category={category}
       currentSubcategorySlug={currentSubcategory?.slug}
     />
-    {/* Header */}
-    <header style="margin-bottom: 2rem;">
-      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; color: #1a1a1a;">
+    <header>
+      <h1 class="title">
         {currentSubcategory ? currentSubcategory.name : category.name}
       </h1>
-      {
-        currentSubcategory && (
-          <p style="font-size: 1.125rem; color: #666;">en {category.name}</p>
-        )
-      }
     </header>
 
     {/* Componente Preact (isla) */}
@@ -183,4 +175,15 @@ const pageDescription = currentSubcategory
     max-width: 1600px;
     margin: 0 auto;
   }
+  header {
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: var(--fs-xxl);
+    font-family: var(--font-primary);
+    font-weight: 450;
+    /* margin-bottom: 0.5rem; */
+  }
+
 </style>
