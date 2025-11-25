@@ -4,15 +4,18 @@ import type { Category } from "@/lib/data/types";
 type Props = {
   categories: Category[];
   limit?: number;
+  showAllLink?: boolean;
+  title?: string;
+  description?: string;
 };
-const { categories: allCategories, limit } = Astro.props;
+const { categories: allCategories, limit, showAllLink = true, title = "Categorías Destacadas", description = "Explora nuestras colecciones más populares" } = Astro.props;
 const categories = limit ? allCategories.slice(0, limit) : allCategories;
 ---
 
 <SectionContainer id="categories" class="mt-4">
   <div class="texts">
-    <h2>Categorías Destacadas</h2>
-    <p>Explora nuestras colecciones más populares</p>
+    <h2>{title}</h2>
+    <p>{description}</p>
   </div>
   <div class="categories-grid">
     {
@@ -36,9 +39,16 @@ const categories = limit ? allCategories.slice(0, limit) : allCategories;
       ))
     }
   </div>
-  <div class="view-all">
-    <a href="/categorias" class="view-all-link"> Ver todas las categorías </a>
-  </div>
+  {
+    showAllLink && (
+      <div class="view-all">
+        <a href="/categorias" class="view-all-link">
+          {" "}
+          Ver todas las categorías{" "}
+        </a>
+      </div>
+    )
+  }
 </SectionContainer>
 
 <style>
@@ -75,7 +85,7 @@ const categories = limit ? allCategories.slice(0, limit) : allCategories;
   }
 
   .category-card:hover .category-image {
-    transform: scale(1.05);
+    transform: scale(1.12);
   }
 
   .category-overlay {
@@ -96,8 +106,9 @@ const categories = limit ? allCategories.slice(0, limit) : allCategories;
   }
 
   .category-title {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    font-weight: 400;
+    font-size: var(--fs-xl);
+    font-family: var(--font-primary);
+    font-weight: 450;
     color: white;
     margin: 0;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
