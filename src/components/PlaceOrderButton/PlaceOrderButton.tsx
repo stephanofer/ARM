@@ -1,5 +1,5 @@
 import { useStore } from "@nanostores/preact";
-import { $cart } from "@/cart.ts";
+import { $cart } from "@/stores/cart";
 import styles from "./PlaceOrderButton.module.css";
 import { object } from "astro:schema";
 

@@ -1,6 +1,6 @@
 import type { CartItem } from "@/lib/data/types";
 import styles from "./AddToCartButton.module.css";
-import { addToCart } from "@/cart";
+import { addToCart } from "@/stores/cart";
 
 interface AddToCartButtonProps {
   product: CartItem;

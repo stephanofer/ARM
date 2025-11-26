@@ -1,5 +1,5 @@
 import Cart from "@/assets/svg/Cart.svg";
-import { $cartCount } from "@/cart";
+import { $cartCount } from "@/stores/cart";
 import { useStore } from "@nanostores/preact";
 import styles from "./CartCounter.module.css";
 

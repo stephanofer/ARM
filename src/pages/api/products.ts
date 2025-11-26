@@ -1,18 +1,20 @@
-import type { APIRoute } from 'astro';
-import { createClient } from '../../lib/supabase';
+import type { APIRoute } from "astro";
+import { createClient } from "@/lib/supabase";
 import {
   getCategoryAndSubcategories,
   getSubcategoryBySlugWithinCategory,
+} from "@/lib/data/categories";
+import {
   getProductsByCategory,
   getProductsBySubcategory,
   enrichProductsWithImages,
-} from '../../lib/data';
-import type { ProductFilters, AttributeFilters } from '../../lib/data';
-import { PAGE_SIZE } from '@/config';
+} from "@/lib/data/products";
+import type { ProductFilters, AttributeFilters } from "@/lib/data/types";
+import { PAGE_SIZE } from "@/config";
 
 /**
  * API endpoint para obtener productos con filtros, paginación y orden
- * 
+ *
  * Query params esperados:
  * - categorySlug: string (obligatorio)
  * - subcategoria: string (opcional, slug de subcategoría)
@@ -23,7 +25,14 @@ import { PAGE_SIZE } from '@/config';
  */
 
 // Valores permitidos para sort
-const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest', 'oldest'];
+const VALID_SORT_OPTIONS = [
+  "price_asc",
+  "price_desc",
+  "name_asc",
+  "name_desc",
+  "newest",
+  "oldest",
+];
 
 export const GET: APIRoute = async ({ request, cookies, url }) => {
   try {
@@ -31,55 +40,66 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
     const supabase = createClient({ request, cookies });
 
     // Leer y sanitizar query params
-    const categorySlug = url.searchParams.get('categorySlug');
-    const subcategorySlug = url.searchParams.get('subcategoria');
-    
+    const categorySlug = url.searchParams.get("categorySlug");
+    const subcategorySlug = url.searchParams.get("subcategoria");
+
     // Page: sanitizar para evitar NaN o valores inválidos
-    const rawPage = url.searchParams.get('page');
+    const rawPage = url.searchParams.get("page");
     const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
     const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
-    
+
     // PageSize: sanitizar con límites
-    const rawPageSize = url.searchParams.get('pageSize');
+    const rawPageSize = url.searchParams.get("pageSize");
     const parsedPageSize = rawPageSize ? parseInt(rawPageSize, 10) : PAGE_SIZE;
-    const pageSize = Number.isNaN(parsedPageSize) || parsedPageSize < 1 || parsedPageSize > 50 
-      ? PAGE_SIZE 
-      : parsedPageSize;
-    
+    const pageSize =
+      Number.isNaN(parsedPageSize) || parsedPageSize < 1 || parsedPageSize > 50
+        ? PAGE_SIZE
+        : parsedPageSize;
+
     // Sort: validar contra valores permitidos
-    const rawSort = url.searchParams.get('sort');
-    const sort = rawSort && VALID_SORT_OPTIONS.includes(rawSort) ? rawSort : undefined;
-    
+    const rawSort = url.searchParams.get("sort");
+    const sort =
+      rawSort && VALID_SORT_OPTIONS.includes(rawSort) ? rawSort : undefined;
+
     // Price: sanitizar
-    const rawMinPrice = url.searchParams.get('minPrice');
-    const rawMaxPrice = url.searchParams.get('maxPrice');
+    const rawMinPrice = url.searchParams.get("minPrice");
+    const rawMaxPrice = url.searchParams.get("maxPrice");
     const parsedMinPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
     const parsedMaxPrice = rawMaxPrice ? parseFloat(rawMaxPrice) : undefined;
-    const minPrice = parsedMinPrice !== undefined && !Number.isNaN(parsedMinPrice) && parsedMinPrice >= 0 
-      ? parsedMinPrice 
-      : undefined;
-    const maxPrice = parsedMaxPrice !== undefined && !Number.isNaN(parsedMaxPrice) && parsedMaxPrice >= 0 
-      ? parsedMaxPrice 
-      : undefined;
-    
-    const inStock = url.searchParams.get('inStock') === 'true';
+    const minPrice =
+      parsedMinPrice !== undefined &&
+      !Number.isNaN(parsedMinPrice) &&
+      parsedMinPrice >= 0
+        ? parsedMinPrice
+        : undefined;
+    const maxPrice =
+      parsedMaxPrice !== undefined &&
+      !Number.isNaN(parsedMaxPrice) &&
+      parsedMaxPrice >= 0
+        ? parsedMaxPrice
+        : undefined;
+
+    const inStock = url.searchParams.get("inStock") === "true";
 
     // Validar categorySlug
     if (!categorySlug) {
       return new Response(
-        JSON.stringify({ error: 'categorySlug is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "categorySlug is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     // Obtener categoría y subcategorías
-    const categoryData = await getCategoryAndSubcategories(supabase, categorySlug);
+    const categoryData = await getCategoryAndSubcategories(
+      supabase,
+      categorySlug
+    );
 
     if (!categoryData) {
-      return new Response(
-        JSON.stringify({ error: 'Category not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Category not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { category, subcategories } = categoryData;
@@ -87,14 +107,14 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
     // Construir filtros de atributos desde query params
     const attributeFilters: AttributeFilters = {};
     const reservedParams = [
-      'categorySlug',
-      'subcategoria',
-      'page',
-      'pageSize',
-      'sort',
-      'minPrice',
-      'maxPrice',
-      'inStock',
+      "categorySlug",
+      "subcategoria",
+      "page",
+      "pageSize",
+      "sort",
+      "minPrice",
+      "maxPrice",
+      "inStock",
     ];
 
     url.searchParams.forEach((value, key) => {
@@ -136,9 +156,9 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
       if (!subcategoryData) {
         return new Response(
           JSON.stringify({
-            error: 'Subcategory not found or does not belong to this category',
+            error: "Subcategory not found or does not belong to this category",
           }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
+          { status: 404, headers: { "Content-Type": "application/json" } }
         );
       }
 
@@ -201,13 +221,13 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('API error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error("API error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };

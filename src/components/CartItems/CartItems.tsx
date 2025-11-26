@@ -4,7 +4,7 @@ import {
   increaseQuantity,
   removeFromCart,
   setQuantity,
-} from "@/cart";
+} from "@/stores/cart";
 import { useStore } from "@nanostores/preact";
 import styles from "./cartItems.module.css";
 export function CartItems() {

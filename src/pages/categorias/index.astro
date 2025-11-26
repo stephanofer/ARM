@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { createClient } from "@/lib/supabase";
 import Categories from "@/sections/home/Categories.astro";
-import { getAllCategories } from "@/lib/data";
+import { getAllCategories } from "@/lib/data/categories";
 
 const supabase = createClient({
   request: Astro.request,
