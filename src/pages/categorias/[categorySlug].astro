@@ -1,17 +1,19 @@
 ---
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import { CategoryPageShell } from "@/components/catalog/CategoryPageShell";
+import { PAGE_SIZE } from "@/config";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { createClient } from "@/lib/supabase";
 import {
   getCategoryAndSubcategories,
   getSubcategoryBySlugWithinCategory,
+} from "@/lib/data/categories";
+import {
   getProductsByCategory,
   getProductsBySubcategory,
-  type ProductFilters,
-  type AttributeFilters,
-} from "@/lib/data";
-import { CategoryPageShell } from "@/components/catalog/CategoryPageShell";
-import { PAGE_SIZE } from "@/config";
-import Breadcrumb from "@/components/Breadcrumb.astro";
+} from "@/lib/data/products";
+
+import type { AttributeFilters, ProductFilters } from "@/lib/data/types";
+import { createClient } from "@/lib/supabase";
 
 const { categorySlug } = Astro.params;
 
@@ -153,9 +155,8 @@ const pageDescription = currentSubcategory
       </h1>
     </header>
 
-    {/* Componente Preact (isla) */}
     <CategoryPageShell
-      client:idle
+      client:load
       category={JSON.parse(JSON.stringify(category))}
       subcategories={JSON.parse(JSON.stringify(subcategories))}
       currentSubcategory={currentSubcategory
@@ -183,7 +184,5 @@ const pageDescription = currentSubcategory
     font-size: var(--fs-xxl);
     font-family: var(--font-primary);
     font-weight: 450;
-    /* margin-bottom: 0.5rem; */
   }
-
 </style>
