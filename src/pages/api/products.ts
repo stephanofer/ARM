@@ -5,6 +5,7 @@ import {
   getSubcategoryBySlugWithinCategory,
   getProductsByCategory,
   getProductsBySubcategory,
+  enrichProductsWithImages,
 } from '../../lib/data';
 import type { ProductFilters, AttributeFilters } from '../../lib/data';
 import { PAGE_SIZE } from '@/config';
@@ -132,9 +133,15 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
       );
     }
 
+    // Enriquecer productos con URLs de imágenes
+    const enrichedProducts = await enrichProductsWithImages(
+      supabase,
+      productsResponse.items
+    );
+
     // Construir respuesta
     const response = {
-      items: productsResponse.items,
+      items: enrichedProducts,
       page: productsResponse.page,
       pageSize: productsResponse.pageSize,
       total: productsResponse.total,

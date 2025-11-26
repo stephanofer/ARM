@@ -27,7 +27,10 @@ export interface CategoryPageShellProps {
   subcategories: Subcategory[];
   currentSubcategory: Subcategory | null;
   filterConfig: FilterConfig[];
-  initialProducts: Product[];
+  initialProducts: Array<Product & { 
+    primaryImageUrl?: string | null; 
+    secondaryImageUrl?: string | null 
+  }>;
   initialFilters: {
     subcategorySlug: string | null;
     page: number;

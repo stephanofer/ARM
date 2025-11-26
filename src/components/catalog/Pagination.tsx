@@ -1,4 +1,4 @@
-import { setPage } from "../../stores";
+import { setPage } from "@/stores/filtersStore";
 import styles from "./Pagination.module.css";
 
 export interface PaginationProps {

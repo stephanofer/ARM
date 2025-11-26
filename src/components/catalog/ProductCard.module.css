@@ -172,3 +172,28 @@
 .product-actions {
   padding: 0 16px 16px;
 }
+
+.no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.no-image svg {
+  margin-bottom: 8px;
+}
+
+.product-price {
+  margin-top: 8px;
+}
+
+.price-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}

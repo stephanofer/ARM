@@ -1,4 +1,4 @@
-import { resetFilters } from '../../stores';
+import { resetFilters } from '@/stores/filtersStore';
 import styles from './EmptyState.module.css';
 
 export function EmptyState() {

@@ -10,6 +10,7 @@ import {
 import {
   getProductsByCategory,
   getProductsBySubcategory,
+  enrichProductsWithImages,
 } from "@/lib/data/products";
 
 import type { AttributeFilters, ProductFilters } from "@/lib/data/types";
@@ -116,6 +117,12 @@ if (currentSubcategory) {
   );
 }
 
+// Enriquecer productos con URLs de imágenes
+const enrichedProducts = await enrichProductsWithImages(
+  supabase,
+  productsResponse.items
+);
+
 const initialFilters = {
   subcategorySlug: subcategorySlug || null,
   page: productsResponse.page,
@@ -160,7 +167,7 @@ const pageDescription = currentSubcategory
         ? JSON.parse(JSON.stringify(currentSubcategory))
         : null}
       filterConfig={JSON.parse(JSON.stringify(filterConfig))}
-      initialProducts={JSON.parse(JSON.stringify(productsResponse.items))}
+      initialProducts={JSON.parse(JSON.stringify(enrichedProducts))}
       initialFilters={JSON.parse(JSON.stringify(initialFilters))}
       initialPagination={JSON.parse(JSON.stringify(initialPagination))}
     />

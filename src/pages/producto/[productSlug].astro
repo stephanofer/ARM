@@ -1,11 +1,13 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { createClient } from "@/lib/supabase";
-import { getProductBySlug } from "@/lib/data/products";
+import { getProductFullDetailsBySlug } from "@/lib/data/products";
+import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
 
-const { slug } = Astro.params;
+const { productSlug } = Astro.params;
+console.log(productSlug);
 
-if (!slug) {
+if (!productSlug) {
   return Astro.redirect("/categorias");
 }
 
@@ -14,17 +16,47 @@ const supabase = createClient({
   cookies: Astro.cookies,
 });
 
-const productData = await getProductBySlug(supabase, slug);
+const productDetails = await getProductFullDetailsBySlug(supabase, productSlug);
 
-if (!productData) {
-  return Astro.redirect("/categorias");
+if (!productDetails) {
+  return Astro.redirect("/404");
 }
 
-const { product: productInfo, category, subcategory } = productData;
+const { product, category, subcategory, assets } = productDetails;
 
-const pageTitle = `${productInfo.name} | ARM`;
-const pageDescription =
-  productInfo.description || `${productInfo.name} en ${category.name}`;
+// Helper para obtener URL pública de Supabase Storage
+const getPublicUrl = (bucket: string, path: string) => {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+};
+
+// Preparar assets con URLs públicas
+const galleryAssets = assets.gallery.map(asset => ({
+  ...asset,
+  url: getPublicUrl(asset.storage_bucket, asset.storage_path),
+  posterUrl: asset.poster_storage_path ? getPublicUrl(asset.storage_bucket, asset.poster_storage_path) : null,
+}));
+
+const additionalAssets = assets.additional.map(asset => ({
+  ...asset,
+  url: getPublicUrl(asset.storage_bucket, asset.storage_path),
+}));
+
+const downloadAssets = assets.download.map(asset => ({
+  ...asset,
+  url: getPublicUrl(asset.storage_bucket, asset.storage_path),
+}));
+
+// Obtener imagen principal para fallback
+const primaryImage = galleryAssets.find(a => a.is_primary) || galleryAssets[0];
+
+// Información del producto
+const brand = product.brand || product.attributes.brand || 'ARM';
+const material = product.attributes.material || 'Madera';
+
+// Meta tags
+const pageTitle = `${product.name} | ARM`;
+const pageDescription = product.description || `${product.name} - ${subcategory.name}`;
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -36,11 +68,9 @@ const pageDescription =
         <span class="separator">/</span>
         <a href="/categorias">Categorías</a>
         <span class="separator">/</span>
-        <a href={`/categorias/${category}`}>{category}</a>
+        <a href={`/categorias/${category.slug}`}>{category.name}</a>
         <span class="separator">/</span>
-        <a href={`/categorias/${category}/${subcategory}`}>{subcategory}</a>
-        <span class="separator">/</span>
-        <span class="current">{productInfo.name}</span>
+        <span class="current">{product.name}</span>
       </nav>
     </div>
 
@@ -48,18 +78,19 @@ const pageDescription =
     <section class="product-main">
       <!-- Gallery Section -->
       <div class="gallery-section">
-        <div class="gallery-thumbnails">
-          {
-            productInfo.images.map((media, index) => (
+        {galleryAssets.length > 1 && (
+          <div class="gallery-thumbnails">
+            {galleryAssets.map((asset, index) => (
               <button
                 class={`thumbnail ${index === 0 ? "active" : ""}`}
                 data-index={index}
-                data-type={media.type}
+                aria-label={`Ver ${asset.kind === 'video' ? 'video' : 'imagen'} ${index + 1}`}
               >
-                {media.type === "image" ? (
+                {asset.kind === "image" ? (
                   <img
-                    src={media.url}
-                    alt={`${productInfo.name} - Vista ${index + 1}`}
+                    src={asset.url}
+                    alt={asset.alt || `${product.name} - Vista ${index + 1}`}
+                    loading="lazy"
                   />
                 ) : (
                   <div class="video-thumbnail">
@@ -70,120 +101,83 @@ const pageDescription =
                       fill="none"
                       stroke="currentColor"
                       stroke-width="2"
+                      aria-hidden="true"
                     >
                       <polygon points="5 3 19 12 5 21 5 3" />
                     </svg>
                   </div>
                 )}
               </button>
-            ))
-          }
-        </div>
+            ))}
+          </div>
+        )}
 
-        <div class="gallery-main">
-          {
-            productInfo.images.map((media, index) => (
+        <div class="gallery-main" style={galleryAssets.length === 1 ? 'grid-column: 1 / -1;' : ''}>
+          {galleryAssets.length > 0 ? (
+            galleryAssets.map((asset, index) => (
               <div
                 class={`media-item ${index === 0 ? "active" : ""}`}
                 data-index={index}
               >
-                {media.type === "image" ? (
-                  <img src={media.url} alt={productInfo.name} />
+                {asset.kind === "image" ? (
+                  <img 
+                    src={asset.url} 
+                    alt={asset.alt || product.name}
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
                 ) : (
-                  <video controls preload="metadata">
-                    <source src={media.url} type="video/mp4" />
+                  <video 
+                    controls 
+                    preload="metadata"
+                    poster={asset.posterUrl || undefined}
+                  >
+                    <source src={asset.url} type={asset.mime_type || "video/mp4"} />
                     Tu navegador no soporta el elemento de video.
                   </video>
                 )}
               </div>
             ))
-          }
+          ) : (
+            <div class="media-item active">
+              <div class="no-image">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p>Sin imagen disponible</p>
+              </div>
+            </div>
+          )}
 
           <!-- Badges -->
-          <div class="product-badges">
-            {
-              productInfo.inStock && (
-                <span class="badge badge-new">NOVEDAD</span>
-              )
-            }
-            {
-              !productInfo.inStock && (
-                <span class="badge badge-sold">AGOTADO</span>
-              )
-            }
-          </div>
+          {new Date(product.created_at).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000 && (
+            <div class="product-badges">
+              <span class="badge badge-new">NOVEDAD</span>
+            </div>
+          )}
         </div>
       </div>
 
       <!-- Product Info Section -->
       <div class="product-info">
-        <h1 class="product-title">{productInfo.name}</h1>
-        <p class="product-subtitle">{subcategory}</p>
+        <h1 class="product-title">{product.name}</h1>
+        <p class="product-subtitle">{subcategory.name}</p>
 
-        <!-- Quick Actions Links -->
-        <div class="quick-links">
-          <a href="#detalles" class="quick-link">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M12 2v20M2 12h20"></path>
-            </svg>
-            Detalles del producto y medidas
-          </a>
-          <a href="#ejemplos" class="quick-link">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"
-              ></rect>
-              <line x1="7" y1="2" x2="7" y2="22"></line>
-              <line x1="17" y1="2" x2="17" y2="22"></line>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <line x1="2" y1="7" x2="7" y2="7"></line>
-              <line x1="2" y1="17" x2="7" y2="17"></line>
-              <line x1="17" y1="17" x2="22" y2="17"></line>
-              <line x1="17" y1="7" x2="22" y2="7"></line>
-            </svg>
-            Ejemplos de uso en videos e imágenes
-          </a>
-          <a href="#descargas" class="quick-link">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Archivos descargables
-          </a>
-          <a href="#confianza" class="quick-link">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            Madera ecológica, fabricación local
-          </a>
+        <!-- Product Meta -->
+        <div class="product-meta">
+          <div class="meta-item">
+            <span class="meta-label">Marca:</span>
+            <span class="meta-value">{brand}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Material:</span>
+            <span class="meta-value">{material}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Categoría:</span>
+            <span class="meta-value">{category.name}</span>
+          </div>
         </div>
 
         <!-- Add to Cart -->
@@ -201,6 +195,7 @@ const pageDescription =
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                aria-hidden="true"
               >
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
@@ -210,8 +205,8 @@ const pageDescription =
               id="quantity"
               value="1"
               min="1"
-              max="10"
-              readonly
+              max="99"
+              aria-label="Cantidad"
             />
             <button
               class="quantity-btn"
@@ -225,6 +220,7 @@ const pageDescription =
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                aria-hidden="true"
               >
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -234,413 +230,393 @@ const pageDescription =
 
           <AddToCartButton
             product={{
-              description: productInfo.description,
-              id: productInfo.id,
-              name: productInfo.name,
-              image: productInfo.images[0],
-              inStock: productInfo.inStock,
+              ...product,
               quantity: 1,
-            }}
+            } as import("@/lib/data/types").CartItem}
             client:load
           />
         </div>
 
-        <!-- Product Meta -->
-        <div class="product-meta">
-          <div class="meta-item">
-            <span class="meta-label">Marca:</span>
-            <span class="meta-value">{productInfo.brand}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Material:</span>
-            <span class="meta-value">{productInfo.material}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Disponibilidad:</span>
-            <span
-              class={`meta-value ${productInfo.inStock ? "in-stock" : "out-stock"}`}
+        <!-- Quick Actions Links -->
+        <div class="quick-links">
+          <a href="#detalles" class="quick-link">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
             >
-              {productInfo.inStock ? "En stock" : "Agotado"}
-            </span>
-          </div>
+              <path d="M12 2v20M2 12h20"></path>
+            </svg>
+            Detalles del producto
+          </a>
+          {additionalAssets.length > 0 && (
+            <a href="#ejemplos" class="quick-link">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                <line x1="7" y1="2" x2="7" y2="22"></line>
+                <line x1="17" y1="2" x2="17" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+              </svg>
+              Ver más imágenes
+            </a>
+          )}
+          {downloadAssets.length > 0 && (
+            <a href="#descargas" class="quick-link">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Archivos descargables
+            </a>
+          )}
+          <a href="#confianza" class="quick-link">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Madera ecológica, fabricación local
+          </a>
         </div>
       </div>
     </section>
 
     <!-- Product Details Section -->
-    <section id="detalles" class="content-section">
-      <div class="section-tabs">
-        <button class="tab-button active" data-tab="detalles-tab"
-          >Detalles del producto</button
-        >
-        <button class="tab-button" data-tab="medidas-tab">Medidas</button>
-        <button class="tab-button" data-tab="caracteristicas-tab"
-          >Características</button
-        >
-        <button class="tab-button" data-tab="acabados-tab">Acabados</button>
-        <button class="tab-button" data-tab="montaje-tab">Montaje</button>
-        <button class="tab-button" data-tab="envio-tab">Envío</button>
-      </div>
+    <!-- Product Details Section - Two Column Layout -->
+    <section id="detalles" class="details-section">
+      <div class="details-grid">
+        <!-- Left Column: Description + Accordions -->
+        <div class="details-left">
+          <h2 class="details-title">Detalles del producto</h2>
+          {product.description && (
+            <p class="details-description">{product.description}</p>
+          )}
 
-      <div class="tab-content">
-        <div id="detalles-tab" class="tab-pane active">
-          <div class="details-content">
-            <h2>Detalles del producto</h2>
-            <p>{productInfo.description}</p>
-            <p>
-              Cama individual para colchón de 90 cm. Una cama con cabecero y dos
-              cajones de almacenaje que llevan ruedas ocultas en la parte
-              inferior, fabricada con madera ecológica natural y disponible en
-              dos largos: para colchón de 190 y 200 cm. Muy práctica para
-              guardar ropa de cama.
-            </p>
-
-            <div class="details-list">
-              <h3>Características</h3>
-              <ul>
-                <li>Madera maciza de {productInfo.material}</li>
-                <li>Acabado natural con certificación PEFC</li>
-                <li>Fabricación local en Gipuzkoa</li>
-                <li>Fácil montaje con instrucciones incluidas</li>
-                <li>Garantía de 2 años</li>
-              </ul>
-            </div>
-
-            <div class="important-info">
-              <h3>Importante</h3>
-              <ul>
-                <li>
-                  Esta cama no incluye los textiles ni los cojines decorativos.
-                </li>
-                <li>Los cajones llevan ruedas para poder deslizarse.</li>
-                <li>Compatible con nuestra barrera de protección.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div id="medidas-tab" class="tab-pane">
-          <div class="measurements-content">
-            <div class="measurements-diagram">
-              <img
-                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
-                alt="Diagrama de medidas"
-              />
-            </div>
-            <div class="measurements-specs">
-              <h3>Especificaciones</h3>
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <span class="spec-label">Altura</span>
-                  <span class="spec-value">Total: 68,5 cm</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Anchura</span>
-                  <span class="spec-value">Total: 99 cm</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Longitud</span>
-                  <span class="spec-value"
-                    >Total 190: 197,5 cm<br />Total 200: 207,5 cm</span
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="caracteristicas-tab" class="tab-pane">
-          <div class="details-content">
-            <h2>Características técnicas</h2>
-            <div class="specs-table">
-              <div class="spec-row">
-                <span class="spec-name">Material principal</span>
-                <span class="spec-detail"
-                  >{productInfo.material} macizo certificado PEFC</span
-                >
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Acabado</span>
-                <span class="spec-detail"
-                  >Aceite natural incoloro, protección UV</span
-                >
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Peso aproximado</span>
-                <span class="spec-detail">45 kg (dependiendo del tamaño)</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Capacidad de carga</span>
-                <span class="spec-detail">Hasta 150 kg</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Certificaciones</span>
-                <span class="spec-detail">PEFC, FSC, Emisiones bajas VOC</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-name">Origen</span>
-                <span class="spec-detail">Fabricado en Gipuzkoa, España</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="acabados-tab" class="tab-pane">
-          <div class="details-content">
-            <h2>Acabados disponibles</h2>
-            <p>
-              Todos nuestros muebles están acabados con aceites naturales que
-              protegen la madera y realzan su belleza natural.
-            </p>
-
-            <div class="finishes-grid">
-              <div class="finish-option">
-                <div class="finish-swatch" style="background: #d4b896;"></div>
-                <h4>Natural</h4>
-                <p>Aceite incoloro que mantiene el tono natural de la madera</p>
-              </div>
-              <div class="finish-option">
-                <div class="finish-swatch" style="background: #c19a6b;"></div>
-                <h4>Miel</h4>
-                <p>Acabado cálido con tonos dorados</p>
-              </div>
-              <div class="finish-option">
-                <div class="finish-swatch" style="background: #8b7355;"></div>
-                <h4>Nogal</h4>
-                <p>Tono más oscuro y elegante</p>
-              </div>
-              <div class="finish-option">
-                <div class="finish-swatch" style="background: #f5f5f5;"></div>
-                <h4>Blanco</h4>
-                <p>Acabado en blanco mate suave</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="montaje-tab" class="tab-pane">
-          <div class="details-content">
-            <h2>Montaje</h2>
-            <p>
-              Todos nuestros muebles vienen con instrucciones detalladas de
-              montaje y las herramientas necesarias incluidas.
-            </p>
-
-            <div class="assembly-steps">
-              <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                  <h4>Preparación</h4>
-                  <p>
-                    Verifica que tienes todas las piezas según la lista
-                    incluida. Tiempo estimado: 5 min
-                  </p>
-                </div>
-              </div>
-              <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                  <h4>Estructura base</h4>
-                  <p>
-                    Ensambla el marco principal siguiendo el diagrama. Tiempo
-                    estimado: 20 min
-                  </p>
-                </div>
-              </div>
-              <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                  <h4>Montaje final</h4>
-                  <p>
-                    Ajusta todos los tornillos y verifica la estabilidad. Tiempo
-                    estimado: 15 min
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="important-info">
-              <h3>Recomendaciones</h3>
-              <ul>
-                <li>Se recomienda el montaje entre dos personas</li>
-                <li>Tiempo total de montaje aproximado: 40-60 minutos</li>
-                <li>Incluye todas las herramientas necesarias</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div id="envio-tab" class="tab-pane">
-          <div class="details-content">
-            <h2>Envío y devoluciones</h2>
-
-            <div class="shipping-info">
-              <div class="info-card">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <rect x="1" y="3" width="15" height="13"></rect>
-                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          <!-- Accordions -->
+          <div class="accordions-container">
+            <!-- Características - Abierto por defecto -->
+            <details class="accordion" open>
+              <summary class="accordion-header">
+                <span>Características</span>
+                <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                <h4>Envío gratuito</h4>
-                <p>En pedidos superiores a 200€ en península</p>
-              </div>
+              </summary>
+              <div class="accordion-content">
+                <!-- Nuestra Madera -->
+                <div class="info-block">
+                  <h4 class="info-block-title">Nuestra madera</h4>
+                  <p class="info-block-text">
+                    Este es un mueble sostenible y reciclable con certificación PEFC. 
+                    Fabricado con madera maciza ecológica de pino insignis, procedente de bosques locales y sostenibles.
+                  </p>
+                </div>
 
-              <div class="info-card">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
+                <!-- Material -->
+                {material && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Material</span>
+                    <span class="characteristic-value">{material}</span>
+                  </div>
+                )}
+
+                <!-- Marca -->
+                {brand && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Marca</span>
+                    <span class="characteristic-value">{brand}</span>
+                  </div>
+                )}
+
+                <!-- Acabado -->
+                {product.attributes.acabado && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Acabado</span>
+                    <span class="characteristic-value">{product.attributes.acabado}</span>
+                  </div>
+                )}
+
+                <!-- Montaje -->
+                {product.attributes.montaje && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Montaje</span>
+                    <span class="characteristic-value">{product.attributes.montaje}</span>
+                  </div>
+                )}
+
+                <!-- Envío -->
+                {product.attributes.envio && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Envío</span>
+                    <span class="characteristic-value">{product.attributes.envio}</span>
+                  </div>
+                )}
+
+                <!-- Embalaje -->
+                {product.attributes.embalaje && (
+                  <div class="characteristic-item">
+                    <span class="characteristic-label">Embalaje</span>
+                    <span class="characteristic-value">{product.attributes.embalaje}</span>
+                  </div>
+                )}
+
+                <!-- Todas las características dinámicas restantes -->
+                {Object.entries(product.attributes)
+                  .filter(([key]) => 
+                    !['medida', 'dimensi', 'altura', 'ancho', 'largo', 'profund', 'fondo', 'longitud', 'alto', 'acabado', 'montaje', 'envio', 'embalaje', 'material', 'brand', 'sku', 'price_note'].some(term => key.toLowerCase().includes(term))
+                  )
+                  .map(([key, value]) => (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">{key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}</span>
+                      <span class="characteristic-value">{typeof value === 'object' ? JSON.stringify(value) : value}</span>
+                    </div>
+                  ))}
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Right Column: Measurements -->
+        <div class="details-right">
+          <h2 class="measurements-title">Medidas</h2>
+          
+          {/* Verificar si hay alguna medida disponible */}
+          {(product.attributes.altura || product.attributes.alto || 
+            product.attributes.longitud || product.attributes.largo || product.attributes.ancho ||
+            product.attributes.fondo || product.attributes.profundidad ||
+            product.attributes.dimensiones ||
+            Object.keys(product.attributes).some(k => k.toLowerCase().includes('medida') || k.toLowerCase().includes('dimensi'))) ? (
+            <div class="measurements-grid">
+              <!-- Altura -->
+              {(product.attributes.altura || product.attributes.alto) && (
+                <div class="measurement-card">
+                  <h4 class="measurement-label">Altura</h4>
+                  <p class="measurement-value">
+                    {product.attributes.altura || product.attributes.alto}
+                  </p>
+                </div>
+              )}
+
+              <!-- Longitud -->
+              {(product.attributes.longitud || product.attributes.largo || product.attributes.ancho) && (
+                <div class="measurement-card">
+                  <h4 class="measurement-label">Longitud</h4>
+                  <p class="measurement-value">
+                    {product.attributes.longitud || product.attributes.largo || product.attributes.ancho}
+                  </p>
+                </div>
+              )}
+
+              <!-- Fondo / Profundidad -->
+              {(product.attributes.fondo || product.attributes.profundidad) && (
+                <div class="measurement-card">
+                  <h4 class="measurement-label">Fondo</h4>
+                  <p class="measurement-value">
+                    {product.attributes.fondo || product.attributes.profundidad}
+                  </p>
+                </div>
+              )}
+
+              <!-- Dimensiones generales -->
+              {product.attributes.dimensiones && (
+                <div class="measurement-card full-width">
+                  <h4 class="measurement-label">Dimensiones</h4>
+                  <p class="measurement-value">
+                    {product.attributes.dimensiones}
+                  </p>
+                </div>
+              )}
+
+              <!-- Otras medidas dinámicas -->
+              {Object.entries(product.attributes)
+                .filter(([key]) => 
+                  (key.toLowerCase().includes('medida') || 
+                  key.toLowerCase().includes('dimensi')) &&
+                  !['dimensiones'].includes(key.toLowerCase())
+                )
+                .map(([key, value]) => (
+                  <div class="measurement-card">
+                    <h4 class="measurement-label">{key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}</h4>
+                    <p class="measurement-value">{value}</p>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <!-- Estado sin medidas especificadas -->
+            <div class="no-measurements">
+              <svg class="no-measurements-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+              <span class="no-measurements-text">Medidas no especificadas. Consulta la ficha técnica para más detalles.</span>
+            </div>
+          )}
+
+          <!-- Nota informativa sobre ficha técnica -->
+          {downloadAssets.length > 0 && (
+            <div class="tech-sheet-note">
+              <div class="tech-sheet-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                <h4>Entrega en 5-7 días</h4>
-                <p>Plazo estimado para península, 10-15 días para islas</p>
               </div>
-
-              <div class="info-card">
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path
-                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                  ></path>
-                </svg>
-                <h4>Devoluciones fáciles</h4>
-                <p>30 días para devoluciones sin compromiso</p>
+              <div class="tech-sheet-content">
+                <p class="tech-sheet-text">
+                  ¿Necesitas información más detallada? Descarga la <strong>ficha técnica</strong> del producto con todas las especificaciones completas.
+                </p>
+                <a href="#descargas" class="tech-sheet-link">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Ver archivos descargables
+                </a>
               </div>
             </div>
-
-            <h3 style="margin-top: 2rem;">Política de devoluciones</h3>
-            <p>
-              Tienes 30 días desde la recepción del producto para realizar una
-              devolución. El producto debe estar en perfecto estado, sin uso y
-              en su embalaje original.
-            </p>
-          </div>
+          )}
         </div>
       </div>
     </section>
 
     <!-- Examples Section -->
-    <section id="ejemplos" class="examples-section">
-      <h2>Inspírate con imágenes reales</h2>
-      <p class="section-subtitle">
-        Mira cómo luce este producto en espacios reales
-      </p>
+    {additionalAssets.length > 0 && (
+      <section id="ejemplos" class="examples-section">
+        <h2>Galería adicional</h2>
+        <p class="section-subtitle">
+          Más imágenes y videos del producto
+        </p>
 
-      <div class="examples-grid">
-        <div class="example-item large">
-          <img
-            src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80"
-            alt="Ejemplo de uso 1"
-          />
+        <div class="examples-grid">
+          {additionalAssets.map((asset, index) => (
+            <div class={`example-item ${index === 0 && additionalAssets.length > 2 ? 'large' : ''}`}>
+              {asset.kind === "image" ? (
+                <img
+                  src={asset.url}
+                  alt={asset.alt || `${product.name} - ${asset.title || 'Imagen adicional'}`}
+                  loading="lazy"
+                />
+              ) : (
+                <div class="example-item video-item">
+                  <video
+                    controls
+                    preload="metadata"
+                  >
+                    <source src={asset.url} type={asset.mime_type || "video/mp4"} />
+                  </video>
+                  <div class="video-overlay">
+                    <svg
+                      width="64"
+                      height="64"
+                      viewBox="0 0 24 24"
+                      fill="white"
+                      stroke="white"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        <div class="example-item">
-          <img
-            src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80"
-            alt="Ejemplo de uso 2"
-          />
-        </div>
-        <div class="example-item">
-          <img
-            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80"
-            alt="Ejemplo de uso 3"
-          />
-        </div>
-        <div class="example-item video-item">
-          <video
-            controls
-            poster="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=600&q=80"
-          >
-            <source
-              src="https://www.w3schools.com/html/mov_bbb.mp4"
-              type="video/mp4"
-            />
-          </video>
-          <div class="video-overlay">
-            <svg
-              width="64"
-              height="64"
-              viewBox="0 0 24 24"
-              fill="white"
-              stroke="white"
-              stroke-width="2"
-            >
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    )}
 
     <!-- Downloads Section -->
-    <section id="descargas" class="downloads-section">
-      <h2>Archivos descargables</h2>
-      <p class="section-subtitle">Descarga manuales, guías y certificados</p>
+    {downloadAssets.length > 0 && (
+      <section id="descargas" class="downloads-section">
+        <h2>Archivos descargables</h2>
+        <p class="section-subtitle">Manuales, certificados y documentación</p>
 
-      <div class="downloads-grid">
-        {
-          // downloadableFiles.map((file) => (
-          //   <a href={file.url} class="download-card" download>
-          //     <div class="download-icon">
-          //       <svg
-          //         width="32"
-          //         height="32"
-          //         viewBox="0 0 24 24"
-          //         fill="none"
-          //         stroke="currentColor"
-          //         stroke-width="2"
-          //       >
-          //         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          //         <polyline points="14 2 14 8 20 8" />
-          //         <line x1="12" y1="18" x2="12" y2="12" />
-          //         <polyline points="9 15 12 18 15 15" />
-          //       </svg>
-          //     </div>
-          //     <div class="download-info">
-          //       <h3>{file.name}</h3>
-          //       <div class="download-meta">
-          //         <span class="file-type">{file.type}</span>
-          //         <span class="file-size">{file.size}</span>
-          //       </div>
-          //     </div>
-          //     <div class="download-action">
-          //       <svg
-          //         width="20"
-          //         height="20"
-          //         viewBox="0 0 24 24"
-          //         fill="none"
-          //         stroke="currentColor"
-          //         stroke-width="2"
-          //       >
-          //         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          //         <polyline points="7 10 12 15 17 10" />
-          //         <line x1="12" y1="15" x2="12" y2="3" />
-          //       </svg>
-          //     </div>
-          //   </a>
-          // ))
-        }
-      </div>
-    </section>
+        <div class="downloads-grid">
+          {downloadAssets.map((file) => (
+            <a 
+              href={file.url} 
+              class="download-card" 
+              download={file.filename}
+              aria-label={`Descargar ${file.title || file.filename}`}
+            >
+              <div class="download-icon">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <polyline points="9 15 12 18 15 15" />
+                </svg>
+              </div>
+              <div class="download-info">
+                <h3>{file.title || file.filename}</h3>
+                <div class="download-meta">
+                  {file.mime_type && (
+                    <span class="file-type">{file.mime_type.split('/')[1].toUpperCase()}</span>
+                  )}
+                  {file.file_size_bytes && (
+                    <span class="file-size">
+                      {(file.file_size_bytes / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div class="download-action">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- Trust Section -->
     <section id="confianza" class="trust-section">
@@ -926,6 +902,48 @@ const pageDescription =
     margin: 0 0 2rem 0;
   }
 
+  /* Product Price */
+  .product-price {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .price-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    display: block;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .price-note {
+    font-size: 0.875rem;
+    color: #6b7280;
+    display: block;
+  }
+
+  /* No Image State */
+  .no-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #9ca3af;
+  }
+
+  .no-image svg {
+    margin-bottom: 1rem;
+  }
+
+  .no-image p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
   /* Quick Links */
   .quick-links {
     display: flex;
@@ -1008,6 +1026,17 @@ const pageDescription =
     background: white;
   }
 
+  /* Ocultar flechas del input number */
+  #quantity::-webkit-outer-spin-button,
+  #quantity::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  #quantity[type=number] {
+    -moz-appearance: textfield;
+  }
+
   .add-to-cart-btn {
     height: 60px;
     background: #111827;
@@ -1036,6 +1065,7 @@ const pageDescription =
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    margin-bottom: 2rem;
   }
 
   .meta-item {
@@ -1064,110 +1094,302 @@ const pageDescription =
     color: #ef4444;
   }
 
-  /* Content Section */
-  .content-section {
+  /* ===== NEW DETAILS SECTION - Two Column Layout ===== */
+  .details-section {
     margin-bottom: 4rem;
+    padding: 3rem 0;
+    background: #f9fafb;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 
-  .section-tabs {
+  .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Left Column */
+  .details-left {
     display: flex;
-    gap: 1rem;
-    border-bottom: 2px solid #e5e7eb;
-    margin-bottom: 2rem;
+    flex-direction: column;
   }
 
-  .tab-button {
-    padding: 1rem 1.5rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
+  .details-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .details-description {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #4b5563;
+    margin: 0 0 2rem 0;
+  }
+
+  .characteristics-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .characteristics-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #6b7280;
-    transition: all 0.2s ease;
-    margin-bottom: -2px;
-  }
-
-  .tab-button:hover {
     color: #111827;
+    margin: 0 0 1.25rem 0;
   }
 
-  .tab-button.active {
+  .info-block {
+    margin-bottom: 1rem;
+  }
+
+  .info-block-title {
+    font-size: 0.875rem;
+    font-weight: 700;
     color: #111827;
-    border-bottom-color: #111827;
+    margin: 0 0 0.5rem 0;
   }
 
-  .tab-pane {
+  .info-block-text {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #4b5563;
+    margin: 0;
+  }
+
+  /* Accordions */
+  .accordions-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .accordion {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+    list-style: none;
+    user-select: none;
+  }
+
+  .accordion-header::-webkit-details-marker {
     display: none;
   }
 
-  .tab-pane.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
+  .accordion-header span {
+    font-weight: 500;
   }
 
-  .details-content h2,
-  .details-content h3 {
-    color: #111827;
-    margin-bottom: 1rem;
+  .accordion-icon {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    color: #6b7280;
   }
 
-  .details-content h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
+  .accordion[open] .accordion-icon {
+    transform: rotate(45deg);
   }
 
-  .details-content h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-top: 2rem;
+  .accordion-content {
+    padding: 0 0 1.25rem 0;
+    animation: slideDown 0.3s ease;
   }
 
-  .details-content p {
-    color: #4b5563;
-    line-height: 1.8;
-    margin-bottom: 1rem;
-  }
-
-  .details-list ul,
-  .important-info ul {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0;
-  }
-
-  .details-list li,
-  .important-info li {
-    padding: 0.75rem 0;
-    padding-left: 1.5rem;
-    position: relative;
-    color: #4b5563;
+  .accordion-content p {
+    font-size: 0.9375rem;
     line-height: 1.6;
+    color: #4b5563;
+    margin: 0;
   }
 
-  .details-list li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #10b981;
-    font-weight: bold;
+  .accordion-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.9375rem;
   }
 
-  .important-info li::before {
-    content: "−";
-    position: absolute;
-    left: 0;
-    color: #f59e0b;
-    font-weight: bold;
+  .accordion-item-label {
+    color: #6b7280;
   }
 
-  .important-info {
-    background: #fef3c7;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border-left: 4px solid #f59e0b;
+  .accordion-item-value {
+    color: #111827;
+    font-weight: 500;
+  }
+
+  /* Characteristic items dentro del accordion */
+  .characteristic-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.9375rem;
+  }
+
+  .characteristic-item:last-child {
+    border-bottom: none;
+  }
+
+  .characteristic-label {
+    color: #6b7280;
+    flex-shrink: 0;
+    margin-right: 1rem;
+  }
+
+  .characteristic-value {
+    color: #111827;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  /* Tech Sheet Note */
+  .tech-sheet-note {
+    display: flex;
+    gap: 1rem;
     margin-top: 2rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 1px solid #bae6fd;
+  }
+
+  .tech-sheet-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 10px;
+    color: #0284c7;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .tech-sheet-content {
+    flex: 1;
+  }
+
+  .tech-sheet-text {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #0c4a6e;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .tech-sheet-text strong {
+    color: #0369a1;
+  }
+
+  .tech-sheet-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0284c7;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .tech-sheet-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+  }
+
+  /* No Measurements State */
+  .no-measurements {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px dashed #d1d5db;
+  }
+
+  .no-measurements-icon {
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+
+  .no-measurements-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Right Column - Measurements */
+  .details-right {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .measurements-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 2rem 0;
+  }
+
+  .measurements-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .measurement-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .measurement-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .measurement-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+
+  .measurement-value {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #4b5563;
+    margin: 0;
   }
 
   /* Measurements */
@@ -1579,6 +1801,209 @@ const pageDescription =
     margin: 0;
   }
 
+  /* ===== ANIMACIONES DE ENTRADA ===== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes staggerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Breadcrumb animación */
+  .breadcrumb-container {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  /* Galería animación */
+  .gallery-section {
+    animation: fadeInLeft 0.7s ease-out 0.1s forwards;
+    opacity: 0;
+  }
+
+  .gallery-thumbnails .thumbnail {
+    opacity: 0;
+    animation: staggerFadeIn 0.4s ease-out forwards;
+  }
+
+  .gallery-thumbnails .thumbnail:nth-child(1) { animation-delay: 0.3s; }
+  .gallery-thumbnails .thumbnail:nth-child(2) { animation-delay: 0.4s; }
+  .gallery-thumbnails .thumbnail:nth-child(3) { animation-delay: 0.5s; }
+  .gallery-thumbnails .thumbnail:nth-child(4) { animation-delay: 0.6s; }
+  .gallery-thumbnails .thumbnail:nth-child(5) { animation-delay: 0.7s; }
+
+  /* Product Info animación */
+  .product-info {
+    animation: fadeInRight 0.7s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .product-title {
+    animation: fadeInUp 0.5s ease-out 0.4s forwards;
+    opacity: 0;
+  }
+
+  .product-subtitle {
+    animation: fadeInUp 0.5s ease-out 0.5s forwards;
+    opacity: 0;
+  }
+
+  .product-meta .meta-item {
+    opacity: 0;
+    animation: staggerFadeIn 0.4s ease-out forwards;
+  }
+
+  .product-meta .meta-item:nth-child(1) { animation-delay: 0.55s; }
+  .product-meta .meta-item:nth-child(2) { animation-delay: 0.65s; }
+  .product-meta .meta-item:nth-child(3) { animation-delay: 0.75s; }
+
+  .add-to-cart-section {
+    animation: fadeInUp 0.5s ease-out 0.8s forwards;
+    opacity: 0;
+  }
+
+  .quick-links .quick-link {
+    opacity: 0;
+    animation: staggerFadeIn 0.4s ease-out forwards;
+  }
+
+  .quick-links .quick-link:nth-child(1) { animation-delay: 0.9s; }
+  .quick-links .quick-link:nth-child(2) { animation-delay: 1s; }
+  .quick-links .quick-link:nth-child(3) { animation-delay: 1.1s; }
+  .quick-links .quick-link:nth-child(4) { animation-delay: 1.2s; }
+
+  /* Secciones con animación al scroll (se activan con IntersectionObserver en JS) */
+  .details-section,
+  .examples-section,
+  .downloads-section,
+  .trust-section {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+
+  .details-section.animate-in,
+  .examples-section.animate-in,
+  .downloads-section.animate-in,
+  .trust-section.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Animación de las tarjetas de descarga */
+  .download-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+
+  .downloads-section.animate-in .download-card:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+  .downloads-section.animate-in .download-card:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+  .downloads-section.animate-in .download-card:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+
+  /* Animación de las tarjetas de confianza */
+  .trust-card-horizontal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+
+  .trust-section.animate-in .trust-card-horizontal:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+
+  /* Hover con transiciones suaves */
+  .thumbnail,
+  .quick-link,
+  .download-card,
+  .quantity-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animación del badge de novedad */
+  .product-badges .badge {
+    animation: scaleIn 0.4s ease-out 0.6s forwards;
+    opacity: 0;
+  }
+
+  /* Preferencia de movimiento reducido */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    .gallery-section,
+    .product-info,
+    .product-title,
+    .product-subtitle,
+    .product-meta .meta-item,
+    .add-to-cart-section,
+    .quick-links .quick-link,
+    .gallery-thumbnails .thumbnail,
+    .details-section,
+    .examples-section,
+    .downloads-section,
+    .trust-section,
+    .download-card,
+    .trust-card-horizontal,
+    .product-badges .badge {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -1601,8 +2026,17 @@ const pageDescription =
       grid-template-columns: 80px 1fr;
     }
 
-    .measurements-content {
+    .details-grid {
       grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    .details-right {
+      order: -1;
+    }
+
+    .measurements-grid {
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .examples-grid {
@@ -1640,12 +2074,24 @@ const pageDescription =
       grid-template-columns: 1fr;
     }
 
-    .section-tabs {
-      overflow-x: auto;
+    .details-section {
+      padding: 2rem 1rem;
+      margin-left: -1rem;
+      margin-right: -1rem;
     }
 
-    .tab-button {
-      white-space: nowrap;
+    .details-grid {
+      gap: 2.5rem;
+    }
+
+    .details-title,
+    .measurements-title {
+      font-size: 1.25rem;
+    }
+
+    .measurements-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
     }
 
     .examples-grid {
@@ -1716,82 +2162,152 @@ const pageDescription =
 </style>
 
 <script>
-  import { addToCart } from "@/cart.ts";
   // Gallery functionality
-  const thumbnails = document.querySelectorAll(".thumbnail");
-  const mediaItems = document.querySelectorAll(".media-item");
-  const addToCartBtn = document.querySelector(".add-to-cart-btn");
+  const thumbnails = document.querySelectorAll<HTMLButtonElement>(".thumbnail");
+  const mediaItems = document.querySelectorAll<HTMLDivElement>(".media-item");
 
-  addToCartBtn?.addEventListener("click", (e) => {
-    if (!addToCartBtn.hasAttribute("disabled")) {
-      const product = JSON.parse((e.target as HTMLElement).dataset.product!);
-      product.quantity = parseInt(
-        (document.getElementById("quantity") as HTMLInputElement).value
-      );
-      addToCart(product);
-    }
-  });
+  // Solo agregar listeners si hay múltiples thumbnails
+  if (thumbnails.length > 0 && mediaItems.length > 0) {
+    thumbnails.forEach((thumb, index) => {
+      thumb.addEventListener("click", () => {
+        // Remove active class from all
+        thumbnails.forEach((t) => t.classList.remove("active"));
+        mediaItems.forEach((m) => m.classList.remove("active"));
 
-  thumbnails.forEach((thumb, index) => {
-    thumb.addEventListener("click", () => {
-      // Remove active class from all
-      thumbnails.forEach((t) => t.classList.remove("active"));
-      mediaItems.forEach((m) => m.classList.remove("active"));
-
-      // Add active class to clicked
-      thumb.classList.add("active");
-      mediaItems[index].classList.add("active");
+        // Add active class to clicked
+        thumb.classList.add("active");
+        if (mediaItems[index]) {
+          mediaItems[index].classList.add("active");
+        }
+      });
     });
-  });
+  }
 
   // Quantity selector
-  const decreaseBtn = document.getElementById("decreaseQty");
-  const increaseBtn = document.getElementById("increaseQty");
+  const decreaseBtn = document.getElementById("decreaseQty") as HTMLButtonElement;
+  const increaseBtn = document.getElementById("increaseQty") as HTMLButtonElement;
   const quantityInput = document.getElementById("quantity") as HTMLInputElement;
 
-  decreaseBtn?.addEventListener("click", () => {
-    const currentValue = parseInt(quantityInput.value);
-    if (currentValue > 1) {
-      quantityInput.value = (currentValue - 1).toString();
-    }
-  });
-
-  increaseBtn?.addEventListener("click", () => {
-    const currentValue = parseInt(quantityInput.value);
-    const maxValue = parseInt(quantityInput.max);
-    if (currentValue < maxValue) {
-      quantityInput.value = (currentValue + 1).toString();
-    }
-  });
-
-  // Tabs functionality
-  const tabButtons = document.querySelectorAll(".tab-button");
-  const tabPanes = document.querySelectorAll(".tab-pane");
-
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const targetTab = button.getAttribute("data-tab");
-
-      // Remove active class from all
-      tabButtons.forEach((btn) => btn.classList.remove("active"));
-      tabPanes.forEach((pane) => pane.classList.remove("active"));
-
-      // Add active class to clicked
-      button.classList.add("active");
-      document.getElementById(targetTab!)?.classList.add("active");
+  if (decreaseBtn && quantityInput) {
+    decreaseBtn.addEventListener("click", () => {
+      const currentValue = parseInt(quantityInput.value);
+      if (currentValue > 1) {
+        quantityInput.value = (currentValue - 1).toString();
+      }
     });
-  });
+  }
+
+  if (increaseBtn && quantityInput) {
+    increaseBtn.addEventListener("click", () => {
+      const currentValue = parseInt(quantityInput.value);
+      const maxValue = parseInt(quantityInput.max);
+      if (currentValue < maxValue) {
+        quantityInput.value = (currentValue + 1).toString();
+      }
+    });
+  }
+
+  // Validación para input manual
+  if (quantityInput) {
+    quantityInput.addEventListener("input", () => {
+      let value = parseInt(quantityInput.value);
+      const min = parseInt(quantityInput.min);
+      const max = parseInt(quantityInput.max);
+
+      // Si el valor está vacío o no es un número, no hacer nada aún
+      if (isNaN(value)) {
+        return;
+      }
+
+      // Limitar entre min y max
+      if (value < min) {
+        quantityInput.value = min.toString();
+      } else if (value > max) {
+        quantityInput.value = max.toString();
+      }
+    });
+
+    quantityInput.addEventListener("blur", () => {
+      // Al perder foco, asegurar que hay un valor válido
+      let value = parseInt(quantityInput.value);
+      const min = parseInt(quantityInput.min);
+
+      if (isNaN(value) || value < min) {
+        quantityInput.value = min.toString();
+      }
+    });
+  }
 
   // Smooth scroll for quick links
-  document.querySelectorAll(".quick-link").forEach((link) => {
+  document.querySelectorAll<HTMLAnchorElement>(".quick-link").forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const targetId = link.getAttribute("href")?.substring(1);
-      const targetElement = document.getElementById(targetId!);
+      const href = link.getAttribute("href");
+      if (!href) return;
+      
+      const targetId = href.substring(1);
+      const targetElement = document.getElementById(targetId);
 
       if (targetElement) {
-        targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        const offset = 80; // Offset para navbar fijo si existe
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
       }
     });
   });
+
+  // Lazy load videos on scroll (performance)
+  if ('IntersectionObserver' in window) {
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const video = entry.target as HTMLVideoElement;
+          if (video.dataset.src) {
+            video.src = video.dataset.src;
+            video.load();
+            videoObserver.unobserve(video);
+          }
+        }
+      });
+    }, {
+      rootMargin: '50px'
+    });
+
+    document.querySelectorAll<HTMLVideoElement>('video[data-src]').forEach(video => {
+      videoObserver.observe(video);
+    });
+  }
+
+  // Animaciones al scroll con IntersectionObserver
+  const animateSections = document.querySelectorAll<HTMLElement>(
+    '.details-section, .examples-section, .downloads-section, .trust-section'
+  );
+
+  if ('IntersectionObserver' in window) {
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+          sectionObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    animateSections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+  } else {
+    // Fallback para navegadores sin IntersectionObserver
+    animateSections.forEach(section => {
+      section.classList.add('animate-in');
+    });
+  }
 </script>

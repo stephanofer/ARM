@@ -11,18 +11,20 @@ export const $cart = persistentMap<Record<string, CartItem>>(
   }
 );
 
-export function addToCart(product: Product) {
+export function addToCart(product: CartItem) {
   const currentCart = $cart.get();
   const productId = product.id;
+  const quantityToAdd = product.quantity || 1;
+  
   if (currentCart[productId]) {
     $cart.setKey(productId.toString(), {
       ...currentCart[productId],
-      quantity: currentCart[productId].quantity + 1,
+      quantity: currentCart[productId].quantity + quantityToAdd,
     });
   } else {
     $cart.setKey(productId.toString(), {
       ...product,
-      quantity: 1,
+      quantity: quantityToAdd,
     });
   }
 }

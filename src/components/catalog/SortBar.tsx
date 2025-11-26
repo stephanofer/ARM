@@ -1,5 +1,5 @@
-import type { SortOption } from '../../lib/data';
-import { setSort } from '../../stores';
+import type { SortOption } from '@/lib/data/types';
+import { setSort } from '@/stores/filtersStore';
 import styles from './SortBar.module.css';
 
 export interface SortBarProps {

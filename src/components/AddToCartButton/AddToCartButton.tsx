@@ -1,22 +1,35 @@
-import type { Product } from "@/lib/data/types";
+import type { CartItem } from "@/lib/data/types";
 import styles from "./AddToCartButton.module.css";
 import { addToCart } from "@/cart";
 
 interface AddToCartButtonProps {
-  product: Product;
+  product: CartItem;
 }
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
-  const handleAddToCart = (product: AddToCartButtonProps["product"]) => {
-    addToCart(product);
+  const handleAddToCart = () => {
+    // Obtener cantidad del input (buscar en el DOM más cercano)
+    const quantityInput = document.querySelector('input#quantity') as HTMLInputElement;
+    const quantity = quantityInput && quantityInput.value ? parseInt(quantityInput.value, 10) : 1;
+    
+    // Validar que la cantidad sea válida
+    const validQuantity = isNaN(quantity) || quantity < 1 ? 1 : quantity;
+    
+    addToCart({
+      ...product,
+      quantity: validQuantity
+    });
   };
+
+  const inStock = product.stock > 0;
+
   return (
     <button
       className={styles["add-to-cart-btn"]}
       data-product-id={product.id}
-      disabled={!product.stock}
+      disabled={!inStock}
       aria-label={`Agregar ${product.name} al carrito`}
-      onClick={() => handleAddToCart(product)}
+      onClick={handleAddToCart}
     >
       <svg
         width="18"
@@ -24,13 +37,13 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        strokeWidth="2"
       >
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
-      <span>{product.stock ? "Agregar al carrito" : "No disponible"}</span>
+      <span>{inStock ? "Agregar al carrito" : "No disponible"}</span>
     </button>
   );
 }

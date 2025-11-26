@@ -1,5 +1,5 @@
-import type { Subcategory } from '../../lib/data';
-import { setSubcategory } from '../../stores';
+import type { Subcategory } from '@/lib/data/types';
+import { setSubcategory } from '@/stores/filtersStore';
 import styles from './SubcategoryTabs.module.css';
 
 export interface SubcategoryTabsProps {
