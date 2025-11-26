@@ -11,6 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
   padding: 0.625rem 1.25rem;
   background: #111827;
   color: white;
@@ -20,15 +21,49 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .button:hover:not(:disabled) {
-  background: #111827;
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading shimmer effect on buttons */
+.button.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: buttonShimmer 1.5s infinite;
+}
+
+@keyframes buttonShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .pages {
@@ -49,28 +84,77 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.pageButton:hover:not(:disabled) {
+.pageButton:hover:not(:disabled):not(.active) {
   border-color: #111827;
   color: #111827;
+  transform: translateY(-1px);
+}
+
+.pageButton:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .pageButton.active {
   background: #111827;
   color: white;
   border-color: #111827;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.25);
 }
 
-.pageButton:disabled {
+.pageButton:disabled:not(.active) {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading shimmer on page buttons */
+.pageButton.loading:not(.active)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    transparent 100%
+  );
+  animation: pageButtonShimmer 1.5s infinite;
+}
+
+@keyframes pageButtonShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .ellipsis {
   padding: 0.5rem;
   color: #999;
   font-size: 0.9rem;
+  user-select: none;
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .button:hover:not(:disabled),
+  .pageButton:hover:not(:disabled):not(.active) {
+    transform: none;
+  }
+  
+  .button.loading::after,
+  .pageButton.loading:not(.active)::after {
+    animation: none;
+  }
 }
 
 @media (max-width: 640px) {

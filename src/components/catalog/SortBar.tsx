@@ -19,10 +19,13 @@ export function SortBar({ currentSort, totalResults, isLoading }: SortBarProps) 
     <div className={styles.container}>
       <div className={styles.results}>
         {isLoading ? (
-          <span className={styles.loading}>Cargando...</span>
+          <span className={styles.loadingPill}>
+            <span className={styles.loadingDot} />
+            <span className={styles.loadingText}>Actualizando</span>
+          </span>
         ) : (
-          <span>
-            {totalResults} {totalResults === 1 ? 'producto' : 'productos'}
+          <span className={styles.resultsText}>
+            <strong>{totalResults}</strong> {totalResults === 1 ? 'producto encontrado' : 'productos encontrados'}
           </span>
         )}
       </div>
@@ -33,7 +36,7 @@ export function SortBar({ currentSort, totalResults, isLoading }: SortBarProps) 
         </label>
         <select
           id="sort"
-          className={styles.select}
+          className={`${styles.select} ${isLoading ? styles.selectLoading : ''}`}
           value={currentSort || ''}
           onChange={handleSortChange}
           disabled={isLoading}

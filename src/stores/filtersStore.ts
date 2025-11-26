@@ -109,7 +109,26 @@ export function setInStock(inStock: boolean) {
   });
 }
 
+/**
+ * Limpia todos los filtros EXCEPTO la subcategoría seleccionada.
+ * Esto permite al usuario limpiar filtros de atributos sin perder
+ * el contexto de la subcategoría en la que está navegando.
+ */
 export function resetFilters() {
+  const current = filtersStore.get();
+  filtersStore.set({
+    ...initialFiltersState,
+    categorySlug: current.categorySlug,
+    subcategorySlug: current.subcategorySlug, // Preservar subcategoría
+    pageSize: current.pageSize,
+  });
+}
+
+/**
+ * Limpia TODOS los filtros incluyendo la subcategoría.
+ * Usar cuando se quiere volver al estado inicial completo.
+ */
+export function resetAllFilters() {
   const current = filtersStore.get();
   filtersStore.set({
     ...initialFiltersState,
@@ -119,9 +138,23 @@ export function resetFilters() {
 }
 
 /**
- * Computed: Verifica si hay filtros activos
+ * Computed: Verifica si hay filtros activos (excluyendo subcategoría)
+ * La subcategoría no se considera filtro para el botón "Limpiar Todo"
  */
 export const hasActiveFilters = computed(filtersStore, (state) => {
+  return (
+    Object.keys(state.attributeFilters).length > 0 ||
+    state.minPrice !== undefined ||
+    state.maxPrice !== undefined ||
+    state.inStock ||
+    state.sort !== null
+  );
+});
+
+/**
+ * Computed: Verifica si hay CUALQUIER filtro activo incluyendo subcategoría
+ */
+export const hasAnyFilters = computed(filtersStore, (state) => {
   return (
     state.subcategorySlug !== null ||
     Object.keys(state.attributeFilters).length > 0 ||

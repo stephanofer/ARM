@@ -11,11 +11,53 @@
   font-size: 1rem;
   color: #666;
   font-weight: 500;
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
 }
 
-.loading {
-  color: #999;
-  font-style: italic;
+.resultsText {
+  color: #4b5563;
+}
+
+.resultsText strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Loading state - pill con dot animado */
+.loadingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
+
+.loadingDot {
+  width: 8px;
+  height: 8px;
+  background: #6b7280;
+  border-radius: 50%;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.loadingText {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .sortGroup {
@@ -38,7 +80,7 @@
   color: #333;
   background: white;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, opacity 0.2s;
   min-width: 200px;
 }
 
@@ -53,23 +95,58 @@
 }
 
 .select:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+}
+
+.selectLoading {
+  background: linear-gradient(90deg, #fff 0%, #f9fafb 50%, #fff 100%);
+  background-size: 200% 100%;
+  animation: selectShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes selectShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .loadingDot {
+    animation: none;
+    opacity: 0.7;
+  }
+  
+  .selectLoading {
+    animation: none;
+  }
 }
 
 @media (max-width: 768px) {
   .container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
   }
 
   .sortGroup {
     width: 100%;
   }
+  
+  .label {
+    display: none;
+  }
 
   .select {
     flex: 1;
     min-width: 0;
+    padding: 0.625rem 0.75rem;
   }
 }

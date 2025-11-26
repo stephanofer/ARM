@@ -21,19 +21,47 @@ import { PAGE_SIZE } from '@/config';
  * - sort: string (opcional)
  * - Cualquier otro param se interpreta como filtro de atributo (size, color, etc.)
  */
+
+// Valores permitidos para sort
+const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest', 'oldest'];
+
 export const GET: APIRoute = async ({ request, cookies, url }) => {
   try {
     // Crear cliente de Supabase
     const supabase = createClient({ request, cookies });
 
-    // Leer query params
+    // Leer y sanitizar query params
     const categorySlug = url.searchParams.get('categorySlug');
     const subcategorySlug = url.searchParams.get('subcategoria');
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const pageSize = parseInt(url.searchParams.get('pageSize') || PAGE_SIZE.toString()); 
-    const sort = url.searchParams.get('sort') || undefined;
-    const minPrice = url.searchParams.get('minPrice');
-    const maxPrice = url.searchParams.get('maxPrice');
+    
+    // Page: sanitizar para evitar NaN o valores inválidos
+    const rawPage = url.searchParams.get('page');
+    const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
+    const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+    
+    // PageSize: sanitizar con límites
+    const rawPageSize = url.searchParams.get('pageSize');
+    const parsedPageSize = rawPageSize ? parseInt(rawPageSize, 10) : PAGE_SIZE;
+    const pageSize = Number.isNaN(parsedPageSize) || parsedPageSize < 1 || parsedPageSize > 50 
+      ? PAGE_SIZE 
+      : parsedPageSize;
+    
+    // Sort: validar contra valores permitidos
+    const rawSort = url.searchParams.get('sort');
+    const sort = rawSort && VALID_SORT_OPTIONS.includes(rawSort) ? rawSort : undefined;
+    
+    // Price: sanitizar
+    const rawMinPrice = url.searchParams.get('minPrice');
+    const rawMaxPrice = url.searchParams.get('maxPrice');
+    const parsedMinPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
+    const parsedMaxPrice = rawMaxPrice ? parseFloat(rawMaxPrice) : undefined;
+    const minPrice = parsedMinPrice !== undefined && !Number.isNaN(parsedMinPrice) && parsedMinPrice >= 0 
+      ? parsedMinPrice 
+      : undefined;
+    const maxPrice = parsedMaxPrice !== undefined && !Number.isNaN(parsedMaxPrice) && parsedMaxPrice >= 0 
+      ? parsedMaxPrice 
+      : undefined;
+    
     const inStock = url.searchParams.get('inStock') === 'true';
 
     // Validar categorySlug
@@ -87,8 +115,8 @@ export const GET: APIRoute = async ({ request, cookies, url }) => {
     // Construir objeto de filtros
     const filters: ProductFilters = {
       attributeFilters,
-      minPrice: minPrice ? parseFloat(minPrice) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
       inStock: inStock || undefined,
       sort: sort as any,
     };

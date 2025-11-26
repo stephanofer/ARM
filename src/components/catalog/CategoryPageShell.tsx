@@ -53,6 +53,49 @@ export interface CategoryPageShellProps {
  * Shell principal de la página de categoría/subcategoría
  * Maneja sincronización URL ↔ Store ↔ API ↔ UI
  */
+// Valores permitidos para sort
+const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest', 'oldest'] as const;
+
+/**
+ * Sanitiza y valida parámetros de URL para evitar valores inválidos
+ */
+function sanitizeUrlParams(params: URLSearchParams, subcategorySlugs: string[]) {
+  // Page: si NaN o < 1 → 1
+  const rawPage = params.get('page');
+  const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
+  const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+
+  // Sort: si no está en valores permitidos → null
+  const rawSort = params.get('sort');
+  const sort = rawSort && VALID_SORT_OPTIONS.includes(rawSort as any) ? rawSort : null;
+
+  // Subcategory: si no existe en la lista → null
+  const rawSubcategory = params.get('subcategoria');
+  const subcategorySlug = rawSubcategory && subcategorySlugs.includes(rawSubcategory) 
+    ? rawSubcategory 
+    : null;
+
+  // MinPrice/MaxPrice: si NaN → undefined
+  const rawMinPrice = params.get('minPrice');
+  const rawMaxPrice = params.get('maxPrice');
+  const minPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
+  const maxPrice = rawMaxPrice ? parseFloat(rawMaxPrice) : undefined;
+  const sanitizedMinPrice = minPrice !== undefined && !Number.isNaN(minPrice) && minPrice >= 0 ? minPrice : undefined;
+  const sanitizedMaxPrice = maxPrice !== undefined && !Number.isNaN(maxPrice) && maxPrice >= 0 ? maxPrice : undefined;
+
+  // InStock: solo true si es exactamente "true"
+  const inStock = params.get('inStock') === 'true';
+
+  return {
+    page,
+    sort,
+    subcategorySlug,
+    minPrice: sanitizedMinPrice,
+    maxPrice: sanitizedMaxPrice,
+    inStock,
+  };
+}
+
 export function CategoryPageShell({
   category,
   subcategories,
@@ -67,6 +110,17 @@ export function CategoryPageShell({
   const isSyncingUrl = useRef(false);
   const hasInitialProductsRendered = useRef(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // AbortController para cancelar requests anteriores y evitar race conditions
+  const abortControllerRef = useRef<AbortController | null>(null);
+  // ID único para cada request, para verificar que el response corresponde al request actual
+  const requestIdRef = useRef(0);
+  
+  // Lista de slugs de subcategorías para validación
+  const subcategorySlugs = subcategories.map(s => s.slug);
+  
+  // Estado para el drawer de filtros en mobile
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   // Estado local para filter config dinámico
   const [currentFilterConfig, setCurrentFilterConfig] =
@@ -193,6 +247,18 @@ export function CategoryPageShell({
     };
 
     const fetchProducts = async () => {
+      // Cancelar request anterior si existe (evita race conditions)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Crear nuevo AbortController para este request
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      
+      // Incrementar ID de request para verificar que el response es el correcto
+      const currentRequestId = ++requestIdRef.current;
+      
       try {
         const apiParams = new URLSearchParams();
         apiParams.set("categorySlug", category.slug);
@@ -231,13 +297,25 @@ export function CategoryPageShell({
           error: null,
         });
 
-        const response = await fetch(`/api/products?${apiParams.toString()}`);
+        const response = await fetch(`/api/products?${apiParams.toString()}`, {
+          signal: controller.signal,
+        });
+
+        // Verificar que este request sigue siendo el actual
+        if (currentRequestId !== requestIdRef.current) {
+          return; // Request obsoleto, ignorar response
+        }
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
+        
+        // Doble verificación después de parsear JSON
+        if (currentRequestId !== requestIdRef.current) {
+          return;
+        }
 
         productsStore.set({
           items: data.items,
@@ -249,6 +327,16 @@ export function CategoryPageShell({
           error: null,
         });
       } catch (error) {
+        // Ignorar errores de abort (son intencionales)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        
+        // Verificar que este request sigue siendo el actual
+        if (currentRequestId !== requestIdRef.current) {
+          return;
+        }
+        
         productsStore.set({
           ...productsStore.get(),
           isLoading: false,
@@ -283,13 +371,8 @@ export function CategoryPageShell({
 
       const params = new URLSearchParams(window.location.search);
 
-      // Parsear parámetros de la URL
-      const subcategorySlug = params.get("subcategoria") || null;
-      const page = parseInt(params.get("page") || "1");
-      const sort = params.get("sort") || null;
-      const minPrice = params.get("minPrice");
-      const maxPrice = params.get("maxPrice");
-      const inStock = params.get("inStock") === "true";
+      // Usar función de sanitización para validar todos los parámetros
+      const sanitized = sanitizeUrlParams(params, subcategorySlugs);
 
       const attributeFilters: Record<string, string | string[]> = {};
       const reservedParams = [
@@ -316,17 +399,17 @@ export function CategoryPageShell({
         }
       });
 
-      // Actualizar filtersStore
+      // Actualizar filtersStore con valores sanitizados
       initFiltersStore({
         categorySlug: category.slug,
-        subcategorySlug,
-        page,
+        subcategorySlug: sanitized.subcategorySlug,
+        page: sanitized.page,
         pageSize: filters.pageSize,
-        sort: sort as any,
+        sort: sanitized.sort as any,
         attributeFilters,
-        minPrice: minPrice ? parseFloat(minPrice) : undefined,
-        maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
-        inStock,
+        minPrice: sanitized.minPrice,
+        maxPrice: sanitized.maxPrice,
+        inStock: sanitized.inStock,
       });
 
       setTimeout(() => {
@@ -336,16 +419,20 @@ export function CategoryPageShell({
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [category.slug, filters.pageSize]);
+  }, [category.slug, filters.pageSize, subcategorySlugs]);
+  
+  // Cleanup: cancelar requests pendientes al desmontar
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
       {/* Tabs de subcategorías */}
-      {/* <SubcategoryTabs
-        subcategories={subcategories}
-        currentSubcategorySlug={filters.subcategorySlug}
-      /> */}
-
       <div className={styles.mainContent}>
         {/* Panel de filtros */}
         <aside className={styles.sidebar}>
@@ -354,18 +441,49 @@ export function CategoryPageShell({
             currentSubcategorySlug={filters.subcategorySlug}
             filterConfig={currentFilterConfig}
             currentFilters={filters.attributeFilters}
+            isOpen={isFilterDrawerOpen}
+            onClose={() => setIsFilterDrawerOpen(false)}
           />
         </aside>
 
         {/* Contenido principal */}
         <main className={styles.content}>
           <h1 className={styles.title}>{category.name}</h1>
-          {/* Barra de orden y resultados */}
-          <SortBar
-            currentSort={filters.sort}
-            totalResults={displayTotal || 0}
-            isLoading={products.isLoading}
-          />
+          <p className={styles.mobileResultsCount}>
+            {displayTotal || 0} productos
+          </p>
+          
+          {/* Barra móvil con filtro y orden */}
+          <div className={styles.mobileToolbar}>
+            <button 
+              className={styles.mobileFilterBtn}
+              onClick={() => setIsFilterDrawerOpen(true)}
+              aria-label="Abrir filtros"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <span>Filtro</span>
+            </button>
+            
+            {/* SortBar en mobile es solo el select */}
+            <div className={styles.mobileSortWrapper}>
+              <SortBar
+                currentSort={filters.sort}
+                totalResults={displayTotal || 0}
+                isLoading={products.isLoading}
+              />
+            </div>
+          </div>
+          
+          {/* Barra de orden y resultados (desktop) */}
+          <div className={styles.desktopSortBar}>
+            <SortBar
+              currentSort={filters.sort}
+              totalResults={displayTotal || 0}
+              isLoading={products.isLoading}
+            />
+          </div>
 
           {/* Estados de error/loading/vacío */}
           {products.error && <ErrorState error={products.error} />}

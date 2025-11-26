@@ -3,13 +3,106 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
-  will-change: opacity;
 }
 
-.grid.loading {
-  opacity: 0.6;
-  pointer-events: none;
+/* Wrapper para animación de entrada */
+.productWrapper {
+  animation: fadeInUp 0.4s ease-out forwards;
+  opacity: 0;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== */
+/* SKELETON LOADING     */
+/* ==================== */
+
+.skeletonCard {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.skeletonImage {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeletonInfo {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonTitle {
+  height: 1.25rem;
+  width: 85%;
+  background: #f3f4f6;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeletonBrand {
+  height: 1rem;
+  width: 50%;
+  background: #f3f4f6;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeletonMeta {
+  height: 0.875rem;
+  width: 35%;
+  background: #f3f4f6;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+/* Shimmer animation - efecto de brillo que pasa */
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ==================== */
+/* PRODUCT CARD         */
+/* ==================== */
 
 .card {
   background: white;
@@ -105,6 +198,26 @@
   margin: 0;
 }
 
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .productWrapper {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .shimmer {
+    animation: none;
+  }
+  
+  .card:hover {
+    transform: none;
+  }
+  
+  .card:hover .image {
+    transform: none;
+  }
+}
+
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -121,5 +234,9 @@
 
   .price {
     font-size: 1.25rem;
+  }
+  
+  .skeletonInfo {
+    padding: 1rem;
   }
 }

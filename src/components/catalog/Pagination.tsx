@@ -57,12 +57,14 @@ export function Pagination({
   return (
     <nav className={styles.container} aria-label="Paginación">
       <button
-        className={styles.button}
+        className={`${styles.button} ${isLoading ? styles.loading : ''}`}
         onClick={() => handlePageClick(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
         aria-label="Página anterior"
       >
-
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
         Anterior
       </button>
 
@@ -81,7 +83,7 @@ export function Pagination({
               key={page}
               className={`${styles.pageButton} ${
                 page === currentPage ? styles.active : ""
-              }`}
+              } ${isLoading ? styles.loading : ''}`}
               onClick={() => handlePageClick(page as number)}
               disabled={isLoading}
               aria-label={`Página ${page}`}
@@ -94,12 +96,15 @@ export function Pagination({
       </div>
 
       <button
-        className={styles.button}
+        className={`${styles.button} ${isLoading ? styles.loading : ''}`}
         onClick={() => handlePageClick(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
         aria-label="Página siguiente"
       >
         Siguiente
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </button>
     </nav>
   );

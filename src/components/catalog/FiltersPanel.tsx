@@ -6,7 +6,7 @@ import {
 } from "@/stores/filtersStore";
 import { useStore } from "@nanostores/preact";
 import { setSubcategory } from "@/stores/filtersStore";
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import styles from "./FiltersPanel.module.css";
 
 export interface FiltersPanelProps {
@@ -14,6 +14,10 @@ export interface FiltersPanelProps {
   currentFilters: Record<string, string | string[]>;
   subcategories: Subcategory[];
   currentSubcategorySlug: string | null;
+  /** Modo mobile: controla si el drawer está abierto */
+  isOpen?: boolean;
+  /** Callback para cerrar el drawer en mobile */
+  onClose?: () => void;
 }
 
 export function FiltersPanel({
@@ -21,18 +25,31 @@ export function FiltersPanel({
   currentFilters,
   currentSubcategorySlug,
   subcategories,
+  isOpen = false,
+  onClose,
 }: FiltersPanelProps) {
   const hasFilters = useStore(hasActiveFilters);
   
   // Estado para controlar qué secciones están colapsadas
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
+  // Bloquear scroll del body cuando el drawer está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const handleFilterChange = (key: string, value: string | string[]) => {
     setAttributeFilter(key, value);
   };
 
   const handleReset = () => {
-    console.log("click");
     resetFilters();
   };
 
@@ -48,21 +65,9 @@ export function FiltersPanel({
     });
   };
 
-  
-
-  return (
-    <div className={styles["filters-sidebar"]}>
-      <div className={styles["filters-header"]}>
-        <h3 className={styles["filters-title"]}>Filtros</h3>
-        <button
-          className={styles["clear-filters"]}
-          onClick={handleReset}
-          disabled={!hasFilters}
-        >
-          Limpiar Todo
-        </button>
-      </div>
-
+  // Contenido de los filtros (reutilizable)
+  const filtersContent = (
+    <>
       <div className={styles.filters}>
         {subcategories.length > 0 && (
           <div className={`${styles["filter-section"]} ${collapsedSections.has('subcategories') ? styles.collapsed : ''}`}>
@@ -90,6 +95,7 @@ export function FiltersPanel({
             >
               {subcategories.map((subcategory) => (
                 <a
+                  key={subcategory.slug}
                   className={
                     styles["subcategory-link"] + (currentSubcategorySlug === subcategory.slug ? " " + styles.active : "")
                   }
@@ -223,6 +229,75 @@ export function FiltersPanel({
           </div>
         ))}
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop: Panel normal en sidebar */}
+      <div className={styles["filters-sidebar"]}>
+        <div className={styles["filters-header"]}>
+          <h3 className={styles["filters-title"]}>Filtros</h3>
+          <button
+            className={styles["clear-filters"]}
+            onClick={handleReset}
+            disabled={!hasFilters}
+          >
+            Limpiar Todo
+          </button>
+        </div>
+        {filtersContent}
+      </div>
+
+      {/* Mobile: Drawer/Modal */}
+      <div 
+        className={`${styles.mobileDrawerOverlay} ${isOpen ? styles.open : ''}`}
+        onClick={onClose}
+        aria-hidden={!isOpen}
+      />
+      <div 
+        className={`${styles.mobileDrawer} ${isOpen ? styles.open : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Filtros"
+      >
+        {/* Header del drawer */}
+        <div className={styles.drawerHeader}>
+          <h3 className={styles.drawerTitle}>Filtros</h3>
+          <button 
+            className={styles.drawerClose}
+            onClick={onClose}
+            aria-label="Cerrar filtros"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        {/* Contenido scrolleable */}
+        <div className={styles.drawerContent}>
+          {filtersContent}
+        </div>
+
+        {/* Footer con acciones */}
+        <div className={styles.drawerFooter}>
+          <button 
+            className={styles.drawerClearBtn}
+            onClick={handleReset}
+            disabled={!hasFilters}
+          >
+            Limpiar
+          </button>
+          <button 
+            className={styles.drawerApplyBtn}
+            onClick={onClose}
+          >
+            Ver resultados
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
