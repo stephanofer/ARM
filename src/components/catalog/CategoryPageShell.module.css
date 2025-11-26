@@ -2,6 +2,12 @@
   width: 100%;
 }
 
+.title {
+  font-size: var(--fs-xxl);
+  font-family: var(--font-primary);
+  font-weight: 450;
+}
+
 .mainContent {
   display: grid;
   grid-template-columns: 280px 1fr;

@@ -8,8 +8,11 @@
 }
 
 .button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 0.625rem 1.25rem;
-  background: #2d5f3f;
+  background: #111827;
   color: white;
   border: none;
   border-radius: 8px;
@@ -20,7 +23,7 @@
 }
 
 .button:hover:not(:disabled) {
-  background: #1a4429;
+  background: #111827;
 }
 
 .button:disabled {
@@ -49,14 +52,14 @@
 }
 
 .pageButton:hover:not(:disabled) {
-  border-color: #2d5f3f;
-  color: #2d5f3f;
+  border-color: #111827;
+  color: #111827;
 }
 
 .pageButton.active {
-  background: #2d5f3f;
+  background: #111827;
   color: white;
-  border-color: #2d5f3f;
+  border-color: #111827;
 }
 
 .pageButton:disabled {

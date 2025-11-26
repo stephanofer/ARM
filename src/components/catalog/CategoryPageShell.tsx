@@ -356,6 +356,7 @@ export function CategoryPageShell({
 
         {/* Contenido principal */}
         <main className={styles.content}>
+          <h1 className={styles.title}>{category.name}</h1>
           {/* Barra de orden y resultados */}
           <SortBar
             currentSort={filters.sort}

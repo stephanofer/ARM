@@ -145,14 +145,11 @@ const pageDescription = currentSubcategory
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <div class="container">
-    <Breadcrumb
-      category={category}
-      currentSubcategorySlug={currentSubcategory?.slug}
-    />
     <header>
-      <h1 class="title">
-        {currentSubcategory ? currentSubcategory.name : category.name}
-      </h1>
+      <Breadcrumb
+        category={category}
+        currentSubcategorySlug={currentSubcategory?.slug}
+      />
     </header>
 
     <CategoryPageShell
@@ -180,9 +177,5 @@ const pageDescription = currentSubcategory
     margin-bottom: 1rem;
   }
 
-  .title {
-    font-size: var(--fs-xxl);
-    font-family: var(--font-primary);
-    font-weight: 450;
-  }
+
 </style>

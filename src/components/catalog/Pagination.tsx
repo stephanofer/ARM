@@ -1,5 +1,5 @@
-import { setPage } from '../../stores';
-import styles from './Pagination.module.css';
+import { setPage } from "../../stores";
+import styles from "./Pagination.module.css";
 
 export interface PaginationProps {
   currentPage: number;
@@ -7,7 +7,11 @@ export interface PaginationProps {
   isLoading: boolean;
 }
 
-export function Pagination({ currentPage, totalPages, isLoading }: PaginationProps) {
+export function Pagination({
+  currentPage,
+  totalPages,
+  isLoading,
+}: PaginationProps) {
   if (totalPages <= 1) {
     return null;
   }
@@ -15,7 +19,7 @@ export function Pagination({ currentPage, totalPages, isLoading }: PaginationPro
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       setPage(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -32,17 +36,17 @@ export function Pagination({ currentPage, totalPages, isLoading }: PaginationPro
       // Mostrar con elipsis
       if (currentPage <= 4) {
         for (let i = 1; i <= 5; i++) pages.push(i);
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 3) {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
       } else {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       }
     }
@@ -58,12 +62,13 @@ export function Pagination({ currentPage, totalPages, isLoading }: PaginationPro
         disabled={currentPage === 1 || isLoading}
         aria-label="Página anterior"
       >
-        ← Anterior
+
+        Anterior
       </button>
 
       <div className={styles.pages}>
         {renderPageNumbers().map((page, index) => {
-          if (page === '...') {
+          if (page === "...") {
             return (
               <span key={`ellipsis-${index}`} className={styles.ellipsis}>
                 ...
@@ -75,12 +80,12 @@ export function Pagination({ currentPage, totalPages, isLoading }: PaginationPro
             <button
               key={page}
               className={`${styles.pageButton} ${
-                page === currentPage ? styles.active : ''
+                page === currentPage ? styles.active : ""
               }`}
               onClick={() => handlePageClick(page as number)}
               disabled={isLoading}
               aria-label={`Página ${page}`}
-              aria-current={page === currentPage ? 'page' : undefined}
+              aria-current={page === currentPage ? "page" : undefined}
             >
               {page}
             </button>
@@ -94,7 +99,7 @@ export function Pagination({ currentPage, totalPages, isLoading }: PaginationPro
         disabled={currentPage === totalPages || isLoading}
         aria-label="Página siguiente"
       >
-        Siguiente →
+        Siguiente
       </button>
     </nav>
   );

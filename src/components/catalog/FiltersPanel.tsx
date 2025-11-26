@@ -6,6 +6,7 @@ import {
 } from "@/stores/filtersStore";
 import { useStore } from "@nanostores/preact";
 import { setSubcategory } from "@/stores/filtersStore";
+import { useState } from "preact/hooks";
 import styles from "./FiltersPanel.module.css";
 
 export interface FiltersPanelProps {
@@ -22,6 +23,9 @@ export function FiltersPanel({
   subcategories,
 }: FiltersPanelProps) {
   const hasFilters = useStore(hasActiveFilters);
+  
+  // Estado para controlar qué secciones están colapsadas
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
   const handleFilterChange = (key: string, value: string | string[]) => {
     setAttributeFilter(key, value);
@@ -32,12 +36,26 @@ export function FiltersPanel({
     resetFilters();
   };
 
+  const toggleSection = (sectionKey: string) => {
+    setCollapsedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionKey)) {
+        newSet.delete(sectionKey);
+      } else {
+        newSet.add(sectionKey);
+      }
+      return newSet;
+    });
+  };
+
+  
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Filtros</h3>
+    <div className={styles["filters-sidebar"]}>
+      <div className={styles["filters-header"]}>
+        <h3 className={styles["filters-title"]}>Filtros</h3>
         <button
-          className={styles.resetButton}
+          className={styles["clear-filters"]}
           onClick={handleReset}
           disabled={!hasFilters}
         >
@@ -47,29 +65,66 @@ export function FiltersPanel({
 
       <div className={styles.filters}>
         {subcategories.length > 0 && (
-          <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}>Subcategoría</label>
-            <select
-              className={styles.select}
-              value={currentSubcategorySlug || ""}
-              onChange={(e) =>
-                setSubcategory(
-                  e.currentTarget.value === "" ? null : e.currentTarget.value
-                )
+          <div className={`${styles["filter-section"]} ${collapsedSections.has('subcategories') ? styles.collapsed : ''}`}>
+            <h3 
+              className={styles["filter-section-title"]}
+              onClick={() => toggleSection('subcategories')}
+            >
+              <span>Subcategorías</span>
+              <svg
+                className={styles.chevron}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </h3>
+            <div
+              className={
+                styles["filter-options"] + " " + styles["subcategories-list"]
               }
             >
-              <option value="">Todas</option>
               {subcategories.map((subcategory) => (
-                <option key={subcategory.id} value={subcategory.slug}>
+                <a
+                  className={
+                    styles["subcategory-link"] + (currentSubcategorySlug === subcategory.slug ? " " + styles.active : "")
+                  }
+                  onClick={() => setSubcategory(subcategory.slug)}
+                >
                   {subcategory.name}
-                </option>
+                  <svg
+                    className={styles["arrow-icon"]}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </a>
               ))}
-            </select>
+            </div>
           </div>
         )}
         {filterConfig.map((config) => (
-          <div key={config.key} className={styles.filterGroup}>
-            <label className={styles.filterLabel}>{config.label}</label>
+          <div 
+            key={config.key} 
+            className={`${styles.filterGroup} ${collapsedSections.has(config.key) ? styles.collapsed : ''}`}
+          >
+            <label 
+              className={styles.filterLabel}
+              onClick={() => toggleSection(config.key)}
+              style={{ cursor: 'pointer' }}
+            >
+              {config.label}
+            </label>
+            
 
             {config.type === "select" && config.options && (
               <select
