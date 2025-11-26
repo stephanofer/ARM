@@ -1,14 +1,6 @@
 import { persistentMap } from "@nanostores/persistent";
 import { computed } from "nanostores";
-
-interface CartItem {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  quantity: number;
-  inStock: boolean;
-}
+import type { CartItem, Product } from "./lib/data";
 
 export const $cart = persistentMap<Record<string, CartItem>>(
   "cart:",
@@ -19,16 +11,16 @@ export const $cart = persistentMap<Record<string, CartItem>>(
   }
 );
 
-export function addToCart(product: CartItem) {
+export function addToCart(product: Product) {
   const currentCart = $cart.get();
   const productId = product.id;
   if (currentCart[productId]) {
-    $cart.setKey(productId, {
+    $cart.setKey(productId.toString(), {
       ...currentCart[productId],
       quantity: currentCart[productId].quantity + 1,
     });
   } else {
-    $cart.setKey(productId, {
+    $cart.setKey(productId.toString(), {
       ...product,
       quantity: 1,
     });

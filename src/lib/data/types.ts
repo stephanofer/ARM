@@ -34,6 +34,10 @@ export interface Product {
   created_at: string;
 }
 
+export interface CartItem extends Product {
+  quantity: number;
+}
+
 // ============================
 // TIPOS DE FILTROS
 // ============================
@@ -41,7 +45,7 @@ export interface Product {
 export interface FilterConfig {
   key: string;
   label: string;
-  type: 'select' | 'checkbox' | 'range' | 'boolean';
+  type: "select" | "checkbox" | "range" | "boolean";
   options?: string[];
   min?: number;
   max?: number;
@@ -49,11 +53,11 @@ export interface FilterConfig {
 }
 
 export type SortOption =
-  | 'price_asc'
-  | 'price_desc'
-  | 'newest'
-  | 'name_asc'
-  | 'name_desc';
+  | "price_asc"
+  | "price_desc"
+  | "newest"
+  | "name_asc"
+  | "name_desc";
 
 export interface AttributeFilters {
   [key: string]: string | string[];

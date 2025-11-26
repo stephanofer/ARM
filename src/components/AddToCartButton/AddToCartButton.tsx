@@ -1,15 +1,9 @@
+import type { Product } from "@/lib/data";
 import styles from "./AddToCartButton.module.css";
 import { addToCart } from "@/cart";
 
 interface AddToCartButtonProps {
-  product: {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    quantity: number;
-    inStock: boolean;
-  };
+  product: Product;
 }
 
 export function AddToCartButton({ product }: AddToCartButtonProps) {
@@ -20,7 +14,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     <button
       className={styles["add-to-cart-btn"]}
       data-product-id={product.id}
-      disabled={!product.inStock}
+      disabled={!product.stock}
       aria-label={`Agregar ${product.name} al carrito`}
       onClick={() => handleAddToCart(product)}
     >
@@ -36,7 +30,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
-      <span>{product.inStock ? "Agregar al carrito" : "No disponible"}</span>
+      <span>{product.stock ? "Agregar al carrito" : "No disponible"}</span>
     </button>
   );
 }
