@@ -1,6 +1,6 @@
 import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
 import styles from "./ProductCard.module.css";
-import type { Product } from "@/lib/data";
+import type { Product } from "@/lib/data/types";
 
 type Props = {
   product: Product;

@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/data";
+import type { Product } from "@/lib/data/types";
 import styles from "./AddToCartButton.module.css";
 import { addToCart } from "@/cart";
 
