@@ -27,10 +27,12 @@ export interface CategoryPageShellProps {
   subcategories: Subcategory[];
   currentSubcategory: Subcategory | null;
   filterConfig: FilterConfig[];
-  initialProducts: Array<Product & { 
-    primaryImageUrl?: string | null; 
-    secondaryImageUrl?: string | null 
-  }>;
+  initialProducts: Array<
+    Product & {
+      primaryImageUrl?: string | null;
+      secondaryImageUrl?: string | null;
+    }
+  >;
   initialFilters: {
     subcategorySlug: string | null;
     page: number;
@@ -54,37 +56,54 @@ export interface CategoryPageShellProps {
  * Maneja sincronización URL ↔ Store ↔ API ↔ UI
  */
 // Valores permitidos para sort
-const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'oldest'] as const;
+const VALID_SORT_OPTIONS = [
+  "price_asc",
+  "price_desc",
+  "name_asc",
+  "name_desc",
+  "oldest",
+] as const;
 
 /**
  * Sanitiza y valida parámetros de URL para evitar valores inválidos
  */
-function sanitizeUrlParams(params: URLSearchParams, subcategorySlugs: string[]) {
+function sanitizeUrlParams(
+  params: URLSearchParams,
+  subcategorySlugs: string[]
+) {
   // Page: si NaN o < 1 → 1
-  const rawPage = params.get('page');
+  const rawPage = params.get("page");
   const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
   const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
 
   // Sort: si no está en valores permitidos → null
-  const rawSort = params.get('sort');
-  const sort = rawSort && VALID_SORT_OPTIONS.includes(rawSort as any) ? rawSort : null;
+  const rawSort = params.get("sort");
+  const sort =
+    rawSort && VALID_SORT_OPTIONS.includes(rawSort as any) ? rawSort : null;
 
   // Subcategory: si no existe en la lista → null
-  const rawSubcategory = params.get('subcategoria');
-  const subcategorySlug = rawSubcategory && subcategorySlugs.includes(rawSubcategory) 
-    ? rawSubcategory 
-    : null;
+  const rawSubcategory = params.get("subcategoria");
+  const subcategorySlug =
+    rawSubcategory && subcategorySlugs.includes(rawSubcategory)
+      ? rawSubcategory
+      : null;
 
   // MinPrice/MaxPrice: si NaN → undefined
-  const rawMinPrice = params.get('minPrice');
-  const rawMaxPrice = params.get('maxPrice');
+  const rawMinPrice = params.get("minPrice");
+  const rawMaxPrice = params.get("maxPrice");
   const minPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
   const maxPrice = rawMaxPrice ? parseFloat(rawMaxPrice) : undefined;
-  const sanitizedMinPrice = minPrice !== undefined && !Number.isNaN(minPrice) && minPrice >= 0 ? minPrice : undefined;
-  const sanitizedMaxPrice = maxPrice !== undefined && !Number.isNaN(maxPrice) && maxPrice >= 0 ? maxPrice : undefined;
+  const sanitizedMinPrice =
+    minPrice !== undefined && !Number.isNaN(minPrice) && minPrice >= 0
+      ? minPrice
+      : undefined;
+  const sanitizedMaxPrice =
+    maxPrice !== undefined && !Number.isNaN(maxPrice) && maxPrice >= 0
+      ? maxPrice
+      : undefined;
 
   // InStock: solo true si es exactamente "true"
-  const inStock = params.get('inStock') === 'true';
+  const inStock = params.get("inStock") === "true";
 
   return {
     page,
@@ -110,15 +129,15 @@ export function CategoryPageShell({
   const isSyncingUrl = useRef(false);
   const hasInitialProductsRendered = useRef(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // AbortController para cancelar requests anteriores y evitar race conditions
   const abortControllerRef = useRef<AbortController | null>(null);
   // ID único para cada request, para verificar que el response corresponde al request actual
   const requestIdRef = useRef(0);
-  
+
   // Lista de slugs de subcategorías para validación
-  const subcategorySlugs = subcategories.map(s => s.slug);
-  
+  const subcategorySlugs = subcategories.map((s) => s.slug);
+
   // Estado para el drawer de filtros en mobile
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
@@ -251,14 +270,14 @@ export function CategoryPageShell({
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      
+
       // Crear nuevo AbortController para este request
       const controller = new AbortController();
       abortControllerRef.current = controller;
-      
+
       // Incrementar ID de request para verificar que el response es el correcto
       const currentRequestId = ++requestIdRef.current;
-      
+
       try {
         const apiParams = new URLSearchParams();
         apiParams.set("categorySlug", category.slug);
@@ -311,7 +330,7 @@ export function CategoryPageShell({
         }
 
         const data = await response.json();
-        
+
         // Doble verificación después de parsear JSON
         if (currentRequestId !== requestIdRef.current) {
           return;
@@ -328,15 +347,15 @@ export function CategoryPageShell({
         });
       } catch (error) {
         // Ignorar errores de abort (son intencionales)
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (error instanceof Error && error.name === "AbortError") {
           return;
         }
-        
+
         // Verificar que este request sigue siendo el actual
         if (currentRequestId !== requestIdRef.current) {
           return;
         }
-        
+
         productsStore.set({
           ...productsStore.get(),
           isLoading: false,
@@ -420,7 +439,7 @@ export function CategoryPageShell({
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [category.slug, filters.pageSize, subcategorySlugs]);
-  
+
   // Cleanup: cancelar requests pendientes al desmontar
   useEffect(() => {
     return () => {
@@ -446,26 +465,36 @@ export function CategoryPageShell({
           />
         </aside>
 
-        {/* Contenido principal */}
         <main className={styles.content}>
           <h1 className={styles.title}>{category.name}</h1>
           <p className={styles.mobileResultsCount}>
-            {displayTotal || 0} productos
+            {(displayTotal ?? 0) > 1
+              ? `${displayTotal} Productos Encontrados`
+              : displayTotal === 1
+              ? "1 Producto Encontrado"
+              : "Sin resultados"}
           </p>
-          
+
           {/* Barra móvil con filtro y orden */}
           <div className={styles.mobileToolbar}>
-            <button 
+            <button
               className={styles.mobileFilterBtn}
               onClick={() => setIsFilterDrawerOpen(true)}
               aria-label="Abrir filtros"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
               <span>Filtro</span>
             </button>
-            
+
             {/* SortBar en mobile es solo el select */}
             <div className={styles.mobileSortWrapper}>
               <SortBar
@@ -475,7 +504,7 @@ export function CategoryPageShell({
               />
             </div>
           </div>
-          
+
           {/* Barra de orden y resultados (desktop) */}
           <div className={styles.desktopSortBar}>
             <SortBar

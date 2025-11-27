@@ -25,6 +25,12 @@
   font-weight: 600;
 }
 
+@media (max-width: 1024px) {
+  .resultsText {
+    display: none;
+  }
+}
+
 /* Loading state - pill con dot animado */
 .loadingPill {
   display: inline-flex;
@@ -34,6 +40,15 @@
   background: #f3f4f6;
   border-radius: 9999px;
   font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .resultsText {
+    display: none;
+  }
+  .loadingPill {
+    display: none;
+  }
 }
 
 .loadingDot {
@@ -50,7 +65,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
     transform: scale(0.8);
   }
@@ -120,7 +136,7 @@
     animation: none;
     opacity: 0.7;
   }
-  
+
   .selectLoading {
     animation: none;
   }
@@ -139,7 +155,7 @@
   .sortGroup {
     width: 100%;
   }
-  
+
   .label {
     display: none;
   }

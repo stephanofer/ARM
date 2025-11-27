@@ -54,26 +54,50 @@ export function Pagination({
     return pages;
   };
 
+  // Versión simplificada para mobile: solo muestra página actual y adyacentes
+  const renderMobilePageNumbers = () => {
+    const pages: (number | string)[] = [];
+    
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Siempre mostrar: primera, actual-1, actual, actual+1, última
+      if (currentPage <= 2) {
+        pages.push(1, 2, 3, "...", totalPages);
+      } else if (currentPage >= totalPages - 1) {
+        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", currentPage, "...", totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <nav className={styles.container} aria-label="Paginación">
+      {/* Botón Anterior */}
       <button
-        className={`${styles.button} ${isLoading ? styles.loading : ''}`}
+        className={`${styles.button} ${styles.prevButton} ${isLoading ? styles.loading : ''}`}
         onClick={() => handlePageClick(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
         aria-label="Página anterior"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="15 18 9 12 15 6" />
         </svg>
-        Anterior
+        <span className={styles.buttonText}>Anterior</span>
       </button>
 
-      <div className={styles.pages}>
+      {/* Páginas - Desktop */}
+      <div className={styles.pagesDesktop}>
         {renderPageNumbers().map((page, index) => {
           if (page === "...") {
             return (
               <span key={`ellipsis-${index}`} className={styles.ellipsis}>
-                ...
+                ···
               </span>
             );
           }
@@ -95,14 +119,50 @@ export function Pagination({
         })}
       </div>
 
+      {/* Páginas - Mobile (simplificado) */}
+      <div className={styles.pagesMobile}>
+        {renderMobilePageNumbers().map((page, index) => {
+          if (page === "...") {
+            return (
+              <span key={`ellipsis-m-${index}`} className={styles.ellipsis}>
+                ·
+              </span>
+            );
+          }
+
+          return (
+            <button
+              key={`m-${page}`}
+              className={`${styles.pageButton} ${
+                page === currentPage ? styles.active : ""
+              } ${isLoading ? styles.loading : ''}`}
+              onClick={() => handlePageClick(page as number)}
+              disabled={isLoading}
+              aria-label={`Página ${page}`}
+              aria-current={page === currentPage ? "page" : undefined}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Indicador de página mobile (alternativo) */}
+      <div className={styles.mobileIndicator}>
+        <span className={styles.currentPageLabel}>
+          {currentPage} <span className={styles.separator}>/</span> {totalPages}
+        </span>
+      </div>
+
+      {/* Botón Siguiente */}
       <button
-        className={`${styles.button} ${isLoading ? styles.loading : ''}`}
+        className={`${styles.button} ${styles.nextButton} ${isLoading ? styles.loading : ''}`}
         onClick={() => handlePageClick(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
         aria-label="Página siguiente"
       >
-        Siguiente
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <span className={styles.buttonText}>Siguiente</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>

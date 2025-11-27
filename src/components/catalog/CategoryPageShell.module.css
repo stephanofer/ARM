@@ -46,6 +46,7 @@
 @media (max-width: 1024px) {
   .mainContent {
     grid-template-columns: 1fr;
+    margin-top: 0;
   }
 
   .sidebar {
