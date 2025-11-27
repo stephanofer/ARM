@@ -22,6 +22,25 @@ export async function getAllCategories(
   return data || [];
 }
 
+export async function getAllSubcategories(
+  supabase: SupabaseClient
+): Promise<Subcategory[]> {
+  // Ordenar por `display_order` (campo que provee la API/DB) y como respaldo
+  // ordenar por `name` para tener consistencia en empates.
+  const { data, error } = await supabase
+    .from("subcategories")
+    .select("*")
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching subcategories:", error);
+    throw new Error("Failed to fetch subcategories");
+  }
+
+  return data || [];
+}
+
 export async function getCategoryAndSubcategories(
   supabase: SupabaseClient,
   categorySlug: string

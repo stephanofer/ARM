@@ -1,28 +1,15 @@
 ---
-import Close from '@/assets/svg/Close.svg';
-const navLinks = [
-  { name: "Novedades", href: "/novedades" },
-  { name: "Descuentos", href: "/descuentos" },
-  { name: "Camas dobles", href: "/productos/camas-dobles" },
-  { name: "Camas individuales", href: "/productos/camas-individuales" },
-  { name: "Literas", href: "/productos/literas" },
-  { name: "Sofás cama", href: "/productos/sofas-cama" },
-  { name: "Accesorios de cama", href: "/productos/accesorios" },
-  { name: "Muebles de almacenaje", href: "/productos/almacenaje" },
-  { name: "Sillas, bancos y taburetes", href: "/productos/sillas" },
-  { name: "Divanes y sillones", href: "/productos/divanes" },
-  { name: "Mesas", href: "/productos/mesas" },
-  { name: "Muebles para exterior", href: "/productos/exterior" },
-  { name: "Estanterías", href: "/productos/estanterias" },
-  { name: "Decoración", href: "/productos/decoracion" },
-];
+import Close from "@/assets/svg/Close.svg";
+import { navLinks } from "@/const/nav";
+import { getAllSubcategories } from "@/lib/data/categories";
+import { createClient } from "@/lib/supabase";
 
-const bottomLinks = [
-  { name: "Filosofía ARM", href: "/filosofia" },
-  { name: "Montaje", href: "/montaje" },
-  { name: "Magazine", href: "/magazine" },
-  { name: "Contacto", href: "/contacto" },
-];
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+const subcategories = await getAllSubcategories(supabase);
 ---
 
 <div class="mobile-menu-overlay" id="mobileMenuOverlay">
@@ -34,18 +21,17 @@ const bottomLinks = [
         id="closeMenuButton"
         aria-label="Cerrar menú"
       >
-      <Close width={32} height={32}/>
-
+        <Close width={32} height={32} />
       </button>
     </div>
 
     <div class="mobile-menu-content">
-      <nav class="mobile-nav">
+      <nav class="mobile-nav-secondary">
         <ul class="mobile-nav-list">
           {
             navLinks.map((link) => (
               <li class="mobile-nav-item">
-                <a href={link.href} class="mobile-nav-link">
+                <a href={link.href} class="mobile-nav-link secondary">
                   {link.name}
                 </a>
               </li>
@@ -53,16 +39,15 @@ const bottomLinks = [
           }
         </ul>
       </nav>
-
       <div class="mobile-menu-divider"></div>
 
-      <nav class="mobile-nav-secondary">
+      <nav class="mobile-nav">
         <ul class="mobile-nav-list">
           {
-            bottomLinks.map((link) => (
+            subcategories.map((subcategory) => (
               <li class="mobile-nav-item">
-                <a href={link.href} class="mobile-nav-link secondary">
-                  {link.name}
+                <a href={`/categorias/decoracion?subcategoria=${subcategory.slug}`} class="mobile-nav-link">
+                  {subcategory.name}
                 </a>
               </li>
             ))
