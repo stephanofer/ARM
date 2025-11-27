@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { Subcategory, FilterConfig } from '../lib/data';
+import type { Subcategory, FilterConfig } from '../lib/data/types';
 
 /**
  * Store de catálogo - Cachea subcategorías y filter configs por categoría

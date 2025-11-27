@@ -1,42 +1,18 @@
 ---
-import ProductCard from "@/components/ProductCard.astro";
+import { ProductCard } from "@/components/catalog/ProductCard";
 import SectionContainer from "@/components/SectionContainer.astro";
+import type { Product } from "@/lib/data/types";
 
-const products = [
-  {
-    id: 4,
-    brand: "ATTACK SHARK",
-    name: "TECLADO ATTACK SHARK X98 | INALAMBRICO | SW LINEAR BLUEBERRY | RGB | BLANCO - GRIS - GRIS OSCURO",
-    price: 289.0,
-    oldPrice: 329.0,
-    discount: 12,
-    image: "/favicon.svg",
-    reviews: 0,
-    available: true,
-  },
-  {
-    id: 5,
-    brand: "ATTACK SHARK",
-    name: "TECLADO ATTACK SHARK X82 PRO HE | INALAMBRICO | MAGNETICO | RGB | BLANCO - COMIC",
-    price: 339.0,
-    oldPrice: 359.0,
-    discount: 6,
-    image: "/favicon.svg",
-    reviews: 0,
-    available: true,
-  },
-  {
-    id: 6,
-    brand: "ATTACK SHARK",
-    name: "MOUSE ATTACK SHARK G3 PRO | BASE DE CARGA| INALAMBRICO | 25,000 DPI | BLANCO",
-    price: 129.0,
-    oldPrice: 149.0,
-    discount: 13,
-    image: "/favicon.svg",
-    reviews: 0,
-    available: true,
-  },
-];
+import { createClient } from "@/lib/supabase";
+
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
+
+const { data } = await supabase.from("products").select("*").limit(3);
+const products = Array.isArray(data) ? data : [];
+console.log(products);
 ---
 
 <SectionContainer id="featured-products" class="mt-4">
@@ -46,49 +22,7 @@ const products = [
       <p>Los mejores productos seleccionados para ti</p>
     </div>
     <div class="products-grid">
-      {
-        products.map((product) => (
-          // <article class="product-card">
-          //   <div class="product-badge">
-          //     <span class="discount-badge">Ahorrar {product.discount}%</span>
-          //     <img
-          //       src="/favicon.svg"
-          //       alt="Attack Shark Logo"
-          //       class="brand-logo-badge"
-          //     />
-          //   </div>
-
-          //   <div class="product-image">
-          //     <img src={product.image} alt={product.name} />
-          //   </div>
-
-          //   <div class="product-info">
-          //     <p class="product-brand">{product.brand}</p>
-          //     <h3 class="product-title">{product.name}</h3>
-
-          //     {product.available && (
-          //       <div class="product-availability">
-          //         <span class="availability-dot" />
-          //         <span class="availability-text">Disponible</span>
-          //       </div>
-          //     )}
-
-          //     <button class="add-to-cart-btn">Añadir al carrito</button>
-          //   </div>
-          // </article>
-          <ProductCard
-            id={product.id.toString()}
-            name={product.name}
-            description='test'
-            inStock={true}
-            image={product.image}
-            images={Object.values({1: product.image})}
-            brand={product.brand}
-            category="test-category"
-            subcategory="test-subcategory"
-          />
-        ))
-      }
+      {products.map((product) => <ProductCard product={product} client:visible/>)}
     </div>
   </div>
 </SectionContainer>
