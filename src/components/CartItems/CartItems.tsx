@@ -25,16 +25,12 @@ export function CartItems() {
               style={{ animationDelay: `${0.05 + index * 0.05}s` }}
             >
               <div className={styles["cart-item-image"]}>
-                <img src={item.image} alt={item.name} />
+                <img src={item.image_url || ""} alt={item.name} />
               </div>
               <div className={styles["cart-item-details"]}>
                 <h3 className={styles["cart-item-name"]}>{item.name}</h3>
                 <div className={styles["cart-item-meta"]}>
-                  <span className={styles["cart-item-brand"]}>ARM</span>
-                  <span className={styles["meta-separator"]}>•</span>
-                  <span className={styles["cart-item-material"]}>
-                    Maderitaxd
-                  </span>
+                  <span className={styles["cart-item-brand"]}>{item.brand || ""}</span>
                 </div>
                 <div className={styles["cart-item-actions"]}>
                   <div className={styles["quantity-controls"]}>
@@ -43,7 +39,7 @@ export function CartItems() {
                       data-action="decrease"
                       data-item-id={item.id}
                       aria-label="Disminuir cantidad"
-                      onClick={() => decreaseQuantity(item.id)}
+                      onClick={() => decreaseQuantity(String(item.id))}
                     >
                       <svg
                         width="16"

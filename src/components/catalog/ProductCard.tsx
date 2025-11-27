@@ -15,8 +15,8 @@ export function ProductCard({
 }: Props) {
   const productUrl = `/producto/${product.slug}`;
   const inStock = product.stock > 0;
-  const displayBrand = product.brand || product.attributes.brand || 'ARM';
-  
+  const displayBrand = product.brand || product.attributes.brand || "ARM";
+
   return (
     <article className={styles["product-card"]}>
       <a href={productUrl} className={styles["product-link"]}>
@@ -51,7 +51,14 @@ export function ProductCard({
               </>
             ) : (
               <div className={styles["no-image"]}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                   <circle cx="8.5" cy="8.5" r="1.5"></circle>
                   <polyline points="21 15 16 10 5 21"></polyline>
@@ -66,8 +73,8 @@ export function ProductCard({
           <h3 className={styles["product-name"]}>{product.name}</h3>
           {product.description && (
             <p className={styles["product-description"]}>
-              {product.description.length > 80 
-                ? `${product.description.substring(0, 80)}...` 
+              {product.description.length > 80
+                ? `${product.description.substring(0, 80)}...`
                 : product.description}
             </p>
           )}
@@ -79,6 +86,7 @@ export function ProductCard({
           product={{
             ...product,
             quantity: 1,
+            image_url: primaryImageUrl || secondaryImageUrl || null,
           }}
         />
       </div>

@@ -100,6 +100,7 @@ export interface ProductWithImages extends Product {
 
 export interface CartItem extends Product {
   quantity: number;
+  image_url: string | null;
 }
 
 // ============================

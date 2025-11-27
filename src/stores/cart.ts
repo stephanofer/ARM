@@ -1,6 +1,6 @@
 import { persistentMap } from "@nanostores/persistent";
 import { computed } from "nanostores";
-import type { CartItem, Product } from "../lib/data";
+import type { CartItem, Product } from "../lib/data/types";
 
 export const $cart = persistentMap<Record<string, CartItem>>(
   "cart:",

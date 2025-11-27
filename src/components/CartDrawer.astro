@@ -3,27 +3,6 @@ import { CartItems } from "@/components/CartItems/CartItems";
 import { PlaceOrderButton } from "./PlaceOrderButton/PlaceOrderButton";
 import Close from "@/assets/svg/Close.svg";
 import Cart from "@/assets/svg/Cart.svg";
-
-const cartItems = [
-  {
-    id: "p01",
-    name: "Cama Montessori Básica",
-    brand: "ARM Kids",
-    material: "Pino",
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&q=80",
-  },
-  {
-    id: "p06",
-    name: "Cama Serie 80",
-    brand: "ARM Classic",
-    material: "Roble",
-    quantity: 2,
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80",
-  },
-];
 ---
 
 <div class="cart-drawer-overlay" id="cartDrawerOverlay">
@@ -45,29 +24,25 @@ const cartItems = [
       <CartItems client:only="preact" />
     </div>
 
-    {
-      cartItems.length > 0 && (
-        <div class="cart-drawer-footer">
-          <div class="cart-summary">
-            <div class="summary-row">
-              <span class="summary-label">Total de artículos</span>
-              <span class="summary-value" />
-            </div>
-            <div class="summary-divider" />
-            <p class="summary-note">
-              Los detalles del pedido se confirmarán en el siguiente paso
-            </p>
-          </div>
-          <div class="cart-actions">
-            <a href="/carrito" class="cart-action-btn secondary">
-            <Cart/>
-              Ver carrito completo
-            </a>
-            <PlaceOrderButton client:only="preact" />
-          </div>
+    <div class="cart-drawer-footer">
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span class="summary-label">Total de artículos</span>
+          <span class="summary-value"></span>
         </div>
-      )
-    }
+        <div class="summary-divider"></div>
+        <p class="summary-note">
+          Los detalles del pedido se confirmarán en el siguiente paso
+        </p>
+      </div>
+      <div class="cart-actions">
+        <a href="/carrito" class="cart-action-btn secondary">
+          <Cart />
+          Ver carrito completo
+        </a>
+        <PlaceOrderButton client:only="preact" />
+      </div>
+    </div>
   </aside>
 </div>
 

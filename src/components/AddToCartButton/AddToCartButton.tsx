@@ -17,7 +17,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     
     addToCart({
       ...product,
-      quantity: validQuantity
+      quantity: validQuantity,
     });
   };
 
