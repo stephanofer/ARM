@@ -20,54 +20,96 @@ function isActive(href: string): boolean {
     <!-- Logo / Brand -->
     <a href="/admin" class="navbar-brand">
       <div class="brand-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <rect x="3" y="3" width="7" height="7"></rect>
           <rect x="14" y="3" width="7" height="7"></rect>
           <rect x="14" y="14" width="7" height="7"></rect>
           <rect x="3" y="14" width="7" height="7"></rect>
         </svg>
       </div>
-      <span class="brand-text">ARM <span class="brand-suffix">Admin</span></span>
+      <span class="brand-text">ARM <span class="brand-suffix">Admin</span></span
+      >
     </a>
 
     <!-- Navigation Links -->
     <div class="navbar-nav">
-      {navItems.map((item) => (
-        <a 
-          href={item.href} 
-          class={`nav-link ${isActive(item.href) ? 'active' : ''}`}
-        >
-          {item.icon === "dashboard" && (
-            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="9"></rect>
-              <rect x="14" y="3" width="7" height="5"></rect>
-              <rect x="14" y="12" width="7" height="9"></rect>
-              <rect x="3" y="16" width="7" height="5"></rect>
-            </svg>
-          )}
-          {item.icon === "products" && (
-            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-          )}
-          {item.icon === "categories" && (
-            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-          )}
-          <span>{item.label}</span>
-        </a>
-      ))}
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class={`nav-link ${isActive(item.href) ? "active" : ""}`}
+          >
+            {item.icon === "dashboard" && (
+              <svg
+                class="nav-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="7" height="9" />
+                <rect x="14" y="3" width="7" height="5" />
+                <rect x="14" y="12" width="7" height="9" />
+                <rect x="3" y="16" width="7" height="5" />
+              </svg>
+            )}
+            {item.icon === "products" && (
+              <svg
+                class="nav-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            )}
+            {item.icon === "categories" && (
+              <svg
+                class="nav-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            )}
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
     </div>
 
     <!-- Right Section -->
     <div class="navbar-right">
       <!-- View Site Link -->
       <a href="/" class="view-site-btn" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          ></path>
           <polyline points="15 3 21 3 21 9"></polyline>
           <line x1="10" y1="14" x2="21" y2="3"></line>
         </svg>
@@ -78,19 +120,41 @@ function isActive(href: string): boolean {
       <div class="user-menu">
         <button class="user-btn" id="user-menu-btn">
           <div class="user-avatar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </div>
-          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            class="chevron"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
-        
+
         <div class="user-dropdown" id="user-dropdown">
           <button class="dropdown-item logout" id="logout-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -103,7 +167,14 @@ function isActive(href: string): boolean {
 
     <!-- Mobile Menu Button -->
     <button class="mobile-menu-btn" id="mobile-menu-btn">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -113,17 +184,21 @@ function isActive(href: string): boolean {
 
   <!-- Mobile Navigation -->
   <div class="mobile-nav" id="mobile-nav">
-    {navItems.map((item) => (
-      <a 
-        href={item.href} 
-        class={`mobile-nav-link ${isActive(item.href) ? 'active' : ''}`}
-      >
-        {item.label}
-      </a>
-    ))}
+    {
+      navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`mobile-nav-link ${isActive(item.href) ? "active" : ""}`}
+        >
+          {item.label}
+        </a>
+      ))
+    }
     <hr class="mobile-divider" />
     <a href="/" class="mobile-nav-link" target="_blank">Ver sitio</a>
-    <button class="mobile-nav-link logout" id="mobile-logout-btn">Cerrar sesión</button>
+    <button class="mobile-nav-link logout" id="mobile-logout-btn"
+      >Cerrar sesión</button
+    >
   </div>
 </nav>
 
@@ -403,66 +478,70 @@ function isActive(href: string): boolean {
 </style>
 
 <script>
-  // User dropdown toggle
-  const userBtn = document.getElementById("user-menu-btn");
-  const userDropdown = document.getElementById("user-dropdown");
+  function initNavbar() {
+    const userBtn = document.getElementById("user-menu-btn");
+    const userDropdown = document.getElementById("user-dropdown");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const mobileNav = document.getElementById("mobile-nav");
+    const mobileLogoutBtn = document.getElementById(
+      "mobile-logout-btn"
+    ) as HTMLButtonElement;
+    const logoutBtn = document.getElementById(
+      "logout-btn"
+    ) as HTMLButtonElement;
 
-  userBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    userBtn.classList.toggle("open");
-    userDropdown?.classList.toggle("open");
-  });
+    console.log(mobileLogoutBtn);
+    console.log(logoutBtn);
 
-  document.addEventListener("click", () => {
-    userBtn?.classList.remove("open");
-    userDropdown?.classList.remove("open");
-  });
-
-  // Mobile menu toggle
-  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-  const mobileNav = document.getElementById("mobile-nav");
-
-  mobileMenuBtn?.addEventListener("click", () => {
-    mobileNav?.classList.toggle("open");
-  });
-
-  // Logout functionality
-  async function handleLogout(btn: HTMLButtonElement) {
-    btn.disabled = true;
-    const originalText = btn.querySelector("span")?.textContent || btn.textContent;
-    if (btn.querySelector("span")) {
-      btn.querySelector("span")!.textContent = "Cerrando...";
-    } else {
-      btn.textContent = "Cerrando...";
+    if (userBtn && userDropdown) {
+      userBtn.addEventListener("click", () => {
+        userBtn.classList.toggle("open");
+        userDropdown.classList.toggle("open");
+      });
     }
 
-    try {
-      const response = await fetch("/api/auth/signout", { method: "POST" });
-      const result = await response.json();
+    if (mobileMenuBtn && mobileNav) {
+      mobileMenuBtn.addEventListener("click", () => {
+        mobileNav.classList.toggle("open");
+      });
+    }
 
-      if (result.success) {
-        window.location.href = "/ingresar";
-      } else {
-        alert(result.message || "Error al cerrar sesión");
-        btn.disabled = false;
-        if (btn.querySelector("span")) {
-          btn.querySelector("span")!.textContent = originalText || "";
-        } else {
-          btn.textContent = originalText;
+    async function handleLogout(button: HTMLButtonElement) {
+      button.disabled = true;
+      button.textContent = "Cerrando sesión...";
+
+      try {
+        const response = await fetch("/api/auth/signout", {
+          method: "POST",
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          alert(result.message || "Error al cerrar sesión");
+          logoutBtn.disabled = false;
+          logoutBtn.textContent = "Cerrar Sesión";
+          return;
         }
+
+        window.location.href = "/ingresar";
+      } catch (error) {
+        console.error(error);
+        alert("Error inesperado al cerrar sesión");
+        logoutBtn.disabled = false;
+        logoutBtn.textContent = "Cerrar Sesión";
       }
-    } catch (error) {
-      console.error(error);
-      alert("Error inesperado");
-      btn.disabled = false;
     }
+
+    if (logoutBtn)
+      logoutBtn.addEventListener("click", () => handleLogout(logoutBtn));
+    if (mobileLogoutBtn)
+      mobileLogoutBtn.addEventListener("click", () =>
+        handleLogout(mobileLogoutBtn)
+      );
   }
 
-  document.getElementById("logout-btn")?.addEventListener("click", (e) => {
-    handleLogout(e.currentTarget as HTMLButtonElement);
-  });
-
-  document.getElementById("mobile-logout-btn")?.addEventListener("click", (e) => {
-    handleLogout(e.currentTarget as HTMLButtonElement);
+  document.addEventListener("astro:page-load", () => {
+    initNavbar();
   });
 </script>
