@@ -10,9 +10,6 @@ export interface ProductsGridProps {
   isLoading: boolean;
 }
 
-/**
- * Skeleton de producto para estado de carga
- */
 function ProductSkeleton() {
   return (
     <div className={styles.skeletonCard}>

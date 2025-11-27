@@ -2162,152 +2162,148 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
 </style>
 
 <script>
-  // Gallery functionality
-  const thumbnails = document.querySelectorAll<HTMLButtonElement>(".thumbnail");
-  const mediaItems = document.querySelectorAll<HTMLDivElement>(".media-item");
+  // 1. Envolvemos la lógica en una función para poder reutilizarla
+  const initProductPage = () => {
+    
+    // --- TU CÓDIGO ORIGINAL EMPIEZA AQUÍ ---
 
-  // Solo agregar listeners si hay múltiples thumbnails
-  if (thumbnails.length > 0 && mediaItems.length > 0) {
-    thumbnails.forEach((thumb, index) => {
-      thumb.addEventListener("click", () => {
-        // Remove active class from all
-        thumbnails.forEach((t) => t.classList.remove("active"));
-        mediaItems.forEach((m) => m.classList.remove("active"));
+    // Gallery functionality
+    const thumbnails = document.querySelectorAll<HTMLButtonElement>(".thumbnail");
+    const mediaItems = document.querySelectorAll<HTMLDivElement>(".media-item");
 
-        // Add active class to clicked
-        thumb.classList.add("active");
-        if (mediaItems[index]) {
-          mediaItems[index].classList.add("active");
-        }
-      });
-    });
-  }
-
-  // Quantity selector
-  const decreaseBtn = document.getElementById("decreaseQty") as HTMLButtonElement;
-  const increaseBtn = document.getElementById("increaseQty") as HTMLButtonElement;
-  const quantityInput = document.getElementById("quantity") as HTMLInputElement;
-
-  if (decreaseBtn && quantityInput) {
-    decreaseBtn.addEventListener("click", () => {
-      const currentValue = parseInt(quantityInput.value);
-      if (currentValue > 1) {
-        quantityInput.value = (currentValue - 1).toString();
-      }
-    });
-  }
-
-  if (increaseBtn && quantityInput) {
-    increaseBtn.addEventListener("click", () => {
-      const currentValue = parseInt(quantityInput.value);
-      const maxValue = parseInt(quantityInput.max);
-      if (currentValue < maxValue) {
-        quantityInput.value = (currentValue + 1).toString();
-      }
-    });
-  }
-
-  // Validación para input manual
-  if (quantityInput) {
-    quantityInput.addEventListener("input", () => {
-      let value = parseInt(quantityInput.value);
-      const min = parseInt(quantityInput.min);
-      const max = parseInt(quantityInput.max);
-
-      // Si el valor está vacío o no es un número, no hacer nada aún
-      if (isNaN(value)) {
-        return;
-      }
-
-      // Limitar entre min y max
-      if (value < min) {
-        quantityInput.value = min.toString();
-      } else if (value > max) {
-        quantityInput.value = max.toString();
-      }
-    });
-
-    quantityInput.addEventListener("blur", () => {
-      // Al perder foco, asegurar que hay un valor válido
-      let value = parseInt(quantityInput.value);
-      const min = parseInt(quantityInput.min);
-
-      if (isNaN(value) || value < min) {
-        quantityInput.value = min.toString();
-      }
-    });
-  }
-
-  // Smooth scroll for quick links
-  document.querySelectorAll<HTMLAnchorElement>(".quick-link").forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const href = link.getAttribute("href");
-      if (!href) return;
-      
-      const targetId = href.substring(1);
-      const targetElement = document.getElementById(targetId);
-
-      if (targetElement) {
-        const offset = 80; // Offset para navbar fijo si existe
-        const elementPosition = targetElement.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth"
-        });
-      }
-    });
-  });
-
-  // Lazy load videos on scroll (performance)
-  if ('IntersectionObserver' in window) {
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const video = entry.target as HTMLVideoElement;
-          if (video.dataset.src) {
-            video.src = video.dataset.src;
-            video.load();
-            videoObserver.unobserve(video);
+    if (thumbnails.length > 0 && mediaItems.length > 0) {
+      thumbnails.forEach((thumb, index) => {
+        thumb.addEventListener("click", () => {
+          thumbnails.forEach((t) => t.classList.remove("active"));
+          mediaItems.forEach((m) => m.classList.remove("active"));
+          thumb.classList.add("active");
+          if (mediaItems[index]) {
+            mediaItems[index].classList.add("active");
           }
+        });
+      });
+    }
+
+    // Quantity selector
+    const decreaseBtn = document.getElementById("decreaseQty") as HTMLButtonElement;
+    const increaseBtn = document.getElementById("increaseQty") as HTMLButtonElement;
+    const quantityInput = document.getElementById("quantity") as HTMLInputElement;
+
+    if (decreaseBtn && quantityInput) {
+      // Nota: Es buena práctica clonar y reemplazar o remover listeners previos si usas SPA,
+      // pero con astro:page-load el DOM se refresca, así que esto suele ser seguro.
+      decreaseBtn.addEventListener("click", () => {
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+          quantityInput.value = (currentValue - 1).toString();
         }
       });
-    }, {
-      rootMargin: '50px'
-    });
+    }
 
-    document.querySelectorAll<HTMLVideoElement>('video[data-src]').forEach(video => {
-      videoObserver.observe(video);
-    });
-  }
-
-  // Animaciones al scroll con IntersectionObserver
-  const animateSections = document.querySelectorAll<HTMLElement>(
-    '.details-section, .examples-section, .downloads-section, .trust-section'
-  );
-
-  if ('IntersectionObserver' in window) {
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in');
-          sectionObserver.unobserve(entry.target);
+    if (increaseBtn && quantityInput) {
+      increaseBtn.addEventListener("click", () => {
+        const currentValue = parseInt(quantityInput.value);
+        const maxValue = parseInt(quantityInput.max);
+        if (currentValue < maxValue) {
+          quantityInput.value = (currentValue + 1).toString();
         }
       });
-    }, {
-      threshold: 0.15,
-      rootMargin: '0px 0px -50px 0px'
+    }
+
+    // Validación para input manual
+    if (quantityInput) {
+      quantityInput.addEventListener("input", () => {
+        let value = parseInt(quantityInput.value);
+        const min = parseInt(quantityInput.min);
+        const max = parseInt(quantityInput.max);
+
+        if (isNaN(value)) return;
+
+        if (value < min) {
+          quantityInput.value = min.toString();
+        } else if (value > max) {
+          quantityInput.value = max.toString();
+        }
+      });
+
+      quantityInput.addEventListener("blur", () => {
+        let value = parseInt(quantityInput.value);
+        const min = parseInt(quantityInput.min);
+        if (isNaN(value) || value < min) {
+          quantityInput.value = min.toString();
+        }
+      });
+    }
+
+    // Smooth scroll
+    document.querySelectorAll<HTMLAnchorElement>(".quick-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const href = link.getAttribute("href");
+        if (!href) return;
+        
+        const targetId = href.substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          const offset = 80;
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }
+      });
     });
 
-    animateSections.forEach(section => {
-      sectionObserver.observe(section);
-    });
-  } else {
-    // Fallback para navegadores sin IntersectionObserver
-    animateSections.forEach(section => {
-      section.classList.add('animate-in');
-    });
-  }
+    // Lazy load videos
+    if ('IntersectionObserver' in window) {
+      const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const video = entry.target as HTMLVideoElement;
+            if (video.dataset.src) {
+              video.src = video.dataset.src;
+              video.load();
+              videoObserver.unobserve(video);
+            }
+          }
+        });
+      }, { rootMargin: '50px' });
+
+      document.querySelectorAll<HTMLVideoElement>('video[data-src]').forEach(video => {
+        videoObserver.observe(video);
+      });
+    }
+
+    // Animaciones al scroll
+    const animateSections = document.querySelectorAll<HTMLElement>(
+      '.details-section, .examples-section, .downloads-section, .trust-section'
+    );
+
+    if ('IntersectionObserver' in window) {
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            sectionObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+      animateSections.forEach(section => {
+        sectionObserver.observe(section);
+      });
+    } else {
+      animateSections.forEach(section => {
+        section.classList.add('animate-in');
+      });
+    }
+    // --- FIN DE TU CÓDIGO ORIGINAL ---
+  };
+
+  // 2. Ejecutar en cada navegación (carga inicial + transiciones)
+  document.addEventListener('astro:page-load', initProductPage);
 </script>
