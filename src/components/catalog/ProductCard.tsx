@@ -71,11 +71,6 @@ export function ProductCard({
                 : product.description}
             </p>
           )}
-          {product.price && (
-            <div className={styles["product-price"]}>
-              <span className={styles["price-amount"]}>{product.price.toFixed(2)}€</span>
-            </div>
-          )}
         </div>
       </a>
 

@@ -46,7 +46,6 @@ export function SortBar({ currentSort, totalResults, isLoading }: SortBarProps) 
           <option value="price_desc">Precio: Mayor a Menor</option>
           <option value="name_asc">Nombre: A-Z</option>
           <option value="name_desc">Nombre: Z-A</option>
-          <option value="newest">Más nuevos</option>
         </select>
       </div>
     </div>

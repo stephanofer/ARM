@@ -81,10 +81,6 @@ function applyFilters(
       query = query.order('price', { ascending: false, nullsFirst: false });
       query = query.order('id', { ascending: true }); // Desempate por id
       break;
-    case 'newest':
-      query = query.order('created_at', { ascending: false });
-      query = query.order('id', { ascending: false }); // Desempate por id
-      break;
     case 'name_asc':
       query = query.order('name', { ascending: true });
       query = query.order('id', { ascending: true }); // Desempate por id

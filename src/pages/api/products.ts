@@ -30,7 +30,6 @@ const VALID_SORT_OPTIONS = [
   "price_desc",
   "name_asc",
   "name_desc",
-  "newest",
   "oldest",
 ];
 

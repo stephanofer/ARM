@@ -54,7 +54,7 @@ export interface CategoryPageShellProps {
  * Maneja sincronización URL ↔ Store ↔ API ↔ UI
  */
 // Valores permitidos para sort
-const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest', 'oldest'] as const;
+const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'oldest'] as const;
 
 /**
  * Sanitiza y valida parámetros de URL para evitar valores inválidos

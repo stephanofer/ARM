@@ -118,7 +118,6 @@ export interface FilterConfig {
 export type SortOption =
   | "price_asc"
   | "price_desc"
-  | "newest"
   | "name_asc"
   | "name_desc";
 
