@@ -1,18 +1,21 @@
 ---
 import { ProductCard } from "@/components/catalog/ProductCard";
 import SectionContainer from "@/components/SectionContainer.astro";
+import { enrichProductsWithImages } from "@/lib/data/products";
 import type { Product } from "@/lib/data/types";
 
 import { createClient } from "@/lib/supabase";
+import type { ParseContext } from "astro:schema";
 
 const supabase = createClient({
   request: Astro.request,
   cookies: Astro.cookies,
 });
 
-const { data } = await supabase.from("products").select("*").limit(3);
-const products = Array.isArray(data) ? data : [];
-console.log(products);
+const dataResponse = await supabase.from("products").select("*").limit(3);
+const products: Product[] = dataResponse.data || [];
+
+const enrichedProducts = await enrichProductsWithImages(supabase, products);
 ---
 
 <SectionContainer id="featured-products" class="mt-4">
@@ -22,7 +25,16 @@ console.log(products);
       <p>Los mejores productos seleccionados para ti</p>
     </div>
     <div class="products-grid">
-      {products.map((product) => <ProductCard product={product} client:visible/>)}
+      {
+        enrichedProducts.map((product) => (
+          <ProductCard
+            product={product}
+            primaryImageUrl={product.primaryImageUrl ?? undefined}
+            secondaryImageUrl={product.secondaryImageUrl ?? undefined}
+            client:visible
+          />
+        ))
+      }
     </div>
   </div>
 </SectionContainer>
