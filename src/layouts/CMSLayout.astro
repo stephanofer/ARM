@@ -1,0 +1,112 @@
+---
+import MainHead from "@/components/MainHead.astro";
+import NavbarCMS from "@/components/NavbarCMS.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Admin - ARM",
+  description = "Panel de administración ARM",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <MainHead title={title} description={description} />
+  </head>
+  <body class="cms-body">
+    <NavbarCMS />
+    <main class="cms-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* Admin Theme Variables */
+    --admin-bg: #f9fafb;
+    --admin-card-bg: #ffffff;
+    --admin-text: #111827;
+    --admin-text-secondary: #374151;
+    --admin-text-muted: #6b7280;
+    --admin-border: #e5e7eb;
+    --admin-border-light: #f3f4f6;
+    --admin-hover: #f3f4f6;
+    --admin-accent: #3b82f6;
+    --admin-accent-hover: #2563eb;
+    --admin-success: #059669;
+    --admin-success-bg: #d1fae5;
+    --admin-warning: #d97706;
+    --admin-warning-bg: #fef3c7;
+    --admin-danger: #dc2626;
+    --admin-danger-bg: #fee2e2;
+  }
+
+  .cms-body {
+    background-color: var(--admin-bg);
+    min-height: 100vh;
+    color: var(--admin-text);
+  }
+  
+  .cms-main {
+    margin: 0;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    padding: 2rem 1.5rem;
+  }
+
+  /* Form base styles for CMS */
+  .cms-body input[type="text"],
+  .cms-body input[type="number"],
+  .cms-body input[type="email"],
+  .cms-body input[type="password"],
+  .cms-body input[type="search"],
+  .cms-body textarea,
+  .cms-body select {
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .cms-body input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--admin-accent);
+  }
+
+  /* Remove number input spinners */
+  .cms-body input[type="number"]::-webkit-outer-spin-button,
+  .cms-body input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .cms-body input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Scrollbar styling for CMS */
+  .cms-body ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .cms-body ::-webkit-scrollbar-track {
+    background: var(--admin-border-light);
+    border-radius: 4px;
+  }
+
+  .cms-body ::-webkit-scrollbar-thumb {
+    background: var(--admin-border);
+    border-radius: 4px;
+  }
+
+  .cms-body ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+</style>

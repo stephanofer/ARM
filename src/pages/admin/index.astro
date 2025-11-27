@@ -1,587 +1,643 @@
 ---
-import Layout from "@/layouts/BaseLayout.astro";
+import CMSLayout from "@/layouts/CMSLayout.astro";
+import { getDashboardStats } from "@/lib/data/admin";
 import { createClient } from "@/lib/supabase";
 
-const supabase = createClient({
-  request: Astro.request,
-  cookies: Astro.cookies,
-});
-
-// Obtener datos del usuario autenticado
-const { data: userData } = await supabase.auth.getUser();
-const user = userData.user;
-
-// Obtener sesión actual
-const { data: sessionData } = await supabase.auth.getSession();
-const session = sessionData.session;
-
-// Calcular tiempo de sesión
-const sessionCreatedAt = session?.created_at 
-  ? new Date(session.created_at * 1000) 
-  : null;
-const sessionExpiresAt = session?.expires_at 
-  ? new Date(session.expires_at * 1000) 
-  : null;
-
-// Formatear fechas
-const formatDate = (date: Date | null) => {
-  if (!date) return "N/A";
-  return date.toLocaleString("es-ES", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatRelativeTime = (date: Date | null) => {
-  if (!date) return "N/A";
-  const now = new Date();
-  const diff = date.getTime() - now.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  
-  if (days > 0) return `${days} día${days > 1 ? 's' : ''}`;
-  if (hours > 0) return `${hours} hora${hours > 1 ? 's' : ''}`;
-  if (minutes > 0) return `${minutes} minuto${minutes > 1 ? 's' : ''}`;
-  return "Menos de 1 minuto";
-};
+const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+const stats = await getDashboardStats(supabase);
 ---
 
-<Layout title="Dashboard">
-  <div class="dashboard-container">
-    <div class="dashboard-content">
-      
-      <!-- Header -->
-      <div class="card header-card">
-        <div class="header-content">
-          <div class="header-text">
-            <h1 class="title">¡Bienvenido de vuelta! 👋</h1>
-            <p class="subtitle">
-              Nos alegra verte por aquí, <span class="highlight">{user?.email}</span>
-            </p>
-          </div>
-          <button id="logout-btn" class="btn btn-logout">
-            Cerrar Sesión
-          </button>
+<CMSLayout title="Dashboard - ARM Admin" description="Panel de administración ARM">
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Bienvenido al panel de administración de ARM</p>
+      </div>
+      <a href="/admin/productos/nuevo" class="primary-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Nuevo Producto
+      </a>
+    </header>
+
+    <!-- Stats Grid -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon products">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{stats.totalProducts}</span>
+          <span class="stat-label">Productos</span>
+        </div>
+        <a href="/admin/productos" class="stat-link">Ver todos →</a>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon categories">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{stats.totalCategories}</span>
+          <span class="stat-label">Categorías</span>
+        </div>
+        <a href="/admin/categorias" class="stat-link">Ver todas →</a>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon subcategories">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3h7v7H3z"></path>
+            <path d="M14 3h7v7h-7z"></path>
+            <path d="M14 14h7v7h-7z"></path>
+            <path d="M3 14h7v7H3z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{stats.totalSubcategories}</span>
+          <span class="stat-label">Subcategorías</span>
         </div>
       </div>
 
-      <!-- Grid de Estadísticas -->
-      <div class="stats-grid">
-        
-        <!-- User ID -->
-        <div class="card stat-card">
-          <div class="stat-content">
-            <div class="stat-text">
-              <p class="stat-label">ID de Usuario</p>
-              <p class="stat-value" title={user?.id}>
-                {user?.id?.substring(0, 8)}...
-              </p>
-            </div>
-            <div class="stat-icon icon-blue">
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon assets">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
         </div>
-
-        <!-- Email Verificado -->
-        <div class="card stat-card">
-          <div class="stat-content">
-            <div class="stat-text">
-              <p class="stat-label">Email Verificado</p>
-              <p class="stat-value">
-                {user?.email_confirmed_at ? (
-                  <span class="verified">✓ Verificado</span>
-                ) : (
-                  <span class="pending">⚠ Pendiente</span>
-                )}
-              </p>
-            </div>
-            <div class={`stat-icon ${user?.email_confirmed_at ? 'icon-green' : 'icon-yellow'}`}>
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Proveedor de Auth -->
-        <div class="card stat-card">
-          <div class="stat-content">
-            <div class="stat-text">
-              <p class="stat-label">Método de Acceso</p>
-              <p class="stat-value capitalize">
-                {user?.app_metadata?.provider || "Email"}
-              </p>
-            </div>
-            <div class="stat-icon icon-purple">
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rol del Usuario -->
-        <div class="card stat-card">
-          <div class="stat-content">
-            <div class="stat-text">
-              <p class="stat-label">Rol</p>
-              <p class="stat-value capitalize">
-                {user?.role || "authenticated"}
-              </p>
-            </div>
-            <div class="stat-icon icon-indigo">
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-          </div>
+        <div class="stat-content">
+          <span class="stat-value">{stats.totalAssets}</span>
+          <span class="stat-label">Imágenes</span>
         </div>
       </div>
+    </section>
 
-      <!-- Grid de Información Detallada -->
-      <div class="info-grid">
-        
-        <!-- Información del Usuario -->
-        <div class="card info-card">
-          <h2 class="info-title">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Información Personal
-          </h2>
-          <div class="info-list">
-            <div class="info-item">
-              <p class="info-label">Correo Electrónico</p>
-              <p class="info-value">{user?.email}</p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Teléfono</p>
-              <p class="info-value">{user?.phone || "No proporcionado"}</p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Cuenta Creada</p>
-              <p class="info-value">
-                {formatDate(user?.created_at ? new Date(user.created_at) : null)}
-              </p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Última Actualización</p>
-              <p class="info-value">
-                {formatDate(user?.updated_at ? new Date(user.updated_at) : null)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Información de la Sesión -->
-        <div class="card info-card">
-          <h2 class="info-title">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Información de Sesión
-          </h2>
-          <div class="info-list">
-            <div class="info-item">
-              <p class="info-label">Estado de Sesión</p>
-              <p class="info-value">
-                <span class="session-active">
-                  <span class="pulse-dot"></span>
-                  Activa
-                </span>
-              </p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Sesión Iniciada</p>
-              <p class="info-value">{formatDate(sessionCreatedAt)}</p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Expira En</p>
-              <p class="info-value">{formatRelativeTime(sessionExpiresAt)}</p>
-            </div>
-            <div class="info-item">
-              <p class="info-label">Tipo de Token</p>
-              <p class="info-value capitalize">{session?.token_type || "Bearer"}</p>
-            </div>
-          </div>
-        </div>
+    <!-- Recent Products -->
+    <section class="recent-section">
+      <div class="section-header">
+        <h2 class="section-title">Productos Recientes</h2>
+        <a href="/admin/productos" class="section-link">Ver todos</a>
       </div>
 
-      <!-- Metadata Adicional -->
-      {user?.user_metadata && Object.keys(user.user_metadata).length > 0 && (
-        <div class="card metadata-card">
-          <h2 class="info-title">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+      {stats.recentProducts.length > 0 ? (
+        <div class="products-table-wrapper">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Subcategoría</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.recentProducts.map((product) => (
+                <tr>
+                  <td>
+                    <div class="product-cell">
+                      <div class="product-thumb">
+                        {product.thumbnail_url ? (
+                          <img src={product.thumbnail_url} alt={product.name} />
+                        ) : (
+                          <div class="no-image">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                              <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <span class="product-name">{product.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="category-badge">{product.category_name}</span>
+                  </td>
+                  <td>
+                    <span class="subcategory-text">{product.subcategory_name || "—"}</span>
+                  </td>
+                  <td>
+                    <span class="date-text">
+                      {new Date(product.created_at).toLocaleDateString("es-AR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                      })}
+                    </span>
+                  </td>
+                  <td>
+                    <a href={`/admin/productos/${product.slug}`} class="edit-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                      Editar
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
             </svg>
-            Metadata del Usuario
-          </h2>
-          <div class="metadata-content">
-            <pre class="metadata-json">{JSON.stringify(user.user_metadata, null, 2)}</pre>
           </div>
+          <h3>No hay productos</h3>
+          <p>Comienza agregando tu primer producto al catálogo</p>
+          <a href="/admin/productos/nuevo" class="primary-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Crear Producto
+          </a>
         </div>
       )}
+    </section>
 
-      <!-- App Metadata -->
-      {user?.app_metadata && Object.keys(user.app_metadata).length > 0 && (
-        <div class="card metadata-card">
-          <h2 class="info-title">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+      <h2 class="section-title">Acciones Rápidas</h2>
+      <div class="actions-grid">
+        <a href="/admin/productos/nuevo" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Metadata de Aplicación
-          </h2>
-          <div class="metadata-content">
-            <pre class="metadata-json">{JSON.stringify(user.app_metadata, null, 2)}</pre>
           </div>
-        </div>
-      )}
-    </div>
+          <span class="action-label">Nuevo Producto</span>
+        </a>
+        <a href="/admin/productos" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <span class="action-label">Buscar Productos</span>
+        </a>
+        <a href="/admin/categorias" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <span class="action-label">Gestionar Categorías</span>
+        </a>
+        <a href="/" target="_blank" class="action-card">
+          <div class="action-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </div>
+          <span class="action-label">Ver Sitio Web</span>
+        </a>
+      </div>
+    </section>
   </div>
-</Layout>
+</CMSLayout>
 
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  .dashboard-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 2rem 1rem;
-  }
-
-  .dashboard-content {
-    max-width: 1200px;
+  .dashboard {
+    max-width: 1400px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    padding: 2rem 1.5rem 4rem;
   }
 
-  .card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Header Card */
-  .header-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-
-  .header-content {
+  /* Header */
+  .dashboard-header {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.25rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .primary-btn {
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .header-text {
-    flex: 1;
-    min-width: 250px;
-  }
-
-  .title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-  }
-
-  .highlight {
-    font-weight: 600;
-    text-decoration: underline;
-  }
-
-  /* Button */
-  .btn {
-    padding: 0.75rem 1.5rem;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: #111827;
+    color: white;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
   }
 
-  .btn-logout {
-    background: #ef4444;
-    color: white;
-  }
-
-  .btn-logout:hover {
-    background: #dc2626;
-    transform: scale(1.05);
-  }
-
-  .btn-logout:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
+  .primary-btn:hover {
+    background: #1f2937;
+    transform: translateY(-1px);
   }
 
   /* Stats Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
   }
 
   .stat-card {
     background: white;
-  }
-
-  .stat-content {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
   }
 
-  .stat-text {
-    flex: 1;
-  }
-
-  .stat-label {
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-value {
-    color: #1f2937;
-    font-size: 1.25rem;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .stat-card:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
   .stat-icon {
-    padding: 0.75rem;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .icon-blue {
+  .stat-icon.products {
     background: #dbeafe;
     color: #2563eb;
   }
 
-  .icon-green {
-    background: #dcfce7;
-    color: #16a34a;
-  }
-
-  .icon-yellow {
+  .stat-icon.categories {
     background: #fef3c7;
-    color: #ca8a04;
+    color: #d97706;
   }
 
-  .icon-purple {
-    background: #f3e8ff;
-    color: #9333ea;
+  .stat-icon.subcategories {
+    background: #d1fae5;
+    color: #059669;
   }
 
-  .icon-indigo {
-    background: #e0e7ff;
-    color: #4f46e5;
+  .stat-icon.assets {
+    background: #ede9fe;
+    color: #7c3aed;
   }
 
-  .verified {
-    color: #16a34a;
-  }
-
-  .pending {
-    color: #ca8a04;
-  }
-
-  .capitalize {
-    text-transform: capitalize;
-  }
-
-  /* Info Grid */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .info-card {
-    background: white;
-  }
-
-  .info-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .info-title svg {
-    color: #667eea;
-  }
-
-  .info-list {
+  .stat-content {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.125rem;
   }
 
-  .info-item {
-    padding-bottom: 1rem;
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .stat-link {
+    font-size: 0.8125rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: auto;
+  }
+
+  .stat-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Recent Section */
+  .recent-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+  }
+
+  .section-link {
+    font-size: 0.875rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .section-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Products Table */
+  .products-table-wrapper {
+    overflow-x: auto;
+    margin: 0 -1.5rem;
+    padding: 0 1.5rem;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .products-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid #e5e7eb;
   }
 
-  .info-item:last-child {
+  .products-table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+
+  .products-table tr:last-child td {
     border-bottom: none;
-    padding-bottom: 0;
   }
 
-  .info-label {
-    color: #6b7280;
-    font-size: 0.875rem;
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .product-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-thumb .no-image {
+    width: 100%;
+    height: 100%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+  }
+
+  .product-name {
+    font-size: 0.9375rem;
     font-weight: 500;
-    margin-bottom: 0.25rem;
+    color: #111827;
   }
 
-  .info-value {
-    color: #1f2937;
-    font-weight: 600;
+  .category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    background: #f3f4f6;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    color: #374151;
   }
 
-  .session-active {
+  .subcategory-text,
+  .date-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .edit-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.15s ease;
   }
 
-  .pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: #16a34a;
+  .edit-btn:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: #f3f4f6;
     border-radius: 50%;
-    animation: pulse 2s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    color: #9ca3af;
   }
 
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
+  .empty-state h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem;
   }
 
-  /* Metadata Cards */
-  .metadata-card {
+  .empty-state p {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    margin: 0 0 1.5rem;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    margin-bottom: 2rem;
+  }
+
+  .quick-actions .section-title {
+    margin-bottom: 1rem;
+  }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
     background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
   }
 
-  .metadata-content {
-    background: #f9fafb;
-    border-radius: 8px;
-    padding: 1rem;
-    overflow-x: auto;
+  .action-card:hover {
+    border-color: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
-  .metadata-json {
-    color: #1f2937;
-    font-family: 'Courier New', monospace;
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    transition: all 0.2s ease;
+  }
+
+  .action-card:hover .action-icon {
+    background: #111827;
+    color: white;
+  }
+
+  .action-label {
     font-size: 0.875rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    font-weight: 500;
+    color: #374151;
+    text-align: center;
   }
 
   /* Responsive */
+  @media (max-width: 1024px) {
+    .stats-grid,
+    .actions-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   @media (max-width: 768px) {
-    .dashboard-container {
-      padding: 1rem 0.5rem;
+    .dashboard {
+      padding: 1.5rem 1rem 3rem;
     }
 
-    .title {
-      font-size: 1.5rem;
-    }
-
-    .subtitle {
-      font-size: 0.95rem;
-    }
-
-    .header-content {
+    .dashboard-header {
       flex-direction: column;
       align-items: stretch;
     }
 
-    .btn-logout {
-      width: 100%;
+    .primary-btn {
+      justify-content: center;
     }
 
     .stats-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
     }
 
-    .info-grid {
-      grid-template-columns: 1fr;
+    .stat-card {
+      padding: 1rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+    }
+
+    .recent-section {
+      padding: 1rem;
+    }
+
+    .products-table-wrapper {
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .actions-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .action-card {
+      padding: 1rem 0.75rem;
+    }
+
+    .action-label {
+      font-size: 0.8125rem;
     }
   }
 </style>
-
-<script>
-  const logoutBtn = document.getElementById("logout-btn") as HTMLButtonElement;
-
-  logoutBtn?.addEventListener("click", async () => {
-    logoutBtn.disabled = true;
-    logoutBtn.textContent = "Cerrando sesión...";
-
-    try {
-      const response = await fetch("/api/auth/signout", {
-        method: "POST",
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        alert(result.message || "Error al cerrar sesión");
-        logoutBtn.disabled = false;
-        logoutBtn.textContent = "Cerrar Sesión";
-        return;
-      }
-
-      window.location.href = "/ingresar";
-    } catch (error) {
-      console.error(error);
-      alert("Error inesperado al cerrar sesión");
-      logoutBtn.disabled = false;
-      logoutBtn.textContent = "Cerrar Sesión";
-    }
-  });
-</script>

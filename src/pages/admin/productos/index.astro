@@ -1,0 +1,38 @@
+---
+import CMSLayout from "@/layouts/CMSLayout.astro";
+import { getAdminProducts, getAllCategoriesWithSubcategories } from "@/lib/data/admin";
+import { createClient } from "@/lib/supabase";
+import ProductsList from "@/components/admin/ProductsList";
+
+const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+
+// Obtener parámetros de URL
+const url = new URL(Astro.request.url);
+const page = Math.max(1, parseInt(url.searchParams.get("page") || "1") || 1);
+const search = url.searchParams.get("search") || "";
+const categoryId = parseInt(url.searchParams.get("category") || "") || undefined;
+
+// Obtener datos
+const [productsResult, categoriesData] = await Promise.all([
+  getAdminProducts(supabase, { page, pageSize: 20, search, categoryId }),
+  getAllCategoriesWithSubcategories(supabase),
+]);
+
+const { products, total, totalPages } = productsResult;
+
+// Preparar categorías para el componente
+const categories = categoriesData.map(c => ({ id: c.id, name: c.name }));
+---
+
+<CMSLayout title="Productos - ARM Admin" description="Gestión de productos">
+  <ProductsList
+    client:load
+    products={products}
+    categories={categories}
+    total={total}
+    totalPages={totalPages}
+    currentPage={page}
+    search={search}
+    categoryId={categoryId}
+  />
+</CMSLayout>

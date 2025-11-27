@@ -1,5 +1,5 @@
 import { atom, computed } from 'nanostores';
-import type { AttributeFilters, SortOption } from '../lib/data';
+import type { AttributeFilters, SortOption } from '../lib/data/types';
 
 /**
  * Store de filtros - ESPEJO de la URL (no fuente de verdad)

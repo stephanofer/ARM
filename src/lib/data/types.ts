@@ -52,6 +52,7 @@ export interface ProductAsset {
   alt: string | null;
   sort_order: number;
   is_primary: boolean;
+  is_secondary: boolean;
   poster_storage_path: string | null;
   duration_seconds: number | null;
   filename: string | null;

@@ -1,0 +1,18 @@
+---
+import CMSLayout from "@/layouts/CMSLayout.astro";
+import { getAllCategoriesWithSubcategories } from "@/lib/data/admin";
+import { createClient } from "@/lib/supabase";
+import ProductForm from "@/components/admin/ProductForm";
+
+const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+
+// Obtener categorías
+const categories = await getAllCategoriesWithSubcategories(supabase);
+---
+
+<CMSLayout title="Nuevo Producto - ARM Admin" description="Crear nuevo producto">
+  <ProductForm 
+    client:load
+    categories={categories}
+  />
+</CMSLayout>

@@ -1,0 +1,468 @@
+---
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { href: "/admin", label: "Dashboard", icon: "dashboard" },
+  { href: "/admin/productos", label: "Productos", icon: "products" },
+  { href: "/admin/categorias", label: "Categorías", icon: "categories" },
+];
+
+function isActive(href: string): boolean {
+  if (href === "/admin") {
+    return currentPath === "/admin" || currentPath === "/admin/";
+  }
+  return currentPath.startsWith(href);
+}
+---
+
+<nav class="cms-navbar">
+  <div class="navbar-container">
+    <!-- Logo / Brand -->
+    <a href="/admin" class="navbar-brand">
+      <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+      </div>
+      <span class="brand-text">ARM <span class="brand-suffix">Admin</span></span>
+    </a>
+
+    <!-- Navigation Links -->
+    <div class="navbar-nav">
+      {navItems.map((item) => (
+        <a 
+          href={item.href} 
+          class={`nav-link ${isActive(item.href) ? 'active' : ''}`}
+        >
+          {item.icon === "dashboard" && (
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9"></rect>
+              <rect x="14" y="3" width="7" height="5"></rect>
+              <rect x="14" y="12" width="7" height="9"></rect>
+              <rect x="3" y="16" width="7" height="5"></rect>
+            </svg>
+          )}
+          {item.icon === "products" && (
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          )}
+          {item.icon === "categories" && (
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          )}
+          <span>{item.label}</span>
+        </a>
+      ))}
+    </div>
+
+    <!-- Right Section -->
+    <div class="navbar-right">
+      <!-- View Site Link -->
+      <a href="/" class="view-site-btn" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <span>Ver sitio</span>
+      </a>
+
+      <!-- User Menu -->
+      <div class="user-menu">
+        <button class="user-btn" id="user-menu-btn">
+          <div class="user-avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        
+        <div class="user-dropdown" id="user-dropdown">
+          <button class="dropdown-item logout" id="logout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobile-menu-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" id="mobile-nav">
+    {navItems.map((item) => (
+      <a 
+        href={item.href} 
+        class={`mobile-nav-link ${isActive(item.href) ? 'active' : ''}`}
+      >
+        {item.label}
+      </a>
+    ))}
+    <hr class="mobile-divider" />
+    <a href="/" class="mobile-nav-link" target="_blank">Ver sitio</a>
+    <button class="mobile-nav-link logout" id="mobile-logout-btn">Cerrar sesión</button>
+  </div>
+</nav>
+
+<style>
+  .cms-navbar {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .navbar-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  /* Brand */
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    background: #111827;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .brand-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .brand-suffix {
+    font-weight: 400;
+    color: #6b7280;
+  }
+
+  /* Navigation */
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #4b5563;
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  .nav-link.active {
+    background: #111827;
+    color: white;
+  }
+
+  .nav-icon {
+    flex-shrink: 0;
+  }
+
+  /* Right Section */
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .view-site-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.2s ease;
+  }
+
+  .view-site-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+
+  /* User Menu */
+  .user-menu {
+    position: relative;
+  }
+
+  .user-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .user-btn:hover {
+    background: #f3f4f6;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+  }
+
+  .user-btn .chevron {
+    color: #9ca3af;
+    transition: transform 0.2s ease;
+  }
+
+  .user-btn.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .user-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    z-index: 50;
+  }
+
+  .user-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    font-size: 0.9375rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: left;
+  }
+
+  .dropdown-item:hover {
+    background: #f3f4f6;
+  }
+
+  .dropdown-item.logout {
+    color: #dc2626;
+    border-radius: 10px;
+  }
+
+  .dropdown-item.logout:hover {
+    background: #fef2f2;
+  }
+
+  /* Mobile */
+  .mobile-menu-btn {
+    display: none;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .mobile-nav {
+    display: none;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: white;
+  }
+
+  .mobile-nav.open {
+    display: block;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-nav-link.active {
+    color: #111827;
+  }
+
+  .mobile-nav-link.logout {
+    color: #dc2626;
+  }
+
+  .mobile-divider {
+    margin: 0.5rem 0;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  @media (max-width: 768px) {
+    .navbar-nav,
+    .view-site-btn,
+    .user-menu {
+      display: none;
+    }
+
+    .mobile-menu-btn {
+      display: block;
+    }
+
+    .navbar-container {
+      padding: 0 1rem;
+    }
+
+    .brand-text {
+      font-size: 1.125rem;
+    }
+  }
+</style>
+
+<script>
+  // User dropdown toggle
+  const userBtn = document.getElementById("user-menu-btn");
+  const userDropdown = document.getElementById("user-dropdown");
+
+  userBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userBtn.classList.toggle("open");
+    userDropdown?.classList.toggle("open");
+  });
+
+  document.addEventListener("click", () => {
+    userBtn?.classList.remove("open");
+    userDropdown?.classList.remove("open");
+  });
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+  const mobileNav = document.getElementById("mobile-nav");
+
+  mobileMenuBtn?.addEventListener("click", () => {
+    mobileNav?.classList.toggle("open");
+  });
+
+  // Logout functionality
+  async function handleLogout(btn: HTMLButtonElement) {
+    btn.disabled = true;
+    const originalText = btn.querySelector("span")?.textContent || btn.textContent;
+    if (btn.querySelector("span")) {
+      btn.querySelector("span")!.textContent = "Cerrando...";
+    } else {
+      btn.textContent = "Cerrando...";
+    }
+
+    try {
+      const response = await fetch("/api/auth/signout", { method: "POST" });
+      const result = await response.json();
+
+      if (result.success) {
+        window.location.href = "/ingresar";
+      } else {
+        alert(result.message || "Error al cerrar sesión");
+        btn.disabled = false;
+        if (btn.querySelector("span")) {
+          btn.querySelector("span")!.textContent = originalText || "";
+        } else {
+          btn.textContent = originalText;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error inesperado");
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById("logout-btn")?.addEventListener("click", (e) => {
+    handleLogout(e.currentTarget as HTMLButtonElement);
+  });
+
+  document.getElementById("mobile-logout-btn")?.addEventListener("click", (e) => {
+    handleLogout(e.currentTarget as HTMLButtonElement);
+  });
+</script>
