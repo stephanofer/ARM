@@ -6,7 +6,6 @@ import styles from "./CartCounter.module.css";
 export function CartCounter() {
   const handleCLick = () => {
     const cartDrawer = document.querySelector(".cart-drawer-overlay");
-    // console.log("Cart button clicked");
     if (!cartDrawer) return;
     cartDrawer.classList.add("active");
     document.body.style.overflow = "hidden";

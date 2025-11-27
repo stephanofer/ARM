@@ -3,10 +3,26 @@ import type { JSX } from "preact";
 import styles from "./ProductForm.module.css";
 
 // Types
+interface FilterConfig {
+  key: string;
+  label: string;
+  type: "select" | "checkbox" | "range" | "boolean";
+  options?: string[];
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+interface Subcategory {
+  id: number;
+  name: string;
+  filter_config?: FilterConfig[];
+}
+
 interface Category {
   id: number;
   name: string;
-  subcategories: { id: number; name: string }[];
+  subcategories: Subcategory[];
 }
 
 type AssetSection = "gallery" | "additional" | "download";
@@ -142,6 +158,10 @@ export default function ProductForm({
   // Get subcategories for selected category
   const selectedCategory = categories.find((c) => c.id.toString() === categoryId);
   const subcategories = selectedCategory?.subcategories || [];
+  
+  // Get selected subcategory with filter_config
+  const selectedSubcategory = subcategories.find((s) => s.id.toString() === subcategoryId);
+  const filterConfig = selectedSubcategory?.filter_config || [];
 
   // Reset subcategory when category changes
   useEffect(() => {
@@ -149,6 +169,42 @@ export default function ProductForm({
       setSubcategoryId("");
     }
   }, [categoryId]);
+
+  // Auto-populate attributes when subcategory changes
+  useEffect(() => {
+    if (!subcategoryId || !selectedSubcategory?.filter_config?.length) {
+      return;
+    }
+    
+    // Only auto-populate for new products or when subcategory actually changed
+    const currentKeys = attributes.map(a => a.key);
+    const filterKeys = selectedSubcategory.filter_config.map(f => f.key);
+    
+    // Check if we need to update (new filters that don't exist yet)
+    const newFilters = selectedSubcategory.filter_config.filter(
+      f => !currentKeys.includes(f.key)
+    );
+    
+    if (newFilters.length > 0) {
+      // Merge existing attributes with new filter attributes
+      const existingAttrs = attributes.filter(a => filterKeys.includes(a.key) || a.value.trim());
+      const newAttrs = newFilters.map(f => ({
+        key: f.key,
+        value: "",
+        _filterConfig: f, // Store the filter config for rendering
+      }));
+      
+      // Combine: keep existing values, add new ones from filter_config
+      const mergedAttrs = [...existingAttrs];
+      newFilters.forEach(f => {
+        if (!existingAttrs.find(a => a.key === f.key)) {
+          mergedAttrs.push({ key: f.key, value: "" });
+        }
+      });
+      
+      setAttributes(mergedAttrs);
+    }
+  }, [subcategoryId]);
 
   // Handle file selection for images and videos (gallery/additional)
   function handleMediaFiles(files: FileList | File[], section: "gallery" | "additional") {
@@ -1181,51 +1237,234 @@ export default function ProductForm({
                   </option>
                   {subcategories.map((sub) => (
                     <option key={sub.id} value={sub.id}>
-                      {sub.name}
+                      {sub.name} {sub.filter_config?.length ? `(${sub.filter_config.length} filtros)` : ""}
                     </option>
                   ))}
                 </select>
               </div>
             </section>
 
-            {/* Attributes */}
+            {/* Attributes Section - Smart based on filter_config */}
             <section class={styles.formSection}>
-              <h2 class={styles.sectionTitle}>Atributos</h2>
-
-              <div class={styles.attributesList}>
-                {attributes.map((attr, index) => (
-                  <div key={index} class={styles.attributeItem}>
-                    <input
-                      type="text"
-                      class={`${styles.formInput} ${styles.attrKey}`}
-                      placeholder="Nombre"
-                      value={attr.key}
-                      onInput={(e) => updateAttribute(index, "key", e.currentTarget.value)}
-                    />
-                    <input
-                      type="text"
-                      class={`${styles.formInput} ${styles.attrValue}`}
-                      placeholder="Valor"
-                      value={attr.value}
-                      onInput={(e) => updateAttribute(index, "value", e.currentTarget.value)}
-                    />
-                    <button type="button" class={styles.removeAttr} onClick={() => removeAttribute(index)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
+              <div class={styles.sectionHeaderWithInfo}>
+                <h2 class={styles.sectionTitle}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                  </svg>
+                  Atributos del Producto
+                </h2>
+                {filterConfig.length > 0 && (
+                  <span class={styles.filterHint}>
+                    {filterConfig.length} atributos de filtro definidos
+                  </span>
+                )}
               </div>
 
-              <button type="button" class={styles.addAttributeBtn} onClick={addAttribute}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Añadir atributo
-              </button>
+              {/* Filter-based attributes from subcategory */}
+              {filterConfig.length > 0 && (
+                <div class={styles.filterAttributes}>
+                  <div class={styles.filterAttributesHeader}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
+                    </svg>
+                    <span>Estos atributos son usados como filtros en el catálogo</span>
+                  </div>
+                  
+                  {filterConfig.map((filter) => {
+                    const attrIndex = attributes.findIndex(a => a.key === filter.key);
+                    const currentValue = attrIndex >= 0 ? attributes[attrIndex].value : "";
+                    
+                    return (
+                      <div key={filter.key} class={styles.filterAttributeItem}>
+                        <label class={styles.filterLabel}>
+                          {filter.label}
+                          <span class={styles.filterType}>({filter.type})</span>
+                        </label>
+                        
+                        {/* Select type */}
+                        {filter.type === "select" && filter.options && (
+                          <select
+                            class={styles.formSelect}
+                            value={currentValue}
+                            onChange={(e) => {
+                              const newValue = e.currentTarget.value;
+                              if (attrIndex >= 0) {
+                                updateAttribute(attrIndex, "value", newValue);
+                              } else {
+                                setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                              }
+                            }}
+                          >
+                            <option value="">Seleccionar {filter.label.toLowerCase()}...</option>
+                            {filter.options.map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        )}
+                        
+                        {/* Checkbox type (multiple values) */}
+                        {filter.type === "checkbox" && filter.options && (
+                          <div class={styles.checkboxGroup}>
+                            {filter.options.map(opt => {
+                              const isChecked = currentValue.split(",").map(v => v.trim()).includes(opt);
+                              return (
+                                <label key={opt} class={styles.checkboxLabel}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const values = currentValue ? currentValue.split(",").map(v => v.trim()).filter(v => v) : [];
+                                      let newValues: string[];
+                                      if (e.currentTarget.checked) {
+                                        newValues = [...values, opt];
+                                      } else {
+                                        newValues = values.filter(v => v !== opt);
+                                      }
+                                      const newValue = newValues.join(", ");
+                                      if (attrIndex >= 0) {
+                                        updateAttribute(attrIndex, "value", newValue);
+                                      } else {
+                                        setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                                      }
+                                    }}
+                                  />
+                                  <span>{opt}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {/* Boolean type */}
+                        {filter.type === "boolean" && (
+                          <div class={styles.booleanGroup}>
+                            <label class={styles.radioLabel}>
+                              <input
+                                type="radio"
+                                name={`filter_${filter.key}`}
+                                checked={currentValue === "true" || currentValue === "Sí"}
+                                onChange={() => {
+                                  if (attrIndex >= 0) {
+                                    updateAttribute(attrIndex, "value", "Sí");
+                                  } else {
+                                    setAttributes([...attributes, { key: filter.key, value: "Sí" }]);
+                                  }
+                                }}
+                              />
+                              <span>Sí</span>
+                            </label>
+                            <label class={styles.radioLabel}>
+                              <input
+                                type="radio"
+                                name={`filter_${filter.key}`}
+                                checked={currentValue === "false" || currentValue === "No"}
+                                onChange={() => {
+                                  if (attrIndex >= 0) {
+                                    updateAttribute(attrIndex, "value", "No");
+                                  } else {
+                                    setAttributes([...attributes, { key: filter.key, value: "No" }]);
+                                  }
+                                }}
+                              />
+                              <span>No</span>
+                            </label>
+                            <label class={styles.radioLabel}>
+                              <input
+                                type="radio"
+                                name={`filter_${filter.key}`}
+                                checked={!currentValue}
+                                onChange={() => {
+                                  if (attrIndex >= 0) {
+                                    updateAttribute(attrIndex, "value", "");
+                                  }
+                                }}
+                              />
+                              <span>Sin especificar</span>
+                            </label>
+                          </div>
+                        )}
+                        
+                        {/* Range type */}
+                        {filter.type === "range" && (
+                          <div class={styles.rangeInput}>
+                            <input
+                              type="number"
+                              class={styles.formInput}
+                              value={currentValue}
+                              min={filter.min}
+                              max={filter.max}
+                              step={filter.step || 1}
+                              placeholder={`${filter.min || 0} - ${filter.max || 100}`}
+                              onInput={(e) => {
+                                const newValue = e.currentTarget.value;
+                                if (attrIndex >= 0) {
+                                  updateAttribute(attrIndex, "value", newValue);
+                                } else {
+                                  setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                                }
+                              }}
+                            />
+                            {filter.min !== undefined && filter.max !== undefined && (
+                              <span class={styles.rangeHint}>
+                                Rango: {filter.min} - {filter.max}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Custom attributes (not from filter_config) */}
+              <div class={styles.customAttributes}>
+                {filterConfig.length > 0 && (
+                  <h4 class={styles.customAttributesTitle}>Atributos adicionales</h4>
+                )}
+                
+                <div class={styles.attributesList}>
+                  {attributes
+                    .filter(attr => !filterConfig.find(f => f.key === attr.key))
+                    .map((attr) => {
+                      const originalIndex = attributes.findIndex(a => a.key === attr.key);
+                      return (
+                        <div key={originalIndex} class={styles.attributeItem}>
+                          <input
+                            type="text"
+                            class={`${styles.formInput} ${styles.attrKey}`}
+                            placeholder="Nombre"
+                            value={attr.key}
+                            onInput={(e) => updateAttribute(originalIndex, "key", e.currentTarget.value)}
+                          />
+                          <input
+                            type="text"
+                            class={`${styles.formInput} ${styles.attrValue}`}
+                            placeholder="Valor"
+                            value={attr.value}
+                            onInput={(e) => updateAttribute(originalIndex, "value", e.currentTarget.value)}
+                          />
+                          <button type="button" class={styles.removeAttr} onClick={() => removeAttribute(originalIndex)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <button type="button" class={styles.addAttributeBtn} onClick={addAttribute}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Añadir atributo personalizado
+                </button>
+              </div>
             </section>
           </aside>
         </div>
