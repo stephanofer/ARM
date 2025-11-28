@@ -84,9 +84,14 @@ export function ProductCard({
       <div className={styles["product-actions"]}>
         <AddToCartButton
           product={{
-            ...product,
-            quantity: 1,
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: product.price,
+            stock: product.stock,
+            brand: product.brand,
             image_url: primaryImageUrl || secondaryImageUrl || null,
+            quantity: 1,
           }}
         />
       </div>

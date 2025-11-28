@@ -38,8 +38,8 @@ export interface Product {
 // TIPOS DE ASSETS
 // ============================
 
-export type AssetKind = 'image' | 'video' | 'file';
-export type AssetSection = 'gallery' | 'additional' | 'download';
+export type AssetKind = "image" | "video" | "file";
+export type AssetSection = "gallery" | "additional" | "download";
 
 export interface ProductAsset {
   id: number;
@@ -117,11 +117,7 @@ export interface FilterConfig {
   step?: number;
 }
 
-export type SortOption =
-  | "price_asc"
-  | "price_desc"
-  | "name_asc"
-  | "name_desc";
+export type SortOption = "price_asc" | "price_desc" | "name_asc" | "name_desc";
 
 export interface AttributeFilters {
   [key: string]: string | string[];

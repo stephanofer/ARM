@@ -10,8 +10,8 @@ import styles from "./cartItems.module.css";
 export function CartItems() {
   const cartItems = Object.values(useStore($cart));
 
-  const handleDelete = (id: string) => {
-    removeFromCart(id);
+  const handleDelete = (id: number) => {
+    removeFromCart(String(id));
   };
 
   return (
@@ -60,15 +60,15 @@ export function CartItems() {
                       onChange={(e) => {
                         const value = parseInt(e.currentTarget.value);
                         if (value > 0) {
-                          setQuantity(item.id, value);
+                          setQuantity(String(item.id), value);
                         } else {
-                          setQuantity(item.id, 1);
+                          setQuantity(String(item.id), 1);
                         }
                       }}
                       onBlur={(e) => {
                         const value = parseInt(e.currentTarget.value);
                         if (!value || value <= 0) {
-                          setQuantity(item.id, 1);
+                          setQuantity(String(item.id), 1);
                         }
                       }}
                     />
@@ -77,7 +77,7 @@ export function CartItems() {
                       data-action="increase"
                       data-item-id={item.id}
                       aria-label="Aumentar cantidad"
-                      onClick={() => increaseQuantity(item.id)}
+                      onClick={() => increaseQuantity(String(item.id))}
                     >
                       <svg
                         width="16"
