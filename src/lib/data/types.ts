@@ -98,7 +98,12 @@ export interface ProductWithImages extends Product {
   secondaryImageUrl: string | null;
 }
 
-export interface CartItem extends Product {
+export interface CartItem  {
+  id: number;
+  name: string;
+  slug: string;
+  brand: string | null;
+  description: string | null;
   quantity: number;
   image_url: string | null;
 }

@@ -21,13 +21,10 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     });
   };
 
-  const inStock = product.stock > 0;
-
   return (
     <button
       className={styles["add-to-cart-btn"]}
       data-product-id={product.id}
-      disabled={!inStock}
       aria-label={`Agregar ${product.name} al carrito`}
       onClick={handleAddToCart}
     >
@@ -43,7 +40,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
-      <span>{inStock ? "Agregar al carrito" : "No disponible"}</span>
+      <span>Agregar al carrito</span>
     </button>
   );
 }

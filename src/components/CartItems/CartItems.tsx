@@ -28,10 +28,14 @@ export function CartItems() {
                 <img src={item.image_url || ""} alt={item.name} />
               </div>
               <div className={styles["cart-item-details"]}>
-                <h3 className={styles["cart-item-name"]}>{item.name}</h3>
-                <div className={styles["cart-item-meta"]}>
-                  <span className={styles["cart-item-brand"]}>{item.brand || ""}</span>
-                </div>
+                <a href={`/producto/${item.slug}`}  className={styles["cart-item-header"]}>
+                  <h3 className={styles["cart-item-name"]}>{item.name}</h3>
+                  <div className={styles["cart-item-meta"]}>
+                    <span className={styles["cart-item-brand"]}>
+                      {item.brand || ""}
+                    </span>
+                  </div>
+                </a>
                 <div className={styles["cart-item-actions"]}>
                   <div className={styles["quantity-controls"]}>
                     <button

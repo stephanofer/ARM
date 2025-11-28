@@ -22,7 +22,7 @@ const productDetails = await getProductFullDetailsBySlug(supabase, productSlug);
 if (!productDetails) {
   return Astro.redirect("/404");
 }
-console.log(productDetails.assets.gallery);
+console.log(productDetails);
 
 const { product, category, subcategory, assets } = productDetails;
 
@@ -280,11 +280,14 @@ const formatFileSize = (bytes: number | null): string => {
 
           <AddToCartButton
             product={{
-              ...product,
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+              brand: product.brand,
+              description: product.description,
               image_url: primaryImage?.url || null,
-
               quantity: 1,
-            } as import("@/lib/data/types").CartItem}
+            } }
             client:load
           />
         </div>

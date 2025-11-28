@@ -87,9 +87,8 @@ export function ProductCard({
             id: product.id,
             name: product.name,
             slug: product.slug,
-            price: product.price,
-            stock: product.stock,
             brand: product.brand,
+            description: product.description,
             image_url: primaryImageUrl || secondaryImageUrl || null,
             quantity: 1,
           }}
