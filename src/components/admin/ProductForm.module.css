@@ -1378,30 +1378,194 @@
 }
 
 @media (max-width: 768px) {
+  .productFormPage {
+    padding: 0 0.5rem;
+  }
+
+  /* Header Mobile */
   .pageHeader {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .headerLeft {
-    order: 1;
+    gap: 0.75rem;
+  }
+
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageMeta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
   }
 
   .headerActions {
-    order: 2;
-    justify-content: stretch;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 
   .headerActions button {
-    flex: 1;
     justify-content: center;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* Form Sections */
+  .formSection {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .sectionTitle {
+    font-size: 0.9375rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Inputs */
+  .formInput,
+  .formTextarea,
+  .formSelect {
+    padding: 0.625rem 0.875rem;
+    font-size: 1rem; /* Prevent zoom on iOS */
   }
 
   .formRow {
     grid-template-columns: 1fr;
   }
 
+  /* Slug Input */
+  .slugInputWrapper {
+    flex-direction: column;
+  }
+
+  .slugPrefix {
+    padding: 0.5rem 0.875rem;
+    border-right: none;
+    border-bottom: 1px solid var(--admin-border);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .slugInput {
+    border-radius: 0 0 8px 8px;
+  }
+
+  /* Media Tabs */
+  .mediaTabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.375rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .mediaTab {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tabBadge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.6875rem;
+  }
+
+  /* Media Legend */
+  .mediaLegend {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .legendItem {
+    font-size: 0.75rem;
+  }
+
+  /* Image Grid */
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .imageActions {
+    opacity: 1; /* Always visible on mobile */
+  }
+
+  .setPrimary,
+  .setSecondary,
+  .deleteImage {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Image Preview Grid */
+  .imagePreviewGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .removePreview {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Upload Zone */
+  .uploadZone {
+    padding: 1.5rem 1rem;
+  }
+
+  .uploadIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.75rem;
+  }
+
+  .uploadIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .uploadText {
+    font-size: 0.875rem;
+  }
+
+  .uploadHint {
+    font-size: 0.75rem;
+  }
+
+  /* File List */
+  .fileItem {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .fileIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .fileName {
+    font-size: 0.8125rem;
+  }
+
+  .downloadBtn,
+  .deleteFileBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Attributes */
   .attributeItem {
     grid-template-columns: 1fr;
     gap: 0.5rem;
@@ -1409,6 +1573,108 @@
 
   .removeAttr {
     justify-self: start;
+    width: auto;
+    padding: 0 0.75rem;
+  }
+
+  .addAttributeBtn {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Filter Attributes */
+  .sectionHeaderWithInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .filterAttributes {
+    padding: 0.75rem;
+  }
+
+  .filterAttributesHeader {
+    font-size: 0.75rem;
+  }
+
+  .checkboxGroup {
+    gap: 0.375rem;
+  }
+
+  .checkboxLabel {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .booleanGroup {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .radioLabel {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  /* Modals */
+  .modal {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+    padding: 1.25rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .modalActions button {
     width: 100%;
+  }
+
+  /* Preview Modal */
+  .previewModalContainer {
+    max-width: 95vw;
+  }
+
+  .previewClose {
+    top: -36px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .previewFooter {
+    padding: 0.75rem;
+  }
+
+  .previewName {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .headerActions {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .imagePreviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mediaTabs {
+    gap: 0.25rem;
+  }
+
+  .mediaTab {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .mediaTab svg {
+    display: none;
   }
 }

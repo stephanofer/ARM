@@ -57,6 +57,61 @@ const material = product.attributes.material || 'Madera';
 // Meta tags
 const pageTitle = `${product.name} | ARM`;
 const pageDescription = product.description || `${product.name} - ${subcategory.name}`;
+
+// Helper para formatear tipos de archivo (MIME types largos a extensiones legibles)
+const getFileTypeLabel = (mimeType: string | null, filename: string | null): string => {
+  // Primero intentar obtener la extensión del filename
+  if (filename) {
+    const ext = filename.split('.').pop()?.toUpperCase();
+    if (ext && ext.length <= 5) return ext;
+  }
+  
+  if (!mimeType) return 'ARCHIVO';
+  
+  // Mapeo de MIME types comunes a extensiones legibles
+  const mimeMap: Record<string, string> = {
+    'application/pdf': 'PDF',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'XLSX',
+    'application/vnd.ms-excel': 'XLS',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
+    'application/msword': 'DOC',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PPTX',
+    'application/vnd.ms-powerpoint': 'PPT',
+    'application/zip': 'ZIP',
+    'application/x-rar-compressed': 'RAR',
+    'application/x-7z-compressed': '7Z',
+    'text/plain': 'TXT',
+    'text/csv': 'CSV',
+    'image/jpeg': 'JPG',
+    'image/png': 'PNG',
+    'image/gif': 'GIF',
+    'image/webp': 'WEBP',
+  };
+  
+  const lowerMime = mimeType.toLowerCase();
+  if (mimeMap[lowerMime]) return mimeMap[lowerMime];
+  
+  // Si no está en el mapa, intentar extraer la extensión del MIME type
+  const parts = mimeType.split('/');
+  if (parts.length === 2) {
+    const subtype = parts[1].toUpperCase();
+    // Si es muy largo, truncar
+    if (subtype.length > 6) {
+      return subtype.substring(0, 4);
+    }
+    return subtype;
+  }
+  
+  return 'ARCHIVO';
+};
+
+// Helper para formatear tamaño de archivo
+const formatFileSize = (bytes: number | null): string => {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -562,10 +617,11 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
 
         <div class="downloads-grid">
           {downloadAssets.map((file) => (
-            <a 
-              href={file.url} 
+            <button 
+              type="button"
               class="download-card" 
-              download={file.filename}
+              data-url={file.url}
+              data-filename={file.filename || 'archivo'}
               aria-label={`Descargar ${file.title || file.filename}`}
             >
               <div class="download-icon">
@@ -587,13 +643,9 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
               <div class="download-info">
                 <h3>{file.title || file.filename}</h3>
                 <div class="download-meta">
-                  {file.mime_type && (
-                    <span class="file-type">{file.mime_type.split('/')[1].toUpperCase()}</span>
-                  )}
+                  <span class="file-type">{getFileTypeLabel(file.mime_type, file.filename)}</span>
                   {file.file_size_bytes && (
-                    <span class="file-size">
-                      {(file.file_size_bytes / 1024 / 1024).toFixed(2)} MB
-                    </span>
+                    <span class="file-size">{formatFileSize(file.file_size_bytes)}</span>
                   )}
                 </div>
               </div>
@@ -612,7 +664,7 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
               </div>
-            </a>
+            </button>
           ))}
         </div>
       </section>
@@ -1525,12 +1577,70 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
     text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    width: 100%;
   }
 
   .download-card:hover {
     border-color: #111827;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .download-card.downloading {
+    pointer-events: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .download-card.downloading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.5s infinite;
+  }
+
+  .download-card.downloading .download-info h3,
+  .download-card.downloading .download-meta {
+    opacity: 0;
+  }
+
+  .download-card.downloading .download-info::after {
+    content: 'Descargando...';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #111827;
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  .download-card.downloading .download-action svg {
+    animation: bounce 0.6s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
   }
 
   .download-icon {
@@ -1547,6 +1657,9 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
 
   .download-info {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
   }
 
   .download-info h3 {
@@ -1554,17 +1667,37 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
     font-weight: 600;
     color: #111827;
     margin: 0 0 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .download-meta {
     display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
     color: #6b7280;
+  }
+
+  .file-type {
+    display: inline-flex;
+    padding: 0.125rem 0.5rem;
+    background: #f3f4f6;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    letter-spacing: 0.025em;
+    color: #374151;
+  }
+
+  .file-size {
+    color: #9ca3af;
   }
 
   .download-action {
     color: #111827;
+    flex-shrink: 0;
   }
 
   /* Trust Section */
@@ -2301,6 +2434,44 @@ const pageDescription = product.description || `${product.name} - ${subcategory.
         section.classList.add('animate-in');
       });
     }
+
+    // Download files - descarga sin abrir nueva pestaña
+    document.querySelectorAll<HTMLButtonElement>('.download-card').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const url = btn.dataset.url;
+        const filename = btn.dataset.filename || 'archivo';
+        
+        if (!url) return;
+
+        try {
+          // Mostrar estado de descarga
+          btn.classList.add('downloading');
+          
+          // Fetch del archivo
+          const response = await fetch(url);
+          const blob = await response.blob();
+          
+          // Crear link temporal para descarga
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          
+          // Limpiar
+          window.URL.revokeObjectURL(downloadUrl);
+          document.body.removeChild(a);
+          
+          btn.classList.remove('downloading');
+        } catch (error) {
+          console.error('Error al descargar:', error);
+          btn.classList.remove('downloading');
+          // Fallback: abrir en nueva pestaña si falla
+          window.open(url, '_blank');
+        }
+      });
+    });
     // --- FIN DE TU CÓDIGO ORIGINAL ---
   };
 
