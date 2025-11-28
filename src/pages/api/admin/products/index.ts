@@ -90,7 +90,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     // Crear producto
     const product = await createProduct(supabase, productData);
-    console.log("Product created:", product.id);
 
     // Función para mover archivo de carpeta temporal a la definitiva
     async function moveFileAndCreateAsset(

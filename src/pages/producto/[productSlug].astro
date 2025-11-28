@@ -5,7 +5,6 @@ import { getProductFullDetailsBySlug } from "@/lib/data/products";
 import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
 
 const { productSlug } = Astro.params;
-console.log(productSlug);
 
 if (!productSlug) {
   return Astro.redirect("/categorias");

@@ -5,7 +5,6 @@ import { object } from "astro:schema";
 
 export const PlaceOrderButton = () => {
   const cartItems = useStore($cart); // <-- tus productos desde nanostores
-  console.log(Object.keys(cartItems).length === 0);
 
   const phone = "51981314610"; // tu número
 
