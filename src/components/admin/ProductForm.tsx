@@ -122,7 +122,8 @@ export default function ProductForm({
   const [additionalPreviews, setAdditionalPreviews] = useState<{ file: File; url: string; isVideo: boolean }[]>([]);
 
   // NEW: Primary/secondary index for new files (before saving)
-  const [primaryNewIndex, setPrimaryNewIndex] = useState<number>(0); // Default first image
+  // In edit mode, don't default to first image - let user choose explicitly
+  const [primaryNewIndex, setPrimaryNewIndex] = useState<number | null>(isNew ? 0 : null);
   const [secondaryNewIndex, setSecondaryNewIndex] = useState<number | null>(null);
 
   // Preview Modal state
@@ -147,6 +148,7 @@ export default function ProductForm({
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(isNew);
   const [isDragging, setIsDragging] = useState(false);
@@ -270,10 +272,10 @@ export default function ProductForm({
       
       // Adjust primary/secondary indices
       if (primaryNewIndex === index) {
-        // If removing primary, set first remaining as primary
-        setPrimaryNewIndex(0);
-      } else if (primaryNewIndex > index) {
-        setPrimaryNewIndex((prev) => prev - 1);
+        // If removing primary, set to null (user must select again)
+        setPrimaryNewIndex(null);
+      } else if (primaryNewIndex !== null && primaryNewIndex > index) {
+        setPrimaryNewIndex((prev) => prev !== null ? prev - 1 : null);
       }
       
       if (secondaryNewIndex === index) {
@@ -344,6 +346,11 @@ export default function ProductForm({
   // Set primary for NEW files (before upload)
   function setNewAsPrimary(index: number) {
     if (galleryPreviews[index]?.isVideo) return; // Videos can't be primary
+    // Toggle: si ya es primaria, quitarla
+    if (primaryNewIndex === index) {
+      setPrimaryNewIndex(null);
+      return;
+    }
     if (secondaryNewIndex === index) {
       setSecondaryNewIndex(null);
     }
@@ -390,6 +397,7 @@ export default function ProductForm({
   async function handleSubmit(e: JSX.TargetedEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    setUploadProgress(null);
 
     try {
       // Build attributes object
@@ -400,42 +408,159 @@ export default function ProductForm({
         }
       });
 
-      // Prepare form data
-      const formData = new FormData();
-      formData.append("name", name.trim());
-      formData.append("slug", slug.trim());
-      formData.append("description", description.trim());
-      formData.append("brand", brand.trim());
-      formData.append("price", price);
-      formData.append("stock", stock || "0");
-      formData.append("category_id", categoryId);
-      formData.append("subcategory_id", subcategoryId);
-      formData.append("attributes", JSON.stringify(attributesObj));
+      // Helper: determina el tipo de archivo
+      const getFileKind = (file: File): "image" | "video" | "file" => {
+        if (file.type.startsWith("image/")) return "image";
+        if (file.type.startsWith("video/")) return "video";
+        return "file";
+      };
 
-      // Add files per section with primary/secondary info
-      galleryFiles.forEach((file, index) => {
-        formData.append("gallery_images", file);
-      });
-      // Send which new file index should be primary/secondary
-      formData.append("primary_new_index", primaryNewIndex.toString());
-      if (secondaryNewIndex !== null) {
-        formData.append("secondary_new_index", secondaryNewIndex.toString());
-      }
-      
-      additionalFiles.forEach((file) => formData.append("additional_images", file));
-      downloadFiles.forEach((file) => formData.append("download_files", file));
+      // Helper: sube un archivo usando Signed Upload URL
+      async function uploadFileWithSignedUrl(
+        file: File,
+        section: "gallery" | "additional" | "download",
+        tempUploadId: string
+      ): Promise<{ storage_path: string; kind: "image" | "video" | "file"; filename: string; mime_type: string; file_size_bytes: number }> {
+        // 1. Obtener URL firmada del servidor
+        const urlResponse = await fetch("/api/admin/upload-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type,
+            section,
+            tempUploadId,
+          }),
+        });
 
-      // For edit mode
-      if (product) {
-        formData.append("delete_assets", JSON.stringify(assetsToDelete));
-        formData.append("set_primary_asset", primaryAssetId?.toString() || "");
-        formData.append("set_secondary_asset", secondaryAssetId?.toString() || "");
+        if (!urlResponse.ok) {
+          const error = await urlResponse.json();
+          throw new Error(error.error || "Error al obtener URL de subida");
+        }
+
+        const { signedUrl, path } = await urlResponse.json();
+
+        // 2. Subir archivo directamente a Supabase usando la URL firmada
+        const uploadResponse = await fetch(signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+          },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Error al subir ${file.name}`);
+        }
+
+        return {
+          storage_path: path,
+          kind: getFileKind(file),
+          filename: file.name,
+          mime_type: file.type,
+          file_size_bytes: file.size,
+        };
       }
+
+      // Calcular total de archivos a subir
+      const totalFiles = galleryFiles.length + additionalFiles.length + downloadFiles.length;
+      let uploadedCount = 0;
+
+      // Generar un ID temporal para la carpeta
+      const tempId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Arrays para guardar los archivos subidos
+      const uploadedGallery: Array<{
+        storage_path: string;
+        kind: "image" | "video" | "file";
+        filename: string;
+        mime_type: string;
+        file_size_bytes: number;
+        is_primary: boolean;
+        is_secondary: boolean;
+      }> = [];
+
+      const uploadedAdditional: Array<{
+        storage_path: string;
+        kind: "image" | "video" | "file";
+        filename: string;
+        mime_type: string;
+        file_size_bytes: number;
+      }> = [];
+
+      const uploadedDownload: Array<{
+        storage_path: string;
+        kind: "image" | "video" | "file";
+        filename: string;
+        mime_type: string;
+        file_size_bytes: number;
+      }> = [];
+
+      // Subir archivos de galería
+      for (let i = 0; i < galleryFiles.length; i++) {
+        const file = galleryFiles[i];
+        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
+        
+        const uploaded = await uploadFileWithSignedUrl(file, "gallery", tempId);
+        uploadedGallery.push({
+          ...uploaded,
+          is_primary: primaryNewIndex === i,
+          is_secondary: secondaryNewIndex === i,
+        });
+        uploadedCount++;
+      }
+
+      // Subir archivos adicionales
+      for (const file of additionalFiles) {
+        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
+        
+        const uploaded = await uploadFileWithSignedUrl(file, "additional", tempId);
+        uploadedAdditional.push(uploaded);
+        uploadedCount++;
+      }
+
+      // Subir archivos descargables
+      for (const file of downloadFiles) {
+        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
+        
+        const uploaded = await uploadFileWithSignedUrl(file, "download", tempId);
+        uploadedDownload.push(uploaded);
+        uploadedCount++;
+      }
+
+      setUploadProgress(null);
+
+      // Preparar datos JSON para el API (sin archivos pesados)
+      const requestData = {
+        name: name.trim(),
+        slug: slug.trim(),
+        description: description.trim(),
+        brand: brand.trim(),
+        price: price ? parseFloat(price) : null,
+        stock: parseInt(stock || "0"),
+        category_id: parseInt(categoryId),
+        subcategory_id: parseInt(subcategoryId),
+        attributes: attributesObj,
+        temp_upload_id: tempId,
+        uploaded_files: {
+          gallery: uploadedGallery,
+          additional: uploadedAdditional,
+          download: uploadedDownload,
+        },
+        // Para modo edición
+        delete_assets: product ? assetsToDelete : [],
+        set_primary_asset: product ? primaryAssetId : null,
+        set_secondary_asset: product ? secondaryAssetId : null,
+      };
 
       const url = product ? `/api/admin/products/${product.id}` : "/api/admin/products";
       const method = product ? "PUT" : "POST";
 
-      const response = await fetch(url, { method, body: formData });
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
       const result = await response.json();
 
       if (result.success) {
@@ -457,8 +582,9 @@ export default function ProductForm({
       }
     } catch (error) {
       console.error(error);
-      alert("Error inesperado al guardar el producto");
+      alert(error instanceof Error ? error.message : "Error inesperado al guardar el producto");
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   }
 
@@ -634,7 +760,9 @@ export default function ProductForm({
                 >
                   <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
-                {product ? "Guardando..." : "Creando..."}
+                {uploadProgress 
+                  ? `Subiendo ${uploadProgress.current}/${uploadProgress.total}...`
+                  : (product ? "Guardando..." : "Creando...")}
               </>
             ) : (
               <>

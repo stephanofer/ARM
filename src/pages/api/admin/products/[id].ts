@@ -3,12 +3,43 @@ import { createClient } from "@/lib/supabase";
 import {
   updateProduct,
   deleteProduct,
-  uploadProductAsset,
   deleteProductAsset,
   setAssetAsPrimary,
   setAssetAsSecondary,
   validateProductData,
 } from "@/lib/data/admin";
+
+// Tipo para los archivos subidos desde el cliente
+interface UploadedFile {
+  storage_path: string;
+  kind: "image" | "video" | "file";
+  filename: string;
+  mime_type: string;
+  file_size_bytes: number;
+  is_primary?: boolean;
+  is_secondary?: boolean;
+}
+
+interface RequestBody {
+  name: string;
+  slug: string;
+  description: string;
+  brand: string;
+  price: number | null;
+  stock: number;
+  category_id: number;
+  subcategory_id: number;
+  attributes: Record<string, string>;
+  temp_upload_id: string;
+  uploaded_files: {
+    gallery: UploadedFile[];
+    additional: UploadedFile[];
+    download: UploadedFile[];
+  };
+  delete_assets: number[];
+  set_primary_asset: number | null;
+  set_secondary_asset: number | null;
+}
 
 // GET - Obtener producto por ID
 export const GET: APIRoute = async ({ params, request, cookies }) => {
@@ -95,35 +126,37 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
       );
     }
 
-    const formData = await request.formData();
+    // Obtener datos JSON
+    const body: RequestBody = await request.json();
+
+    const {
+      name,
+      slug,
+      description,
+      brand,
+      price,
+      stock,
+      category_id,
+      subcategory_id,
+      attributes,
+      temp_upload_id,
+      uploaded_files,
+      delete_assets,
+      set_primary_asset,
+      set_secondary_asset,
+    } = body;
 
     // Construir datos de actualización
     const updateData: any = {};
-
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const description = formData.get("description") as string;
-    const brand = formData.get("brand") as string;
-    const priceStr = formData.get("price") as string;
-    const stockStr = formData.get("stock") as string;
-    const categoryIdStr = formData.get("category_id") as string;
-    const subcategoryIdStr = formData.get("subcategory_id") as string;
-    const attributesStr = formData.get("attributes") as string;
-
     if (name) updateData.name = name;
     if (slug) updateData.slug = slug;
-    if (description !== null) updateData.description = description || null;
-    if (brand !== null) updateData.brand = brand || null;
-    if (priceStr !== null) {
-      const price = parseFloat(priceStr);
-      updateData.price = isNaN(price) ? null : price;
-    }
-    if (stockStr !== null) {
-      updateData.stock = parseInt(stockStr) || 0;
-    }
-    if (categoryIdStr) updateData.category_id = parseInt(categoryIdStr);
-    if (subcategoryIdStr) updateData.subcategory_id = parseInt(subcategoryIdStr);
-    if (attributesStr) updateData.attributes = JSON.parse(attributesStr);
+    if (description !== undefined) updateData.description = description || null;
+    if (brand !== undefined) updateData.brand = brand || null;
+    if (price !== undefined) updateData.price = price;
+    if (stock !== undefined) updateData.stock = stock || 0;
+    if (category_id) updateData.category_id = category_id;
+    if (subcategory_id) updateData.subcategory_id = subcategory_id;
+    if (attributes) updateData.attributes = attributes;
 
     // Validar datos
     const errors = validateProductData(updateData);
@@ -137,66 +170,118 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
     // Actualizar producto
     const product = await updateProduct(supabase, productId, updateData);
 
-    // Función helper para determinar el tipo de archivo
-    const getFileKind = (file: File): "image" | "video" | "file" => {
-      if (file.type.startsWith("image/")) return "image";
-      if (file.type.startsWith("video/")) return "video";
-      return "file";
-    };
+    // Función para mover archivo de carpeta temporal a la definitiva
+    async function moveFileAndCreateAsset(
+      file: UploadedFile,
+      section: "gallery" | "additional" | "download",
+      isPrimary: boolean = false,
+      isSecondary: boolean = false
+    ) {
+      const oldPath = file.storage_path;
+      const timestamp = Date.now();
+      const sanitizedName = file.filename.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const newPath = `${productId}/${section}/${timestamp}-${sanitizedName}`;
 
-    // Subir archivos de la galería
-    const galleryFiles = formData.getAll("gallery_images") as File[];
-    for (const file of galleryFiles) {
-      if (file && file.size > 0) {
-        try {
-          await uploadProductAsset(supabase, productId, file, {
-            kind: getFileKind(file),
-            section: "gallery",
-            alt: product.name,
+      // Mover archivo en el storage
+      const { error: moveError } = await supabase.storage
+        .from("products")
+        .move(oldPath, newPath);
+
+      if (moveError) {
+        console.error(`Error moving file ${oldPath} to ${newPath}:`, moveError);
+        // Si falla mover, intentar copiar y luego eliminar
+        const { data: fileData } = await supabase.storage
+          .from("products")
+          .download(oldPath);
+        
+        if (fileData) {
+          await supabase.storage.from("products").upload(newPath, fileData, {
+            cacheControl: "3600",
+            upsert: true,
           });
-        } catch (uploadError) {
-          console.error("Error uploading gallery file:", uploadError);
+          await supabase.storage.from("products").remove([oldPath]);
+        } else {
+          throw new Error(`Failed to move file: ${file.filename}`);
+        }
+      }
+
+      // Obtener el siguiente sort_order
+      const { data: lastAsset } = await supabase
+        .from("product_assets")
+        .select("sort_order")
+        .eq("product_id", productId)
+        .eq("section", section)
+        .order("sort_order", { ascending: false })
+        .limit(1)
+        .single();
+
+      const nextSortOrder = (lastAsset?.sort_order || 0) + 1;
+
+      // Crear registro en la base de datos
+      const { error: dbError } = await supabase.from("product_assets").insert({
+        product_id: productId,
+        kind: file.kind,
+        section: section,
+        storage_bucket: "products",
+        storage_path: newPath,
+        title: section === "download" ? file.filename : null,
+        alt: section !== "download" ? product.name : null,
+        is_primary: isPrimary,
+        is_secondary: isSecondary,
+        sort_order: nextSortOrder,
+        filename: file.filename,
+        mime_type: file.mime_type,
+        file_size_bytes: file.file_size_bytes,
+        is_public: true,
+      });
+
+      if (dbError) {
+        console.error("Error creating asset record:", dbError);
+        throw new Error(`Error saving asset: ${dbError.message}`);
+      }
+    }
+
+    // Procesar archivos de galería (si hay nuevos)
+    if (uploaded_files?.gallery) {
+      for (const file of uploaded_files.gallery) {
+        try {
+          await moveFileAndCreateAsset(
+            file,
+            "gallery",
+            file.is_primary || false,
+            file.is_secondary || false
+          );
+        } catch (error) {
+          console.error("Error processing gallery file:", error);
         }
       }
     }
 
-    // Subir archivos adicionales
-    const additionalFiles = formData.getAll("additional_images") as File[];
-    for (const file of additionalFiles) {
-      if (file && file.size > 0) {
+    // Procesar archivos adicionales
+    if (uploaded_files?.additional) {
+      for (const file of uploaded_files.additional) {
         try {
-          await uploadProductAsset(supabase, productId, file, {
-            kind: getFileKind(file),
-            section: "additional",
-            alt: product.name,
-          });
-        } catch (uploadError) {
-          console.error("Error uploading additional file:", uploadError);
+          await moveFileAndCreateAsset(file, "additional");
+        } catch (error) {
+          console.error("Error processing additional file:", error);
         }
       }
     }
 
-    // Subir archivos descargables
-    const downloadFilesArr = formData.getAll("download_files") as File[];
-    for (const file of downloadFilesArr) {
-      if (file && file.size > 0) {
+    // Procesar archivos descargables
+    if (uploaded_files?.download) {
+      for (const file of uploaded_files.download) {
         try {
-          await uploadProductAsset(supabase, productId, file, {
-            kind: "file",
-            section: "download",
-            title: file.name,
-          });
-        } catch (uploadError) {
-          console.error("Error uploading download file:", uploadError);
+          await moveFileAndCreateAsset(file, "download");
+        } catch (error) {
+          console.error("Error processing download file:", error);
         }
       }
     }
 
     // Eliminar assets marcados para eliminar
-    const deleteAssetsStr = formData.get("delete_assets") as string;
-    if (deleteAssetsStr) {
-      const deleteAssetIds = JSON.parse(deleteAssetsStr) as number[];
-      for (const assetId of deleteAssetIds) {
+    if (delete_assets && delete_assets.length > 0) {
+      for (const assetId of delete_assets) {
         try {
           await deleteProductAsset(supabase, assetId);
         } catch (deleteError) {
@@ -206,37 +291,51 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
     }
 
     // Actualizar asset primario si se especifica
-    const setPrimaryAssetId = formData.get("set_primary_asset") as string;
-    if (setPrimaryAssetId) {
+    if (set_primary_asset) {
       try {
-        await setAssetAsPrimary(supabase, parseInt(setPrimaryAssetId));
+        await setAssetAsPrimary(supabase, set_primary_asset);
       } catch (error) {
         console.error("Error setting primary asset:", error);
       }
     }
 
     // Actualizar asset secundario (hover) si se especifica
-    const setSecondaryAssetId = formData.get("set_secondary_asset") as string;
-    if (setSecondaryAssetId !== undefined) {
+    if (set_secondary_asset !== undefined) {
       try {
-        const secondaryId = setSecondaryAssetId ? parseInt(setSecondaryAssetId) : null;
-        await setAssetAsSecondary(supabase, secondaryId, productId);
+        await setAssetAsSecondary(supabase, set_secondary_asset, productId);
       } catch (error) {
         console.error("Error setting secondary asset:", error);
       }
     }
 
-    return new Response(
-      JSON.stringify({ success: true, product }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    // Limpiar carpeta temporal si quedó algo
+    if (temp_upload_id) {
+      try {
+        const { data: tempFiles } = await supabase.storage
+          .from("products")
+          .list(`temp/${temp_upload_id}`);
+        
+        if (tempFiles && tempFiles.length > 0) {
+          const pathsToDelete = tempFiles.map(f => `temp/${temp_upload_id}/${f.name}`);
+          await supabase.storage.from("products").remove(pathsToDelete);
+        }
+      } catch (e) {
+        // Ignorar errores de limpieza
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, product }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error updating product:", error);
-    const message = error instanceof Error ? error.message : "Error desconocido";
-    return new Response(
-      JSON.stringify({ success: false, error: message }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    const message =
+      error instanceof Error ? error.message : "Error desconocido";
+    return new Response(JSON.stringify({ success: false, error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
 

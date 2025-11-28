@@ -149,6 +149,8 @@ const enrichedProducts = await enrichProductsWithImages(
   productsResponse.items
 );
 
+console.log(enrichedProducts);
+
 const initialFilters = {
   subcategorySlug: validatedSubcategorySlug,
   page: productsResponse.page,
