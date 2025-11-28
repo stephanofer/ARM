@@ -22,7 +22,6 @@ const productDetails = await getProductFullDetailsBySlug(supabase, productSlug);
 if (!productDetails) {
   return Astro.redirect("/404");
 }
-console.log(productDetails);
 
 const { product, category, subcategory, assets } = productDetails;
 
