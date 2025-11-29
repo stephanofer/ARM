@@ -865,7 +865,7 @@ export default function ProductForm({
                     Precio
                   </label>
                   <div class={styles.priceInputWrapper}>
-                    <span class={styles.pricePrefix}>$</span>
+                    <span class={styles.pricePrefix}>S/</span>
                     <input
                       type="number"
                       id="price"

@@ -1,29 +1,48 @@
 import type { CartItem } from "@/lib/data/types";
 import styles from "./AddToCartButton.module.css";
-import { addToCart } from "@/stores/cart";
+import { addToCart, DEFAULT_QUANTITY } from "@/stores/cart";
+
+type CartItemData = Omit<CartItem, "quantity">;
 
 interface AddToCartButtonProps {
-  product: CartItem;
+  /** Datos del producto a agregar */
+  product: CartItemData;
+  /** Cantidad a agregar (por defecto 1) */
+  quantity?: number;
+  /** Callback ejecutado después de agregar al carrito */
+  onAddToCart?: () => void;
+  /** Texto personalizado del botón */
+  label?: string;
+  /** Si solo muestra el icono (sin texto) */
+  iconOnly?: boolean;
+  /** Clase CSS adicional */
+  className?: string;
 }
 
-export function AddToCartButton({ product }: AddToCartButtonProps) {
+/**
+ * Botón para agregar productos al carrito.
+ * 
+ * Casos de uso:
+ * - ProductCard: Solo botón, agrega 1 unidad (quantity=1)
+ * - Página de producto: Con QuantitySelector, recibe quantity como prop
+ */
+export function AddToCartButton({
+  product,
+  quantity = DEFAULT_QUANTITY,
+  onAddToCart,
+  label = "Agregar al carrito",
+  iconOnly = false,
+  className = "",
+}: AddToCartButtonProps) {
   const handleAddToCart = () => {
-    // Obtener cantidad del input (buscar en el DOM más cercano)
-    const quantityInput = document.querySelector('input#quantity') as HTMLInputElement;
-    const quantity = quantityInput && quantityInput.value ? parseInt(quantityInput.value, 10) : 1;
-    
-    // Validar que la cantidad sea válida
-    const validQuantity = isNaN(quantity) || quantity < 1 ? 1 : quantity;
-    
-    addToCart({
-      ...product,
-      quantity: validQuantity
-    });
+    addToCart(product, quantity);
+    onAddToCart?.();
   };
 
   return (
     <button
-      className={styles["add-to-cart-btn"]}
+      type="button"
+      className={`${styles["add-to-cart-btn"]} ${iconOnly ? styles["icon-only"] : ""} ${className}`}
       data-product-id={product.id}
       aria-label={`Agregar ${product.name} al carrito`}
       onClick={handleAddToCart}
@@ -40,7 +59,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
-      <span>Agregar al carrito</span>
+      {!iconOnly && <span>{label}</span>}
     </button>
   );
 }

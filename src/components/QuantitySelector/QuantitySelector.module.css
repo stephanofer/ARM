@@ -1,0 +1,61 @@
+.quantitySelector {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.quantityBtn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.quantityBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.quantityBtn:active:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.quantityBtn:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.quantityInput {
+  width: 50px;
+  height: 40px;
+  border: none;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #111827;
+  background: transparent;
+  -moz-appearance: textfield;
+}
+
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantityInput:focus {
+  outline: none;
+  background: #f9fafb;
+}

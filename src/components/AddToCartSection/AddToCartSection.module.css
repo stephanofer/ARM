@@ -1,0 +1,17 @@
+.addToCartSection {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  margin: 1.5rem 0;
+}
+
+.addToCartBtn {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .addToCartSection {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

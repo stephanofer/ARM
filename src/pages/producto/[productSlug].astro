@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { createClient } from "@/lib/supabase";
 import { getProductFullDetailsBySlug } from "@/lib/data/products";
-import { AddToCartButton } from "@/components/AddToCartButton/AddToCartButton";
+import { AddToCartSection } from "@/components/AddToCartSection/AddToCartSection";
 
 const { productSlug } = Astro.params;
 
@@ -230,66 +230,17 @@ const formatFileSize = (bytes: number | null): string => {
         </div>
 
         <!-- Add to Cart -->
-        <div class="add-to-cart-section">
-          <div class="quantity-selector">
-            <button
-              class="quantity-btn"
-              id="decreaseQty"
-              aria-label="Disminuir cantidad"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            <input
-              type="number"
-              id="quantity"
-              value="1"
-              min="1"
-              max="99"
-              aria-label="Cantidad"
-            />
-            <button
-              class="quantity-btn"
-              id="increaseQty"
-              aria-label="Aumentar cantidad"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-          </div>
-
-          <AddToCartButton
-            product={{
-              id: product.id,
-              name: product.name,
-              slug: product.slug,
-              brand: product.brand,
-              description: product.description,
-              image_url: primaryImage?.url || null,
-              quantity: 1,
-            } }
-            client:load
-          />
-        </div>
+        <AddToCartSection
+          product={{
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            brand: product.brand,
+            description: product.description,
+            image_url: primaryImage?.url || null,
+          }}
+          client:load
+        />
 
         <!-- Quick Actions Links -->
         <div class="quick-links">
@@ -2324,8 +2275,6 @@ const formatFileSize = (bytes: number | null): string => {
 <script>
   // 1. Envolvemos la lógica en una función para poder reutilizarla
   const initProductPage = () => {
-    
-    // --- TU CÓDIGO ORIGINAL EMPIEZA AQUÍ ---
 
     // Gallery functionality
     const thumbnails = document.querySelectorAll<HTMLButtonElement>(".thumbnail");
@@ -2344,57 +2293,6 @@ const formatFileSize = (bytes: number | null): string => {
             mediaItems[index].classList.add("active");
           }
         });
-      });
-    }
-
-    // Quantity selector
-    const decreaseBtn = document.getElementById("decreaseQty") as HTMLButtonElement;
-    const increaseBtn = document.getElementById("increaseQty") as HTMLButtonElement;
-    const quantityInput = document.getElementById("quantity") as HTMLInputElement;
-
-    if (decreaseBtn && quantityInput) {
-      // Nota: Es buena práctica clonar y reemplazar o remover listeners previos si usas SPA,
-      // pero con astro:page-load el DOM se refresca, así que esto suele ser seguro.
-      decreaseBtn.addEventListener("click", () => {
-        const currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-          quantityInput.value = (currentValue - 1).toString();
-        }
-      });
-    }
-
-    if (increaseBtn && quantityInput) {
-      increaseBtn.addEventListener("click", () => {
-        const currentValue = parseInt(quantityInput.value);
-        const maxValue = parseInt(quantityInput.max);
-        if (currentValue < maxValue) {
-          quantityInput.value = (currentValue + 1).toString();
-        }
-      });
-    }
-
-    // Validación para input manual
-    if (quantityInput) {
-      quantityInput.addEventListener("input", () => {
-        let value = parseInt(quantityInput.value);
-        const min = parseInt(quantityInput.min);
-        const max = parseInt(quantityInput.max);
-
-        if (isNaN(value)) return;
-
-        if (value < min) {
-          quantityInput.value = min.toString();
-        } else if (value > max) {
-          quantityInput.value = max.toString();
-        }
-      });
-
-      quantityInput.addEventListener("blur", () => {
-        let value = parseInt(quantityInput.value);
-        const min = parseInt(quantityInput.min);
-        if (isNaN(value) || value < min) {
-          quantityInput.value = min.toString();
-        }
       });
     }
 

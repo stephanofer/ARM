@@ -90,7 +90,6 @@ export function ProductCard({
             brand: product.brand,
             description: product.description,
             image_url: primaryImageUrl || secondaryImageUrl || null,
-            quantity: 1,
           }}
         />
       </div>

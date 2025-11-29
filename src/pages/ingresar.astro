@@ -402,15 +402,15 @@ if (data.user) {
     const togglePassword = document.getElementById(
       "togglePassword"
     ) as HTMLButtonElement;
-    const eyeIcon = document.getElementById("eyeIcon") as SVGElement;
-    const eyeOffIcon = document.getElementById("eyeOffIcon") as SVGElement;
+    const eyeIcon = document.querySelector<SVGElement>("#eyeIcon");
+    const eyeOffIcon = document.querySelector<SVGElement>("#eyeOffIcon");
 
     // Toggle mostrar/ocultar contraseña
     togglePassword.addEventListener("click", () => {
       const isPassword = passwordInput.type === "password";
       passwordInput.type = isPassword ? "text" : "password";
-      eyeIcon.classList.toggle("hidden");
-      eyeOffIcon.classList.toggle("hidden");
+      eyeIcon?.classList.toggle("hidden");
+      eyeOffIcon?.classList.toggle("hidden");
       togglePassword.setAttribute(
         "aria-label",
         isPassword ? "Ocultar contraseña" : "Mostrar contraseña"

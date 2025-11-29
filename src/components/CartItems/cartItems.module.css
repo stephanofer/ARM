@@ -91,24 +91,24 @@
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: white;
+  gap: 0;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 0.25rem 0.5rem;
+  overflow: hidden;
+  background: #fff;
 }
 
 .qty-btn {
-  background: none;
+  width: 32px;
+  height: 32px;
   border: none;
-  color: #6b7280;
+  background: transparent;
   cursor: pointer;
-  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
-  border-radius: 4px;
+  color: #374151;
+  transition: all 0.2s ease;
 }
 
 .qty-btn:hover {
@@ -117,20 +117,20 @@
 }
 
 .qty-btn:active {
-  transform: scale(0.9);
+  background: #e5e7eb;
 }
 
 .quantity-display {
-  font-size: 0.9375rem;
+  width: 40px;
+  height: 32px;
+  border: none;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #111827;
-  min-width: 32px;
-  width: 32px;
-  text-align: center;
-  border: none;
   background: transparent;
-  padding: 0;
-  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -142,6 +142,7 @@
 
 .quantity-display:focus {
   outline: none;
+  background: #f9fafb;
 }
 
 .remove-item-btn {

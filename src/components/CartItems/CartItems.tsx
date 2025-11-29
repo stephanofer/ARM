@@ -4,6 +4,9 @@ import {
   increaseQuantity,
   removeFromCart,
   setQuantity,
+  MIN_QUANTITY,
+  MAX_QUANTITY,
+  clampQuantity,
 } from "@/stores/cart";
 import { useStore } from "@nanostores/preact";
 import styles from "./cartItems.module.css";
@@ -58,22 +61,31 @@ export function CartItems() {
                     </button>
                     <input
                       type="number"
-                      min="1"
+                      min={MIN_QUANTITY}
+                      max={MAX_QUANTITY}
                       className={styles["quantity-display"]}
                       value={item.quantity}
-                      onChange={(e) => {
-                        const value = parseInt(e.currentTarget.value);
-                        if (value > 0) {
+                      onInput={(e) => {
+                        const target = e.currentTarget;
+                        const value = parseInt(target.value, 10);
+                        
+                        // Si excede el máximo, corregir inmediatamente
+                        if (value > MAX_QUANTITY) {
+                          target.value = MAX_QUANTITY.toString();
+                          setQuantity(String(item.id), MAX_QUANTITY);
+                          return;
+                        }
+                        
+                        // Si es válido, actualizar
+                        if (!isNaN(value) && value >= MIN_QUANTITY) {
                           setQuantity(String(item.id), value);
-                        } else {
-                          setQuantity(String(item.id), 1);
                         }
                       }}
                       onBlur={(e) => {
-                        const value = parseInt(e.currentTarget.value);
-                        if (!value || value <= 0) {
-                          setQuantity(String(item.id), 1);
-                        }
+                        const value = parseInt(e.currentTarget.value, 10);
+                        const validValue = clampQuantity(value);
+                        e.currentTarget.value = validValue.toString();
+                        setQuantity(String(item.id), validValue);
                       }}
                     />
                     <button
