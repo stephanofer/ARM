@@ -153,6 +153,14 @@ export default function ProductForm({
   const [showSuccessBanner, setShowSuccessBanner] = useState(isNew);
   const [isDragging, setIsDragging] = useState(false);
 
+  // Modal de confirmación para eliminar asset individual
+  const [deleteAssetModal, setDeleteAssetModal] = useState<{
+    isOpen: boolean;
+    assetId: number | null;
+    section: AssetSection | null;
+    assetName: string;
+  }>({ isOpen: false, assetId: null, section: null, assetName: "" });
+
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const additionalInputRef = useRef<HTMLInputElement>(null);
   const downloadInputRef = useRef<HTMLInputElement>(null);
@@ -292,25 +300,57 @@ export default function ProductForm({
     }
   }
 
-  // Delete existing asset
+  // Delete existing asset - abre modal de confirmación
   function deleteExistingAsset(section: AssetSection, assetId: number) {
-    if (confirm("¿Eliminar este archivo?")) {
-      setAssetsToDelete((prev) => [...prev, assetId]);
-
-      if (section === "gallery") {
-        setGalleryAssets((prev) => prev.filter((a) => a.id !== assetId));
-        if (primaryAssetId === assetId) {
-          setPrimaryAssetId(null);
-        }
-        if (secondaryAssetId === assetId) {
-          setSecondaryAssetId(null);
-        }
-      } else if (section === "additional") {
-        setAdditionalAssets((prev) => prev.filter((a) => a.id !== assetId));
-      } else {
-        setDownloadAssets((prev) => prev.filter((a) => a.id !== assetId));
-      }
+    // Buscar info del asset para mostrar en el modal
+    let assetName = "este archivo";
+    if (section === "gallery") {
+      const asset = galleryAssets.find((a) => a.id === assetId);
+      assetName = asset?.filename || asset?.title || "esta imagen";
+    } else if (section === "additional") {
+      const asset = additionalAssets.find((a) => a.id === assetId);
+      assetName = asset?.filename || asset?.title || "esta imagen";
+    } else {
+      const asset = downloadAssets.find((a) => a.id === assetId);
+      assetName = asset?.filename || asset?.title || "este archivo";
     }
+
+    setDeleteAssetModal({
+      isOpen: true,
+      assetId,
+      section,
+      assetName,
+    });
+  }
+
+  // Confirmar eliminación del asset
+  function confirmDeleteAsset() {
+    const { assetId, section } = deleteAssetModal;
+    if (!assetId || !section) return;
+
+    setAssetsToDelete((prev) => [...prev, assetId]);
+
+    if (section === "gallery") {
+      setGalleryAssets((prev) => prev.filter((a) => a.id !== assetId));
+      if (primaryAssetId === assetId) {
+        setPrimaryAssetId(null);
+      }
+      if (secondaryAssetId === assetId) {
+        setSecondaryAssetId(null);
+      }
+    } else if (section === "additional") {
+      setAdditionalAssets((prev) => prev.filter((a) => a.id !== assetId));
+    } else {
+      setDownloadAssets((prev) => prev.filter((a) => a.id !== assetId));
+    }
+
+    // Cerrar modal
+    setDeleteAssetModal({ isOpen: false, assetId: null, section: null, assetName: "" });
+  }
+
+  // Cancelar eliminación
+  function cancelDeleteAsset() {
+    setDeleteAssetModal({ isOpen: false, assetId: null, section: null, assetName: "" });
   }
 
   // Set primary asset
@@ -1598,7 +1638,43 @@ export default function ProductForm({
         </div>
       </form>
 
-      {/* Delete Modal */}
+      {/* Delete Asset Modal */}
+      {deleteAssetModal.isOpen && (
+        <div class={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && cancelDeleteAsset()}>
+          <div class={styles.modal}>
+            <div class={`${styles.modalIcon} ${styles.warning}`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </div>
+            <h3 class={styles.modalTitle}>Eliminar archivo</h3>
+            <p class={styles.modalMessage}>
+              ¿Estás seguro de que deseas eliminar <strong>{deleteAssetModal.assetName}</strong>?
+              {"\n"}
+              <span class={styles.modalHint}>
+                El archivo se eliminará permanentemente del servidor al guardar los cambios.
+              </span>
+            </p>
+            <div class={styles.modalActions}>
+              <button class={styles.secondaryBtn} onClick={cancelDeleteAsset}>
+                Cancelar
+              </button>
+              <button class={styles.dangerBtn} onClick={confirmDeleteAsset}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Product Modal */}
       {showDeleteModal && product && (
         <div class={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}>
           <div class={styles.modal}>

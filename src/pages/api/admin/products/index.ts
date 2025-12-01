@@ -138,6 +138,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
       const nextSortOrder = (lastAsset?.sort_order || 0) + 1;
 
+      // Si este nuevo asset será primario, quitar el flag de los existentes
+      if (isPrimary) {
+        await supabase
+          .from("product_assets")
+          .update({ is_primary: false })
+          .eq("product_id", product.id)
+          .eq("section", "gallery");
+      }
+
+      // Si este nuevo asset será secundario, quitar el flag de los existentes
+      if (isSecondary) {
+        await supabase
+          .from("product_assets")
+          .update({ is_secondary: false })
+          .eq("product_id", product.id)
+          .eq("section", "gallery");
+      }
+
       // Crear registro en la base de datos
       const { error: dbError } = await supabase.from("product_assets").insert({
         product_id: product.id,
