@@ -786,7 +786,7 @@ const formatFileSize = (bytes: number | null): string => {
   /* Product Main Section */
   .product-main {
     display: grid;
-    grid-template-columns: 1fr 420px;
+    grid-template-columns: minmax(500px, 700px) 1fr;
     gap: 3rem;
     margin-bottom: 4rem;
     align-items: start;
@@ -795,10 +795,11 @@ const formatFileSize = (bytes: number | null): string => {
   /* ===== GALLERY - Shopify Style ===== */
   .gallery-section {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 75px 1fr;
     gap: 12px;
     position: sticky;
     top: 2rem;
+    max-width: 700px;
   }
 
   /* Thumbnails Container - Vertical en desktop */
@@ -806,7 +807,7 @@ const formatFileSize = (bytes: number | null): string => {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 600px;
+    max-height: 620px;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
@@ -821,10 +822,10 @@ const formatFileSize = (bytes: number | null): string => {
 
   /* Thumbnail Individual */
   .thumbnail {
-    width: 72px;
-    height: 72px;
-    min-width: 72px;
-    min-height: 72px;
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    min-height: 68px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
