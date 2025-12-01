@@ -7,11 +7,27 @@
 
 .addToCartBtn {
   flex: 1;
+  min-height: 48px;
+}
+
+@media (max-width: 768px) {
+  .addToCartSection {
+    /* Mantener horizontal en mobile: INPUT | BOTON */
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .addToCartBtn {
+    /* Botón toma el espacio restante */
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 480px) {
   .addToCartSection {
-    flex-direction: column;
-    gap: 10px;
+    /* Horizontal también en pantallas pequeñas */
+    flex-direction: row;
+    gap: 8px;
   }
 }
