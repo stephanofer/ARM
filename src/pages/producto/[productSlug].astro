@@ -513,51 +513,79 @@ const formatFileSize = (bytes: number | null): string => {
       </div>
     </section>
 
-    <!-- Examples Section -->
+    <!-- Examples Section - Galería Adicional -->
     {additionalAssets.length > 0 && (
       <section id="ejemplos" class="examples-section">
-        <h2>Galería adicional</h2>
-        <p class="section-subtitle">
-          Más imágenes y videos del producto
-        </p>
+        <div class="examples-header">
+          <h2>Galería adicional</h2>
+          <p class="section-subtitle">
+            Explora más detalles y perspectivas del producto
+          </p>
+          <p class="image-count">
+            {additionalAssets.length} {additionalAssets.length === 1 ? 'elemento' : 'elementos'}
+          </p>
+        </div>
 
-        <div class="examples-grid">
+        <div class="examples-grid" data-count={additionalAssets.length}>
           {additionalAssets.map((asset, index) => (
-            <div class={`example-item ${asset.kind === 'video' ? 'video-item' : ''} ${index === 0 && additionalAssets.length > 2 ? 'large' : ''}`}>
-              {asset.kind === "image" ? (
-                <img
-                  src={asset.url}
-                  alt={asset.alt || `${product.name} - ${asset.title || 'Imagen adicional'}`}
-                  loading="lazy"
-                />
-              ) : (
-                <>
-                  <video
-                    class="example-video"
-                    preload="metadata"
-                    playsinline
-                  >
-                    <source src={asset.url} type={asset.mime_type || "video/mp4"} />
-                    Tu navegador no soporta el elemento de video.
-                  </video>
-                  <div class="video-overlay">
-                    <svg
-                      width="64"
-                      height="64"
-                      viewBox="0 0 24 24"
-                      fill="white"
-                      stroke="white"
-                      stroke-width="2"
-                      aria-hidden="true"
+            <article 
+              class={`example-item ${asset.kind === 'video' ? 'video-item' : 'image-item'}`}
+              data-index={index}
+            >
+              <div class="example-media-wrapper">
+                {asset.kind === "image" ? (
+                  <img
+                    src={asset.url}
+                    alt={asset.alt || `${product.name} - ${asset.title || `Vista ${index + 1}`}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <>
+                    <video
+                      class="example-video"
+                      preload="metadata"
+                      playsinline
+                      muted
                     >
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                  </div>
-                </>
+                      <source src={asset.url} type={asset.mime_type || "video/mp4"} />
+                      Tu navegador no soporta el elemento de video.
+                    </video>
+                    <div class="video-overlay">
+                      <div class="video-play-button">
+                        <svg
+                          width="48"
+                          height="48"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                      </div>
+                      <span class="video-label">Reproducir video</span>
+                    </div>
+                  </>
+                )}
+              </div>
+              {asset.title && (
+                <div class="example-caption">
+                  <span>{asset.title}</span>
+                </div>
               )}
-            </div>
+            </article>
           ))}
         </div>
+
+        <!-- Nota para el diseñador (comentario visible solo en desarrollo) -->
+        <!-- 
+          📐 ESPECIFICACIONES PARA IMÁGENES:
+          - Proporción recomendada: 4:3 (landscape) o 3:4 (portrait)
+          - Resolución mínima: 800x600px
+          - Resolución óptima: 1200x900px
+          - Formato: WebP preferido, JPG como fallback
+          - Peso máximo: 500KB por imagen
+        -->
       </section>
     )}
 
@@ -1531,14 +1559,197 @@ const formatFileSize = (bytes: number | null): string => {
     line-height: 1.6;
   }
 
-  /* Examples Section */
-  .examples-section,
+  /* ===== EXAMPLES SECTION - Galería Adicional ===== */
+  .examples-section {
+    margin-bottom: 4rem;
+    padding: 3rem 0;
+  }
+
+  .examples-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .examples-section h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+  }
+
+  .image-count {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin: 0;
+  }
+
+  /* Grid Principal - Diseño adaptativo según cantidad */
+  .examples-grid {
+    display: grid;
+    gap: 1rem;
+    /* Grid por defecto: 3 columnas */
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Ajustes según cantidad de elementos */
+  .examples-grid[data-count="1"] {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .examples-grid[data-count="2"] {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .examples-grid[data-count="4"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Item individual */
+  .example-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    /* Aspect ratio consistente 4:3 para estandarización */
+    aspect-ratio: 4 / 3;
+  }
+
+  .example-media-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Imágenes */
+  .example-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  /* Videos */
+  .example-item.video-item {
+    cursor: pointer;
+  }
+
+  .example-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.2) 50%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+    transition: background 0.3s ease;
+    pointer-events: none;
+  }
+
+  .example-item.video-item:hover .video-overlay {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.6) 0%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+  }
+
+  .video-play-button {
+    width: 72px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111827;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .video-play-button svg {
+    margin-left: 4px; /* Ajuste visual para centrar el triángulo */
+  }
+
+  .example-item.video-item:hover .video-play-button {
+    transform: scale(1.1);
+    background: #fff;
+  }
+
+  .video-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Estado reproduciendo */
+  .example-item.video-item.playing .video-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .example-item.video-item.playing video {
+    z-index: 3;
+  }
+
+  /* Caption opcional */
+  .example-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .example-item:hover .example-caption {
+    opacity: 1;
+  }
+
+  .example-caption span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+  }
+
+  /* Downloads y Trust Section mantienen sus estilos */
   .downloads-section,
   .trust-section {
     margin-bottom: 4rem;
   }
 
-  .examples-section h2,
   .downloads-section h2,
   .trust-section h2 {
     font-size: 2rem;
@@ -1546,79 +1757,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: #111827;
     margin-bottom: 0.5rem;
     text-align: center;
-  }
-
-  .section-subtitle {
-    text-align: center;
-    color: #6b7280;
-    margin-bottom: 2.5rem;
-    font-size: 1.125rem;
-  }
-
-  .examples-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-
-  .example-item {
-    border-radius: 12px;
-    overflow: hidden;
-    aspect-ratio: 4/3;
-    background: #f9fafb;
-  }
-
-  .example-item.large {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-
-  .example-item img,
-  .example-item video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .example-item.video-item {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .example-item.video-item video {
-    cursor: pointer;
-  }
-
-  .example-item.video-item.playing video {
-    cursor: default;
-  }
-
-  .video-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    opacity: 1;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  .example-item.video-item:hover .video-overlay {
-    opacity: 0.8;
-  }
-
-  /* Ocultar overlay cuando el video está reproduciendo */
-  .example-item.video-item.playing .video-overlay {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Mostrar controles cuando está reproduciendo */
-  .example-item.video-item.playing video {
-    z-index: 3;
   }
 
   /* Downloads Section */
@@ -2141,6 +2279,20 @@ const formatFileSize = (bytes: number | null): string => {
   .downloads-section.animate-in .download-card:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
   .downloads-section.animate-in .download-card:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
 
+  /* Animación de los items de la galería adicional */
+  .example-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  }
+
+  .examples-section.animate-in .example-item:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(3) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(4) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(5) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(n+6) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+
   /* Animación de las tarjetas de confianza */
   .trust-card-horizontal {
     opacity: 0;
@@ -2252,13 +2404,30 @@ const formatFileSize = (bytes: number | null): string => {
       grid-template-columns: repeat(3, 1fr);
     }
 
+    /* Galería adicional - Tablet */
     .examples-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.875rem;
+    }
+
+    .examples-grid[data-count="1"] {
+      grid-template-columns: 1fr;
+      max-width: 500px;
+    }
+
+    .examples-grid[data-count="2"],
+    .examples-grid[data-count="4"] {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .example-item.large {
-      grid-column: span 1;
-      grid-row: span 1;
+    .video-play-button {
+      width: 64px;
+      height: 64px;
+    }
+
+    .video-play-button svg {
+      width: 40px;
+      height: 40px;
     }
   }
 
@@ -2354,8 +2523,52 @@ const formatFileSize = (bytes: number | null): string => {
       gap: 1.5rem;
     }
 
+    /* Galería adicional - Mobile */
+    .examples-section {
+      padding: 2rem 0;
+    }
+
+    .examples-section h2 {
+      font-size: 1.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+    }
+
     .examples-grid {
       grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .examples-grid[data-count="1"],
+    .examples-grid[data-count="2"],
+    .examples-grid[data-count="4"] {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+    }
+
+    /* En mobile con 2 elementos, mostrar lado a lado */
+    .examples-grid[data-count="2"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .example-item {
+      border-radius: 8px;
+    }
+
+    .video-play-button {
+      width: 56px;
+      height: 56px;
+    }
+
+    .video-play-button svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .video-label {
+      font-size: 0.75rem;
     }
 
     .trust-grid {
