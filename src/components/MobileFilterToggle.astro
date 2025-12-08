@@ -1,9 +1,16 @@
----
-// Mobile filter toggle component
----
-
-<button class="mobile-filter-toggle" id="mobileFilterToggle" aria-label="Abrir filtros">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<button
+  class="mobile-filter-toggle"
+  id="mobileFilterToggle"
+  aria-label="Abrir filtros"
+>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
     <line x1="4" y1="21" x2="4" y2="14"></line>
     <line x1="4" y1="10" x2="4" y2="3"></line>
     <line x1="12" y1="21" x2="12" y2="12"></line>
@@ -21,18 +28,25 @@
   <div class="mobile-filter-panel">
     <div class="mobile-filter-header">
       <button class="close-btn" id="closeFilterBtn" aria-label="Cerrar filtros">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
-    <div class="mobile-filter-content" id="mobileFilterContent">
-      <!-- Filters will be moved here -->
-    </div>
+    <div class="mobile-filter-content" id="mobileFilterContent"></div>
     <div class="mobile-filter-footer">
-      <button class="btn-secondary" id="clearMobileFilters">Limpiar todo</button>
-      <button class="btn-primary" id="applyMobileFilters">Ver resultados</button>
+      <button class="btn-secondary" id="clearMobileFilters">Limpiar todo</button
+      >
+      <button class="btn-primary" id="applyMobileFilters">Ver resultados</button
+      >
     </div>
   </div>
 </div>
@@ -192,7 +206,7 @@
     .mobile-filter-overlay {
       display: none !important;
     }
-    
+
     .mobile-filter-toggle {
       display: none !important;
     }
@@ -206,67 +220,63 @@
 </style>
 
 <script>
-  const toggleBtn = document.getElementById('mobileFilterToggle');
-  const overlay = document.getElementById('mobileFilterOverlay');
-  const closeBtn = document.getElementById('closeFilterBtn');
-  const applyBtn = document.getElementById('applyMobileFilters');
-  const clearBtn = document.getElementById('clearMobileFilters');
-  const filterContent = document.getElementById('mobileFilterContent');
-  const desktopFilters = document.querySelector('.filters-sidebar');
+  const toggleBtn = document.getElementById("mobileFilterToggle");
+  const overlay = document.getElementById("mobileFilterOverlay");
+  const closeBtn = document.getElementById("closeFilterBtn");
+  const applyBtn = document.getElementById("applyMobileFilters");
+  const clearBtn = document.getElementById("clearMobileFilters");
+  const filterContent = document.getElementById("mobileFilterContent");
+  const desktopFilters = document.querySelector(".filters-sidebar");
 
   function openFilters() {
     if (overlay && desktopFilters && filterContent) {
-      // Clone filters to mobile container
       const clone = desktopFilters.cloneNode(true) as HTMLElement;
-      filterContent.innerHTML = '';
+      filterContent.innerHTML = "";
       filterContent.appendChild(clone);
-      
-      // Trigger reflow for animation
+
       requestAnimationFrame(() => {
-        overlay.classList.add('active');
+        overlay.classList.add("active");
       });
-      
-      document.body.style.overflow = 'hidden';
+
+      document.body.style.overflow = "hidden";
     }
   }
 
   function closeFilters() {
     if (overlay) {
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
     }
   }
 
-  toggleBtn?.addEventListener('click', openFilters);
-  closeBtn?.addEventListener('click', closeFilters);
-  applyBtn?.addEventListener('click', closeFilters);
-  
-  // Close on backdrop click
-  overlay?.addEventListener('click', (e) => {
+  toggleBtn?.addEventListener("click", openFilters);
+  closeBtn?.addEventListener("click", closeFilters);
+  applyBtn?.addEventListener("click", closeFilters);
+
+  overlay?.addEventListener("click", (e) => {
     if (e.target === overlay) {
       closeFilters();
     }
   });
 
-  // Clear filters
-  clearBtn?.addEventListener('click', () => {
-    const inputs = filterContent?.querySelectorAll('input[type="checkbox"], input[type="radio"]');
-    inputs?.forEach(input => {
+  clearBtn?.addEventListener("click", () => {
+    const inputs = filterContent?.querySelectorAll(
+      'input[type="checkbox"], input[type="radio"]'
+    );
+    inputs?.forEach((input) => {
       if (input instanceof HTMLInputElement) {
         input.checked = false;
       }
     });
-    
-    // Reset to "Todos" category
+
     const todosRadio = filterContent?.querySelector('input[value="todos"]');
     if (todosRadio instanceof HTMLInputElement) {
       todosRadio.checked = true;
     }
   });
 
-  // Close on ESC key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlay?.classList.contains('active')) {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay?.classList.contains("active")) {
       closeFilters();
     }
   });

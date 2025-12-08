@@ -1,10 +1,7 @@
-/* CategoriesManager Styles */
-
 .manager {
   position: relative;
 }
 
-/* Messages */
 .successMessage,
 .errorMessage {
   display: flex;
@@ -41,7 +38,6 @@
   }
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -122,7 +118,6 @@
   transform: translateY(-1px);
 }
 
-/* Grid for Categories */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -208,7 +203,6 @@
   border-top: 1px solid var(--admin-border-light);
 }
 
-/* Table for Subcategories */
 .table {
   background: var(--admin-card-bg);
   border: 1px solid var(--admin-border);
@@ -322,7 +316,6 @@
   justify-content: flex-end;
 }
 
-/* Buttons */
 .editBtn,
 .deleteBtn {
   display: inline-flex;
@@ -367,7 +360,6 @@
   cursor: not-allowed;
 }
 
-/* Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -494,7 +486,6 @@
   gap: 1rem;
 }
 
-/* Filters Section */
 .filtersSection {
   background: var(--admin-hover);
   border-radius: 12px;
@@ -624,7 +615,6 @@
   background: rgba(59, 130, 246, 0.04);
 }
 
-/* Modal Actions */
 .modalActions {
   display: flex;
   gap: 0.75rem;
@@ -685,7 +675,6 @@
   cursor: not-allowed;
 }
 
-/* Delete Modal */
 .deleteModalContent {
   width: 100%;
   max-width: 400px;
@@ -728,7 +717,6 @@
   margin-top: 0;
 }
 
-/* Empty State */
 .emptyState {
   text-align: center;
   padding: 3rem 1rem;
@@ -739,7 +727,6 @@
   margin: 0;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .header {
     flex-direction: column;

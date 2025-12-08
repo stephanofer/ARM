@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "preact/hooks";
 import type { JSX } from "preact";
 import styles from "./ProductForm.module.css";
 
-// Types
 interface FilterConfig {
   key: string;
   label: string;
@@ -94,42 +93,55 @@ export default function ProductForm({
   categories,
   isNew = false,
 }: ProductFormProps) {
-  // Form state
   const [name, setName] = useState(product?.name || "");
   const [slug, setSlug] = useState(product?.slug || "");
   const [description, setDescription] = useState(product?.description || "");
   const [brand, setBrand] = useState(product?.brand || "");
   const [price, setPrice] = useState(product?.price?.toString() || "");
   const [stock, setStock] = useState(product?.stock?.toString() || "0");
-  const [categoryId, setCategoryId] = useState(product?.category_id?.toString() || "");
-  const [subcategoryId, setSubcategoryId] = useState(product?.subcategory_id?.toString() || "");
-  const [attributes, setAttributes] = useState<{ key: string; value: string }[]>(
-    product?.attributes ? Object.entries(product.attributes).map(([key, value]) => ({ 
-      key, 
-      value: typeof value === 'number' ? value.toString() : value 
-    })) : []
+  const [categoryId, setCategoryId] = useState(
+    product?.category_id?.toString() || ""
+  );
+  const [subcategoryId, setSubcategoryId] = useState(
+    product?.subcategory_id?.toString() || ""
+  );
+  const [attributes, setAttributes] = useState<
+    { key: string; value: string }[]
+  >(
+    product?.attributes
+      ? Object.entries(product.attributes).map(([key, value]) => ({
+          key,
+          value: typeof value === "number" ? value.toString() : value,
+        }))
+      : []
   );
 
-  // Assets state - grouped by section
   const [galleryAssets, setGalleryAssets] = useState<Asset[]>(assets.gallery);
-  const [additionalAssets, setAdditionalAssets] = useState<Asset[]>(assets.additional);
-  const [downloadAssets, setDownloadAssets] = useState<Asset[]>(assets.download);
+  const [additionalAssets, setAdditionalAssets] = useState<Asset[]>(
+    assets.additional
+  );
+  const [downloadAssets, setDownloadAssets] = useState<Asset[]>(
+    assets.download
+  );
 
-  // Files to upload per section
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [downloadFiles, setDownloadFiles] = useState<File[]>([]);
 
-  // Previews per section
-  const [galleryPreviews, setGalleryPreviews] = useState<{ file: File; url: string; isVideo: boolean }[]>([]);
-  const [additionalPreviews, setAdditionalPreviews] = useState<{ file: File; url: string; isVideo: boolean }[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<
+    { file: File; url: string; isVideo: boolean }[]
+  >([]);
+  const [additionalPreviews, setAdditionalPreviews] = useState<
+    { file: File; url: string; isVideo: boolean }[]
+  >([]);
 
-  // NEW: Primary/secondary index for new files (before saving)
-  // In edit mode, don't default to first image - let user choose explicitly
-  const [primaryNewIndex, setPrimaryNewIndex] = useState<number | null>(isNew ? 0 : null);
-  const [secondaryNewIndex, setSecondaryNewIndex] = useState<number | null>(null);
+  const [primaryNewIndex, setPrimaryNewIndex] = useState<number | null>(
+    isNew ? 0 : null
+  );
+  const [secondaryNewIndex, setSecondaryNewIndex] = useState<number | null>(
+    null
+  );
 
-  // Preview Modal state
   const [previewModal, setPreviewModal] = useState<{
     isOpen: boolean;
     url: string;
@@ -137,7 +149,6 @@ export default function ProductForm({
     title: string;
   }>({ isOpen: false, url: "", isVideo: false, title: "" });
 
-  // Assets to delete
   const [assetsToDelete, setAssetsToDelete] = useState<number[]>([]);
   const [primaryAssetId, setPrimaryAssetId] = useState<number | null>(
     assets.gallery.find((a) => a.is_primary)?.id || null
@@ -146,17 +157,18 @@ export default function ProductForm({
     assets.gallery.find((a) => a.is_secondary)?.id || null
   );
 
-  // Active section tab
   const [activeMediaTab, setActiveMediaTab] = useState<AssetSection>("gallery");
 
-  // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    fileName: string;
+  } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(isNew);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Modal de confirmación para eliminar asset individual
   const [deleteAssetModal, setDeleteAssetModal] = useState<{
     isOpen: boolean;
     assetId: number | null;
@@ -167,61 +179,67 @@ export default function ProductForm({
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const additionalInputRef = useRef<HTMLInputElement>(null);
   const downloadInputRef = useRef<HTMLInputElement>(null);
-
-  // Get subcategories for selected category
-  const selectedCategory = categories.find((c) => c.id.toString() === categoryId);
+  const selectedCategory = categories.find(
+    (c) => c.id.toString() === categoryId
+  );
   const subcategories = selectedCategory?.subcategories || [];
-  
-  // Get selected subcategory with filter_config
-  const selectedSubcategory = subcategories.find((s) => s.id.toString() === subcategoryId);
+
+  const selectedSubcategory = subcategories.find(
+    (s) => s.id.toString() === subcategoryId
+  );
   const filterConfig = selectedSubcategory?.filter_config || [];
 
-  // Reset subcategory when category changes
   useEffect(() => {
     if (!subcategories.find((s) => s.id.toString() === subcategoryId)) {
       setSubcategoryId("");
     }
   }, [categoryId]);
 
-  // Auto-populate attributes when subcategory changes
   useEffect(() => {
     if (!subcategoryId || !selectedSubcategory?.filter_config?.length) {
       return;
     }
-    
-    // Only auto-populate for new products or when subcategory actually changed
-    const currentKeys = attributes.map(a => a.key);
-    const filterKeys = selectedSubcategory.filter_config.map(f => f.key);
-    
-    // Check if we need to update (new filters that don't exist yet)
+
+    const currentKeys = attributes.map((a) => a.key);
+    const filterKeys = selectedSubcategory.filter_config.map((f) => f.key);
+
     const newFilters = selectedSubcategory.filter_config.filter(
-      f => !currentKeys.includes(f.key)
+      (f) => !currentKeys.includes(f.key)
     );
-    
+
     if (newFilters.length > 0) {
-      // Merge existing attributes with new filter attributes
-      const existingAttrs = attributes.filter(a => filterKeys.includes(a.key) || (typeof a.value === 'string' && a.value.trim()));
-      const newAttrs = newFilters.map(f => ({
+      const existingAttrs = attributes.filter(
+        (a) =>
+          filterKeys.includes(a.key) ||
+          (typeof a.value === "string" && a.value.trim())
+      );
+      const newAttrs = newFilters.map((f) => ({
         key: f.key,
         value: "",
-        _filterConfig: f, // Store the filter config for rendering
+        _filterConfig: f,
       }));
-      
-      // Combine: keep existing values, add new ones from filter_config
+
       const mergedAttrs = [...existingAttrs];
-      newFilters.forEach(f => {
-        if (!existingAttrs.find(a => a.key === f.key)) {
+      newFilters.forEach((f) => {
+        if (!existingAttrs.find((a) => a.key === f.key)) {
           mergedAttrs.push({ key: f.key, value: "" });
         }
       });
-      
+
       setAttributes(mergedAttrs);
     }
   }, [subcategoryId]);
 
-  // Handle file selection for images and videos (gallery/additional)
-  function handleMediaFiles(files: FileList | File[], section: "gallery" | "additional") {
-    const validImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  function handleMediaFiles(
+    files: FileList | File[],
+    section: "gallery" | "additional"
+  ) {
+    const validImageTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
     const validVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
     const validTypes = [...validImageTypes, ...validVideoTypes];
     const maxImageSize = 10 * 1024 * 1024; // 10MB
@@ -234,13 +252,17 @@ export default function ProductForm({
     fileArray.forEach((file) => {
       const isVideo = validVideoTypes.includes(file.type);
       const maxSize = isVideo ? maxVideoSize : maxImageSize;
-      
+
       if (!validTypes.includes(file.type)) {
         alert(`${file.name} no es un tipo de archivo válido`);
         return;
       }
       if (file.size > maxSize) {
-        alert(`${file.name} excede el tamaño máximo de ${isVideo ? "100MB" : "10MB"}`);
+        alert(
+          `${file.name} excede el tamaño máximo de ${
+            isVideo ? "100MB" : "10MB"
+          }`
+        );
         return;
       }
       validFiles.push(file);
@@ -256,7 +278,6 @@ export default function ProductForm({
     }
   }
 
-  // Handle file selection for downloads
   function handleDownloadFiles(files: FileList | File[]) {
     const maxSize = 50 * 1024 * 1024; // 50MB
     const fileArray = Array.from(files);
@@ -274,25 +295,22 @@ export default function ProductForm({
     setDownloadFiles((prev) => [...prev, ...validFiles]);
   }
 
-  // Remove preview
   function removePreview(section: AssetSection, index: number) {
     if (section === "gallery") {
       URL.revokeObjectURL(galleryPreviews[index].url);
       setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
       setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
-      
-      // Adjust primary/secondary indices
+
       if (primaryNewIndex === index) {
-        // If removing primary, set to null (user must select again)
         setPrimaryNewIndex(null);
       } else if (primaryNewIndex !== null && primaryNewIndex > index) {
-        setPrimaryNewIndex((prev) => prev !== null ? prev - 1 : null);
+        setPrimaryNewIndex((prev) => (prev !== null ? prev - 1 : null));
       }
-      
+
       if (secondaryNewIndex === index) {
         setSecondaryNewIndex(null);
       } else if (secondaryNewIndex !== null && secondaryNewIndex > index) {
-        setSecondaryNewIndex((prev) => prev !== null ? prev - 1 : null);
+        setSecondaryNewIndex((prev) => (prev !== null ? prev - 1 : null));
       }
     } else if (section === "additional") {
       URL.revokeObjectURL(additionalPreviews[index].url);
@@ -303,9 +321,7 @@ export default function ProductForm({
     }
   }
 
-  // Delete existing asset - abre modal de confirmación
   function deleteExistingAsset(section: AssetSection, assetId: number) {
-    // Buscar info del asset para mostrar en el modal
     let assetName = "este archivo";
     if (section === "gallery") {
       const asset = galleryAssets.find((a) => a.id === assetId);
@@ -326,7 +342,6 @@ export default function ProductForm({
     });
   }
 
-  // Confirmar eliminación del asset
   function confirmDeleteAsset() {
     const { assetId, section } = deleteAssetModal;
     if (!assetId || !section) return;
@@ -347,49 +362,56 @@ export default function ProductForm({
       setDownloadAssets((prev) => prev.filter((a) => a.id !== assetId));
     }
 
-    // Cerrar modal
-    setDeleteAssetModal({ isOpen: false, assetId: null, section: null, assetName: "" });
+    setDeleteAssetModal({
+      isOpen: false,
+      assetId: null,
+      section: null,
+      assetName: "",
+    });
   }
 
-  // Cancelar eliminación
   function cancelDeleteAsset() {
-    setDeleteAssetModal({ isOpen: false, assetId: null, section: null, assetName: "" });
+    setDeleteAssetModal({
+      isOpen: false,
+      assetId: null,
+      section: null,
+      assetName: "",
+    });
   }
 
-  // Set primary asset
   function setAsPrimary(assetId: number) {
-    // Si ya es secundaria, limpiarla
     if (secondaryAssetId === assetId) {
       setSecondaryAssetId(null);
     }
     setPrimaryAssetId(assetId);
-    setGalleryAssets((prev) => prev.map((a) => ({ 
-      ...a, 
-      is_primary: a.id === assetId,
-      is_secondary: a.id === assetId ? false : a.is_secondary
-    })));
+    setGalleryAssets((prev) =>
+      prev.map((a) => ({
+        ...a,
+        is_primary: a.id === assetId,
+        is_secondary: a.id === assetId ? false : a.is_secondary,
+      }))
+    );
   }
 
-  // Set secondary asset (for hover effect)
   function setAsSecondary(assetId: number) {
-    // Si ya es primaria, no permitir
     if (primaryAssetId === assetId) {
       return;
     }
-    // Toggle: si ya es secundaria, quitarla
     if (secondaryAssetId === assetId) {
       setSecondaryAssetId(null);
-      setGalleryAssets((prev) => prev.map((a) => ({ ...a, is_secondary: false })));
+      setGalleryAssets((prev) =>
+        prev.map((a) => ({ ...a, is_secondary: false }))
+      );
     } else {
       setSecondaryAssetId(assetId);
-      setGalleryAssets((prev) => prev.map((a) => ({ ...a, is_secondary: a.id === assetId })));
+      setGalleryAssets((prev) =>
+        prev.map((a) => ({ ...a, is_secondary: a.id === assetId }))
+      );
     }
   }
 
-  // Set primary for NEW files (before upload)
   function setNewAsPrimary(index: number) {
-    if (galleryPreviews[index]?.isVideo) return; // Videos can't be primary
-    // Toggle: si ya es primaria, quitarla
+    if (galleryPreviews[index]?.isVideo) return;
     if (primaryNewIndex === index) {
       setPrimaryNewIndex(null);
       return;
@@ -400,10 +422,9 @@ export default function ProductForm({
     setPrimaryNewIndex(index);
   }
 
-  // Set secondary for NEW files (before upload)
   function setNewAsSecondary(index: number) {
-    if (galleryPreviews[index]?.isVideo) return; // Videos can't be secondary
-    if (primaryNewIndex === index) return; // Can't be both
+    if (galleryPreviews[index]?.isVideo) return;
+    if (primaryNewIndex === index) return;
     if (secondaryNewIndex === index) {
       setSecondaryNewIndex(null);
     } else {
@@ -411,47 +432,44 @@ export default function ProductForm({
     }
   }
 
-  // Open preview modal
   function openPreview(url: string, isVideo: boolean, title: string) {
     setPreviewModal({ isOpen: true, url, isVideo, title });
   }
-
-  // Close preview modal
   function closePreview() {
     setPreviewModal({ isOpen: false, url: "", isVideo: false, title: "" });
   }
 
-  // Add attribute
   function addAttribute() {
     setAttributes((prev) => [...prev, { key: "", value: "" }]);
   }
 
-  // Update attribute
-  function updateAttribute(index: number, field: "key" | "value", value: string) {
-    setAttributes((prev) => prev.map((attr, i) => (i === index ? { ...attr, [field]: value } : attr)));
+  function updateAttribute(
+    index: number,
+    field: "key" | "value",
+    value: string
+  ) {
+    setAttributes((prev) =>
+      prev.map((attr, i) => (i === index ? { ...attr, [field]: value } : attr))
+    );
   }
 
-  // Remove attribute
   function removeAttribute(index: number) {
     setAttributes((prev) => prev.filter((_, i) => i !== index));
   }
 
-  // Handle form submission
   async function handleSubmit(e: JSX.TargetedEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
     setUploadProgress(null);
 
     try {
-      // Build attributes object
       const attributesObj: Record<string, string | number> = {};
       attributes.forEach(({ key, value }) => {
         const trimmedKey = key.trim();
         const trimmedValue = value.trim();
         if (trimmedKey && trimmedValue) {
-          // Solo convertir a número si es un filtro de tipo range
-          const filterDef = filterConfig.find(f => f.key === trimmedKey);
-          if (filterDef?.type === 'range') {
+          const filterDef = filterConfig.find((f) => f.key === trimmedKey);
+          if (filterDef?.type === "range") {
             attributesObj[trimmedKey] = parseFloat(trimmedValue);
           } else {
             attributesObj[trimmedKey] = trimmedValue;
@@ -459,20 +477,23 @@ export default function ProductForm({
         }
       });
 
-      // Helper: determina el tipo de archivo
       const getFileKind = (file: File): "image" | "video" | "file" => {
         if (file.type.startsWith("image/")) return "image";
         if (file.type.startsWith("video/")) return "video";
         return "file";
       };
 
-      // Helper: sube un archivo usando Signed Upload URL
       async function uploadFileWithSignedUrl(
         file: File,
         section: "gallery" | "additional" | "download",
         tempUploadId: string
-      ): Promise<{ storage_path: string; kind: "image" | "video" | "file"; filename: string; mime_type: string; file_size_bytes: number }> {
-        // 1. Obtener URL firmada del servidor
+      ): Promise<{
+        storage_path: string;
+        kind: "image" | "video" | "file";
+        filename: string;
+        mime_type: string;
+        file_size_bytes: number;
+      }> {
         const urlResponse = await fetch("/api/admin/upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -491,7 +512,6 @@ export default function ProductForm({
 
         const { signedUrl, path } = await urlResponse.json();
 
-        // 2. Subir archivo directamente a Supabase usando la URL firmada
         const uploadResponse = await fetch(signedUrl, {
           method: "PUT",
           headers: {
@@ -513,14 +533,14 @@ export default function ProductForm({
         };
       }
 
-      // Calcular total de archivos a subir
-      const totalFiles = galleryFiles.length + additionalFiles.length + downloadFiles.length;
+      const totalFiles =
+        galleryFiles.length + additionalFiles.length + downloadFiles.length;
       let uploadedCount = 0;
 
-      // Generar un ID temporal para la carpeta
-      const tempId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const tempId = `upload_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
 
-      // Arrays para guardar los archivos subidos
       const uploadedGallery: Array<{
         storage_path: string;
         kind: "image" | "video" | "file";
@@ -547,11 +567,14 @@ export default function ProductForm({
         file_size_bytes: number;
       }> = [];
 
-      // Subir archivos de galería
       for (let i = 0; i < galleryFiles.length; i++) {
         const file = galleryFiles[i];
-        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
-        
+        setUploadProgress({
+          current: uploadedCount + 1,
+          total: totalFiles,
+          fileName: file.name,
+        });
+
         const uploaded = await uploadFileWithSignedUrl(file, "gallery", tempId);
         uploadedGallery.push({
           ...uploaded,
@@ -561,27 +584,40 @@ export default function ProductForm({
         uploadedCount++;
       }
 
-      // Subir archivos adicionales
       for (const file of additionalFiles) {
-        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
-        
-        const uploaded = await uploadFileWithSignedUrl(file, "additional", tempId);
+        setUploadProgress({
+          current: uploadedCount + 1,
+          total: totalFiles,
+          fileName: file.name,
+        });
+
+        const uploaded = await uploadFileWithSignedUrl(
+          file,
+          "additional",
+          tempId
+        );
         uploadedAdditional.push(uploaded);
         uploadedCount++;
       }
 
-      // Subir archivos descargables
       for (const file of downloadFiles) {
-        setUploadProgress({ current: uploadedCount + 1, total: totalFiles, fileName: file.name });
-        
-        const uploaded = await uploadFileWithSignedUrl(file, "download", tempId);
+        setUploadProgress({
+          current: uploadedCount + 1,
+          total: totalFiles,
+          fileName: file.name,
+        });
+
+        const uploaded = await uploadFileWithSignedUrl(
+          file,
+          "download",
+          tempId
+        );
         uploadedDownload.push(uploaded);
         uploadedCount++;
       }
 
       setUploadProgress(null);
 
-      // Preparar datos JSON para el API (sin archivos pesados)
       const requestData = {
         name: name.trim(),
         slug: slug.trim(),
@@ -598,13 +634,14 @@ export default function ProductForm({
           additional: uploadedAdditional,
           download: uploadedDownload,
         },
-        // Para modo edición
         delete_assets: product ? assetsToDelete : [],
         set_primary_asset: product ? primaryAssetId : null,
         set_secondary_asset: product ? secondaryAssetId : null,
       };
 
-      const url = product ? `/api/admin/products/${product.id}` : "/api/admin/products";
+      const url = product
+        ? `/api/admin/products/${product.id}`
+        : "/api/admin/products";
       const method = product ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -616,7 +653,6 @@ export default function ProductForm({
 
       if (result.success) {
         if (product) {
-          // Edit mode - redirect if slug changed
           const newSlug = slug.trim();
           if (newSlug !== product.slug) {
             window.location.href = `/admin/productos/${newSlug}`;
@@ -624,7 +660,6 @@ export default function ProductForm({
             window.location.reload();
           }
         } else {
-          // Create mode - redirect to edit page
           window.location.href = `/admin/productos/${result.product.slug}?created=true`;
         }
       } else {
@@ -633,13 +668,16 @@ export default function ProductForm({
       }
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Error inesperado al guardar el producto");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Error inesperado al guardar el producto"
+      );
       setIsSubmitting(false);
       setUploadProgress(null);
     }
   }
 
-  // Handle delete
   async function handleDelete() {
     if (!product) return;
 
@@ -660,7 +698,6 @@ export default function ProductForm({
     }
   }
 
-  // Drag and drop handlers
   function handleDragOver(e: JSX.TargetedDragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragging(true);
@@ -670,7 +707,10 @@ export default function ProductForm({
     setIsDragging(false);
   }
 
-  function handleDrop(e: JSX.TargetedDragEvent<HTMLDivElement>, section: AssetSection) {
+  function handleDrop(
+    e: JSX.TargetedDragEvent<HTMLDivElement>,
+    section: AssetSection
+  ) {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer?.files) {
@@ -682,12 +722,11 @@ export default function ProductForm({
     }
   }
 
-  // Get the relevant data for active tab
   const tabConfigs = {
     gallery: {
       label: "Galería Principal",
-      description: product 
-        ? "Imágenes y videos del producto. Haz clic en los iconos para configurar:" 
+      description: product
+        ? "Imágenes y videos del producto. Haz clic en los iconos para configurar:"
         : "La primera imagen que subas será la principal (thumbnail). Después de guardar podrás elegir la secundaria para el efecto hover.",
       assets: galleryAssets,
       files: galleryFiles,
@@ -700,7 +739,8 @@ export default function ProductForm({
     },
     additional: {
       label: "Imágenes Adicionales",
-      description: "Imágenes y videos complementarios como especificaciones técnicas, diagramas, etc.",
+      description:
+        "Imágenes y videos complementarios como especificaciones técnicas, diagramas, etc.",
       assets: additionalAssets,
       files: additionalFiles,
       previews: additionalPreviews,
@@ -712,7 +752,8 @@ export default function ProductForm({
     },
     download: {
       label: "Archivos Descargables",
-      description: "PDFs, manuales, fichas técnicas u otros archivos disponibles para descarga.",
+      description:
+        "PDFs, manuales, fichas técnicas u otros archivos disponibles para descarga.",
       assets: downloadAssets,
       files: downloadFiles,
       previews: [],
@@ -728,10 +769,16 @@ export default function ProductForm({
 
   return (
     <div class={styles.productFormPage}>
-      {/* Success Banner */}
       {showSuccessBanner && (
         <div class={styles.successBanner}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
@@ -746,7 +793,14 @@ export default function ProductForm({
               window.history.replaceState({}, "", url.toString());
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -754,20 +808,39 @@ export default function ProductForm({
         </div>
       )}
 
-      {/* Header */}
       <header class={styles.pageHeader}>
         <div class={styles.headerLeft}>
           <a href="/admin/productos" class={styles.backBtn}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </a>
           <div class={styles.headerContent}>
-            <h1 class={styles.pageTitle}>{product ? name || product.name : "Nuevo Producto"}</h1>
+            <h1 class={styles.pageTitle}>
+              {product ? name || product.name : "Nuevo Producto"}
+            </h1>
             {product && (
               <div class={styles.pageMeta}>
-                <a href={`/producto/${product.slug}`} target="_blank" class={styles.viewLink}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <a
+                  href={`/producto/${product.slug}`}
+                  target="_blank"
+                  class={styles.viewLink}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                     <polyline points="15 3 21 3 21 9" />
                     <line x1="10" y1="14" x2="21" y2="3" />
@@ -789,15 +862,31 @@ export default function ProductForm({
         </div>
         <div class={styles.headerActions}>
           {product && (
-            <button type="button" class={styles.dangerBtnOutline} onClick={() => setShowDeleteModal(true)}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button
+              type="button"
+              class={styles.dangerBtnOutline}
+              onClick={() => setShowDeleteModal(true)}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
               Eliminar
             </button>
           )}
-          <button type="submit" form="product-form" class={styles.primaryBtn} disabled={isSubmitting}>
+          <button
+            type="submit"
+            form="product-form"
+            class={styles.primaryBtn}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
               <>
                 <svg
@@ -811,13 +900,22 @@ export default function ProductForm({
                 >
                   <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
-                {uploadProgress 
+                {uploadProgress
                   ? `Subiendo ${uploadProgress.current}/${uploadProgress.total}...`
-                  : (product ? "Guardando..." : "Creando...")}
+                  : product
+                  ? "Guardando..."
+                  : "Creando..."}
               </>
             ) : (
               <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                   <polyline points="17 21 17 13 7 13 7 21" />
                   <polyline points="7 3 7 8 15 8" />
@@ -829,12 +927,13 @@ export default function ProductForm({
         </div>
       </header>
 
-      {/* Form */}
-      <form id="product-form" class={styles.productForm} onSubmit={handleSubmit}>
+      <form
+        id="product-form"
+        class={styles.productForm}
+        onSubmit={handleSubmit}
+      >
         <div class={styles.formGrid}>
-          {/* Main Column */}
           <div class={styles.formMain}>
-            {/* Basic Info */}
             <section class={styles.formSection}>
               <h2 class={styles.sectionTitle}>Información Básica</h2>
 
@@ -876,7 +975,9 @@ export default function ProductForm({
                     pattern="[a-z0-9-]+"
                   />
                 </div>
-                <span class={styles.inputHint}>Solo letras minúsculas, números y guiones</span>
+                <span class={styles.inputHint}>
+                  Solo letras minúsculas, números y guiones
+                </span>
               </div>
 
               <div class={styles.formGroup}>
@@ -906,7 +1007,6 @@ export default function ProductForm({
               </div>
             </section>
 
-            {/* Inventory */}
             <section class={styles.formSection}>
               <h2 class={styles.sectionTitle}>Inventario</h2>
 
@@ -945,77 +1045,129 @@ export default function ProductForm({
               </div>
             </section>
 
-            {/* Media Section with Tabs */}
             <section class={styles.formSection}>
               <h2 class={styles.sectionTitle}>Archivos Multimedia</h2>
 
-              {/* Tabs */}
               <div class={styles.mediaTabs}>
                 <button
                   type="button"
-                  class={`${styles.mediaTab} ${activeMediaTab === "gallery" ? styles.activeTab : ""}`}
+                  class={`${styles.mediaTab} ${
+                    activeMediaTab === "gallery" ? styles.activeTab : ""
+                  }`}
                   onClick={() => setActiveMediaTab("gallery")}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <polyline points="21 15 16 10 5 21" />
                   </svg>
                   Galería
                   {(galleryAssets.length > 0 || galleryFiles.length > 0) && (
-                    <span class={styles.tabBadge}>{galleryAssets.length + galleryFiles.length}</span>
+                    <span class={styles.tabBadge}>
+                      {galleryAssets.length + galleryFiles.length}
+                    </span>
                   )}
                 </button>
                 <button
                   type="button"
-                  class={`${styles.mediaTab} ${activeMediaTab === "additional" ? styles.activeTab : ""}`}
+                  class={`${styles.mediaTab} ${
+                    activeMediaTab === "additional" ? styles.activeTab : ""
+                  }`}
                   onClick={() => setActiveMediaTab("additional")}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <line x1="12" y1="8" x2="12" y2="16" />
                     <line x1="8" y1="12" x2="16" y2="12" />
                   </svg>
                   Adicionales
-                  {(additionalAssets.length > 0 || additionalFiles.length > 0) && (
-                    <span class={styles.tabBadge}>{additionalAssets.length + additionalFiles.length}</span>
+                  {(additionalAssets.length > 0 ||
+                    additionalFiles.length > 0) && (
+                    <span class={styles.tabBadge}>
+                      {additionalAssets.length + additionalFiles.length}
+                    </span>
                   )}
                 </button>
                 <button
                   type="button"
-                  class={`${styles.mediaTab} ${activeMediaTab === "download" ? styles.activeTab : ""}`}
+                  class={`${styles.mediaTab} ${
+                    activeMediaTab === "download" ? styles.activeTab : ""
+                  }`}
                   onClick={() => setActiveMediaTab("download")}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                   Descargables
                   {(downloadAssets.length > 0 || downloadFiles.length > 0) && (
-                    <span class={styles.tabBadge}>{downloadAssets.length + downloadFiles.length}</span>
+                    <span class={styles.tabBadge}>
+                      {downloadAssets.length + downloadFiles.length}
+                    </span>
                   )}
                 </button>
               </div>
 
-              {/* Tab Content */}
               <div class={styles.mediaTabContent}>
-                <p class={styles.sectionDescription}>{currentTab.description}</p>
+                <p class={styles.sectionDescription}>
+                  {currentTab.description}
+                </p>
 
-                {/* Legend for gallery controls */}
                 {currentTab.showLegend && (
                   <div class={styles.mediaLegend}>
                     <div class={styles.legendItem}>
-                      <span class={styles.legendIcon} style={{ background: "#fef3c7", color: "#d97706" }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                      <span
+                        class={styles.legendIcon}
+                        style={{ background: "#fef3c7", color: "#d97706" }}
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>
                       </span>
                       <span>Principal (thumbnail en catálogo)</span>
                     </div>
                     <div class={styles.legendItem}>
-                      <span class={styles.legendIcon} style={{ background: "#ede9fe", color: "#7c3aed" }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                      <span
+                        class={styles.legendIcon}
+                        style={{ background: "#ede9fe", color: "#7c3aed" }}
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <circle cx="12" cy="12" r="10" />
                         </svg>
                       </span>
@@ -1024,28 +1176,48 @@ export default function ProductForm({
                   </div>
                 )}
 
-                {/* Existing Assets */}
                 {currentTab.assets.length > 0 && (
                   <div class={styles.existingImages}>
                     {activeMediaTab === "download" ? (
-                      // File list for downloads
                       <div class={styles.fileList}>
                         {downloadAssets.map((asset) => (
                           <div key={asset.id} class={styles.fileItem}>
                             <div class={styles.fileIcon}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                              >
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                 <polyline points="14 2 14 8 20 8" />
                               </svg>
                             </div>
                             <div class={styles.fileInfo}>
-                              <span class={styles.fileName}>{asset.filename || asset.title || "Archivo"}</span>
+                              <span class={styles.fileName}>
+                                {asset.filename || asset.title || "Archivo"}
+                              </span>
                               <span class={styles.fileMeta}>
-                                {formatFileSize(asset.file_size_bytes)} {asset.mime_type && `• ${asset.mime_type}`}
+                                {formatFileSize(asset.file_size_bytes)}{" "}
+                                {asset.mime_type && `• ${asset.mime_type}`}
                               </span>
                             </div>
-                            <a href={asset.public_url} target="_blank" class={styles.downloadBtn} title="Descargar">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <a
+                              href={asset.public_url}
+                              target="_blank"
+                              class={styles.downloadBtn}
+                              title="Descargar"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                              >
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <polyline points="7 10 12 15 17 10" />
                                 <line x1="12" y1="15" x2="12" y2="3" />
@@ -1054,10 +1226,19 @@ export default function ProductForm({
                             <button
                               type="button"
                               class={styles.deleteFileBtn}
-                              onClick={() => deleteExistingAsset("download", asset.id)}
+                              onClick={() =>
+                                deleteExistingAsset("download", asset.id)
+                              }
                               title="Eliminar"
                             >
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                              >
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                               </svg>
@@ -1066,22 +1247,37 @@ export default function ProductForm({
                         ))}
                       </div>
                     ) : (
-                      // Image/Video grid for gallery/additional
                       <div class={styles.imageGrid}>
                         {currentTab.assets.map((asset) => (
                           <div key={asset.id} class={styles.imageItem}>
-                            <div 
+                            <div
                               class={styles.imagePreviewClick}
-                              onClick={() => openPreview(asset.public_url, asset.kind === "video", asset.title || asset.filename || name)}
+                              onClick={() =>
+                                openPreview(
+                                  asset.public_url,
+                                  asset.kind === "video",
+                                  asset.title || asset.filename || name
+                                )
+                              }
                               title="Click para ver en grande"
                             >
                               {asset.kind === "video" ? (
                                 <video src={asset.public_url} muted />
                               ) : (
-                                <img src={asset.public_url} alt={asset.alt || name} />
+                                <img
+                                  src={asset.public_url}
+                                  alt={asset.alt || name}
+                                />
                               )}
                               <div class={styles.zoomOverlay}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg
+                                  width="20"
+                                  height="20"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                >
                                   <circle cx="11" cy="11" r="8" />
                                   <path d="m21 21-4.35-4.35" />
                                   <line x1="11" y1="8" x2="11" y2="14" />
@@ -1090,49 +1286,84 @@ export default function ProductForm({
                               </div>
                             </div>
                             <div class={styles.imageActions}>
-                              {currentTab.showPrimary && asset.kind !== "video" && (
-                                <>
-                                  <button
-                                    type="button"
-                                    class={`${styles.setPrimary} ${asset.is_primary ? styles.isPrimary : ""}`}
-                                    onClick={() => setAsPrimary(asset.id)}
-                                    title={asset.is_primary ? "Imagen principal" : "Establecer como principal"}
-                                  >
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill={asset.is_primary ? "currentColor" : "none"}
-                                      stroke="currentColor"
-                                      stroke-width="2"
+                              {currentTab.showPrimary &&
+                                asset.kind !== "video" && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      class={`${styles.setPrimary} ${
+                                        asset.is_primary ? styles.isPrimary : ""
+                                      }`}
+                                      onClick={() => setAsPrimary(asset.id)}
+                                      title={
+                                        asset.is_primary
+                                          ? "Imagen principal"
+                                          : "Establecer como principal"
+                                      }
                                     >
-                                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    class={`${styles.setSecondary} ${asset.is_secondary ? styles.isSecondary : ""}`}
-                                    onClick={() => setAsSecondary(asset.id)}
-                                    title={asset.is_secondary ? "Imagen secundaria (hover)" : "Establecer como secundaria (hover)"}
-                                    disabled={asset.is_primary}
-                                  >
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill={asset.is_secondary ? "currentColor" : "none"}
-                                      stroke="currentColor"
-                                      stroke-width="2"
+                                      <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill={
+                                          asset.is_primary
+                                            ? "currentColor"
+                                            : "none"
+                                        }
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                      >
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      class={`${styles.setSecondary} ${
+                                        asset.is_secondary
+                                          ? styles.isSecondary
+                                          : ""
+                                      }`}
+                                      onClick={() => setAsSecondary(asset.id)}
+                                      title={
+                                        asset.is_secondary
+                                          ? "Imagen secundaria (hover)"
+                                          : "Establecer como secundaria (hover)"
+                                      }
+                                      disabled={asset.is_primary}
                                     >
-                                      <circle cx="12" cy="12" r="10" />
-                                      <path d="M12 2a10 10 0 0 1 0 20" fill={asset.is_secondary ? "currentColor" : "none"} />
-                                    </svg>
-                                  </button>
-                                </>
-                              )}
+                                      <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill={
+                                          asset.is_secondary
+                                            ? "currentColor"
+                                            : "none"
+                                        }
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                      >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path
+                                          d="M12 2a10 10 0 0 1 0 20"
+                                          fill={
+                                            asset.is_secondary
+                                              ? "currentColor"
+                                              : "none"
+                                          }
+                                        />
+                                      </svg>
+                                    </button>
+                                  </>
+                                )}
                               {asset.kind === "video" && (
                                 <span class={styles.videoBadge} title="Video">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                  >
                                     <polygon points="5 3 19 12 5 21 5 3" />
                                   </svg>
                                 </span>
@@ -1140,17 +1371,30 @@ export default function ProductForm({
                               <button
                                 type="button"
                                 class={styles.deleteImage}
-                                onClick={() => deleteExistingAsset(activeMediaTab, asset.id)}
+                                onClick={() =>
+                                  deleteExistingAsset(activeMediaTab, asset.id)
+                                }
                                 title="Eliminar"
                               >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                >
                                   <polyline points="3 6 5 6 21 6" />
                                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                 </svg>
                               </button>
                             </div>
-                            {asset.is_primary && <span class={styles.primaryBadge}>Principal</span>}
-                            {asset.is_secondary && <span class={styles.secondaryBadge}>Hover</span>}
+                            {asset.is_primary && (
+                              <span class={styles.primaryBadge}>Principal</span>
+                            )}
+                            {asset.is_secondary && (
+                              <span class={styles.secondaryBadge}>Hover</span>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1158,14 +1402,14 @@ export default function ProductForm({
                   </div>
                 )}
 
-                {/* Upload Zone */}
                 <div
-                  class={`${styles.uploadZone} ${isDragging ? styles.dragover : ""}`}
+                  class={`${styles.uploadZone} ${
+                    isDragging ? styles.dragover : ""
+                  }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, activeMediaTab)}
                   onClick={(e) => {
-                    // Evitar doble click: solo abrir si el click no viene del input
                     if ((e.target as HTMLElement).tagName !== "INPUT") {
                       currentTab.inputRef.current?.click();
                     }
@@ -1179,13 +1423,18 @@ export default function ProductForm({
                     accept={currentTab.accept}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => {
-                      if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+                      if (
+                        e.currentTarget.files &&
+                        e.currentTarget.files.length > 0
+                      ) {
                         if (activeMediaTab === "download") {
                           handleDownloadFiles(e.currentTarget.files);
                         } else {
-                          handleMediaFiles(e.currentTarget.files, activeMediaTab);
+                          handleMediaFiles(
+                            e.currentTarget.files,
+                            activeMediaTab
+                          );
                         }
-                        // Resetear el input para permitir seleccionar el mismo archivo
                         e.currentTarget.value = "";
                       }
                     }}
@@ -1193,15 +1442,36 @@ export default function ProductForm({
                   <div class={styles.uploadContent}>
                     <div class={styles.uploadIcon}>
                       {activeMediaTab === "download" ? (
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                           <polyline points="14 2 14 8 20 8" />
                           <line x1="12" y1="18" x2="12" y2="12" />
                           <line x1="9" y1="15" x2="15" y2="15" />
                         </svg>
                       ) : (
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <svg
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <rect
+                            x="3"
+                            y="3"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          />
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
@@ -1218,135 +1488,241 @@ export default function ProductForm({
                   </div>
                 </div>
 
-                {/* Preview Grid for images and videos */}
-                {activeMediaTab !== "download" && currentTab.previews.length > 0 && (
-                  <>
-                    {/* Show legend for new gallery files */}
-                    {activeMediaTab === "gallery" && galleryPreviews.length > 0 && (
-                      <div class={styles.mediaLegend}>
-                        <div class={styles.legendItem}>
-                          <span class={styles.legendIcon} style={{ background: "#fef3c7", color: "#d97706" }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                          </span>
-                          <span>Principal (thumbnail)</span>
-                        </div>
-                        <div class={styles.legendItem}>
-                          <span class={styles.legendIcon} style={{ background: "#ede9fe", color: "#7c3aed" }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
-                              <circle cx="12" cy="12" r="10" />
-                            </svg>
-                          </span>
-                          <span>Secundaria (hover)</span>
-                        </div>
-                      </div>
-                    )}
-                    <div class={styles.imagePreviewGrid}>
-                      {currentTab.previews.map((preview, index) => {
-                        const isPrimary = activeMediaTab === "gallery" && primaryNewIndex === index && !preview.isVideo;
-                        const isSecondary = activeMediaTab === "gallery" && secondaryNewIndex === index && !preview.isVideo;
-                        
-                        return (
-                          <div key={preview.file.name} class={`${styles.imagePreviewItem} ${isPrimary ? styles.isPrimaryNew : ""} ${isSecondary ? styles.isSecondaryNew : ""}`}>
-                            <div 
-                              class={styles.imagePreviewClick}
-                              onClick={() => openPreview(preview.url, preview.isVideo, preview.file.name)}
-                              title="Click para ver en grande"
-                            >
-                              {preview.isVideo ? (
-                                <video src={preview.url} muted />
-                              ) : (
-                                <img src={preview.url} alt={preview.file.name} />
-                              )}
-                              <div class={styles.zoomOverlay}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <circle cx="11" cy="11" r="8" />
-                                  <path d="m21 21-4.35-4.35" />
-                                  <line x1="11" y1="8" x2="11" y2="14" />
-                                  <line x1="8" y1="11" x2="14" y2="11" />
-                                </svg>
-                              </div>
-                            </div>
-                            
-                            {/* Actions for gallery items */}
-                            {activeMediaTab === "gallery" && !preview.isVideo && (
-                              <div class={styles.newImageActions}>
-                                <button
-                                  type="button"
-                                  class={`${styles.setPrimary} ${isPrimary ? styles.isPrimary : ""}`}
-                                  onClick={() => setNewAsPrimary(index)}
-                                  title={isPrimary ? "Imagen principal" : "Establecer como principal"}
+                {activeMediaTab !== "download" &&
+                  currentTab.previews.length > 0 && (
+                    <>
+                      {activeMediaTab === "gallery" &&
+                        galleryPreviews.length > 0 && (
+                          <div class={styles.mediaLegend}>
+                            <div class={styles.legendItem}>
+                              <span
+                                class={styles.legendIcon}
+                                style={{
+                                  background: "#fef3c7",
+                                  color: "#d97706",
+                                }}
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  stroke="currentColor"
+                                  stroke-width="2"
                                 >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill={isPrimary ? "currentColor" : "none"}
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                  >
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                  </svg>
-                                </button>
-                                <button
-                                  type="button"
-                                  class={`${styles.setSecondary} ${isSecondary ? styles.isSecondary : ""}`}
-                                  onClick={() => setNewAsSecondary(index)}
-                                  title={isSecondary ? "Imagen secundaria" : "Establecer como secundaria"}
-                                  disabled={isPrimary}
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill={isSecondary ? "currentColor" : "none"}
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                  >
-                                    <circle cx="12" cy="12" r="10" />
-                                  </svg>
-                                </button>
-                              </div>
-                            )}
-                            
-                            <button type="button" class={styles.removePreview} onClick={() => removePreview(activeMediaTab, index)}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                              </svg>
-                            </button>
-                            {preview.isVideo && (
-                              <span class={styles.videoBadgeNew}>
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                  <polygon points="5 3 19 12 5 21 5 3" />
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                 </svg>
                               </span>
-                            )}
-                            {isPrimary && <span class={styles.primaryBadge}>Principal</span>}
-                            {isSecondary && <span class={styles.secondaryBadge}>Hover</span>}
-                            {!isPrimary && !isSecondary && <span class={styles.newBadge}>Nueva</span>}
+                              <span>Principal (thumbnail)</span>
+                            </div>
+                            <div class={styles.legendItem}>
+                              <span
+                                class={styles.legendIcon}
+                                style={{
+                                  background: "#ede9fe",
+                                  color: "#7c3aed",
+                                }}
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                >
+                                  <circle cx="12" cy="12" r="10" />
+                                </svg>
+                              </span>
+                              <span>Secundaria (hover)</span>
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
+                        )}
+                      <div class={styles.imagePreviewGrid}>
+                        {currentTab.previews.map((preview, index) => {
+                          const isPrimary =
+                            activeMediaTab === "gallery" &&
+                            primaryNewIndex === index &&
+                            !preview.isVideo;
+                          const isSecondary =
+                            activeMediaTab === "gallery" &&
+                            secondaryNewIndex === index &&
+                            !preview.isVideo;
 
-                {/* File list for new downloads */}
+                          return (
+                            <div
+                              key={preview.file.name}
+                              class={`${styles.imagePreviewItem} ${
+                                isPrimary ? styles.isPrimaryNew : ""
+                              } ${isSecondary ? styles.isSecondaryNew : ""}`}
+                            >
+                              <div
+                                class={styles.imagePreviewClick}
+                                onClick={() =>
+                                  openPreview(
+                                    preview.url,
+                                    preview.isVideo,
+                                    preview.file.name
+                                  )
+                                }
+                                title="Click para ver en grande"
+                              >
+                                {preview.isVideo ? (
+                                  <video src={preview.url} muted />
+                                ) : (
+                                  <img
+                                    src={preview.url}
+                                    alt={preview.file.name}
+                                  />
+                                )}
+                                <div class={styles.zoomOverlay}>
+                                  <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                  >
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.35-4.35" />
+                                    <line x1="11" y1="8" x2="11" y2="14" />
+                                    <line x1="8" y1="11" x2="14" y2="11" />
+                                  </svg>
+                                </div>
+                              </div>
+
+                              {activeMediaTab === "gallery" &&
+                                !preview.isVideo && (
+                                  <div class={styles.newImageActions}>
+                                    <button
+                                      type="button"
+                                      class={`${styles.setPrimary} ${
+                                        isPrimary ? styles.isPrimary : ""
+                                      }`}
+                                      onClick={() => setNewAsPrimary(index)}
+                                      title={
+                                        isPrimary
+                                          ? "Imagen principal"
+                                          : "Establecer como principal"
+                                      }
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill={
+                                          isPrimary ? "currentColor" : "none"
+                                        }
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                      >
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                      </svg>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      class={`${styles.setSecondary} ${
+                                        isSecondary ? styles.isSecondary : ""
+                                      }`}
+                                      onClick={() => setNewAsSecondary(index)}
+                                      title={
+                                        isSecondary
+                                          ? "Imagen secundaria"
+                                          : "Establecer como secundaria"
+                                      }
+                                      disabled={isPrimary}
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill={
+                                          isSecondary ? "currentColor" : "none"
+                                        }
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                      >
+                                        <circle cx="12" cy="12" r="10" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )}
+
+                              <button
+                                type="button"
+                                class={styles.removePreview}
+                                onClick={() =>
+                                  removePreview(activeMediaTab, index)
+                                }
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                >
+                                  <line x1="18" y1="6" x2="6" y2="18" />
+                                  <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                              </button>
+                              {preview.isVideo && (
+                                <span class={styles.videoBadgeNew}>
+                                  <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                  >
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                  </svg>
+                                </span>
+                              )}
+                              {isPrimary && (
+                                <span class={styles.primaryBadge}>
+                                  Principal
+                                </span>
+                              )}
+                              {isSecondary && (
+                                <span class={styles.secondaryBadge}>Hover</span>
+                              )}
+                              {!isPrimary && !isSecondary && (
+                                <span class={styles.newBadge}>Nueva</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
                 {activeMediaTab === "download" && downloadFiles.length > 0 && (
                   <div class={styles.fileList}>
                     {downloadFiles.map((file, index) => (
-                      <div key={file.name} class={`${styles.fileItem} ${styles.newFile}`}>
+                      <div
+                        key={file.name}
+                        class={`${styles.fileItem} ${styles.newFile}`}
+                      >
                         <div class={styles.fileIcon}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
                           </svg>
                         </div>
                         <div class={styles.fileInfo}>
                           <span class={styles.fileName}>{file.name}</span>
-                          <span class={styles.fileMeta}>{formatFileSize(file.size)} • Nuevo</span>
+                          <span class={styles.fileMeta}>
+                            {formatFileSize(file.size)} • Nuevo
+                          </span>
                         </div>
                         <button
                           type="button"
@@ -1354,7 +1730,14 @@ export default function ProductForm({
                           onClick={() => removePreview("download", index)}
                           title="Eliminar"
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                           </svg>
@@ -1367,9 +1750,7 @@ export default function ProductForm({
             </section>
           </div>
 
-          {/* Sidebar */}
           <aside class={styles.formSidebar}>
-            {/* Category */}
             <section class={styles.formSection}>
               <h2 class={styles.sectionTitle}>
                 Categoría <span class={styles.required}>*</span>
@@ -1411,23 +1792,32 @@ export default function ProductForm({
                     {!categoryId
                       ? "Selecciona una categoría primero"
                       : subcategories.length === 0
-                        ? "No hay subcategorías"
-                        : "Seleccionar subcategoría"}
+                      ? "No hay subcategorías"
+                      : "Seleccionar subcategoría"}
                   </option>
                   {subcategories.map((sub) => (
                     <option key={sub.id} value={sub.id}>
-                      {sub.name} {sub.filter_config?.length ? `(${sub.filter_config.length} filtros)` : ""}
+                      {sub.name}{" "}
+                      {sub.filter_config?.length
+                        ? `(${sub.filter_config.length} filtros)`
+                        : ""}
                     </option>
                   ))}
                 </select>
               </div>
             </section>
 
-            {/* Attributes Section - Smart based on filter_config */}
             <section class={styles.formSection}>
               <div class={styles.sectionHeaderWithInfo}>
                 <h2 class={styles.sectionTitle}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                   </svg>
                   Atributos del Producto
@@ -1439,30 +1829,40 @@ export default function ProductForm({
                 )}
               </div>
 
-              {/* Filter-based attributes from subcategory */}
               {filterConfig.length > 0 && (
                 <div class={styles.filterAttributes}>
                   <div class={styles.filterAttributesHeader}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 16v-4" />
                       <path d="M12 8h.01" />
                     </svg>
-                    <span>Estos atributos son usados como filtros en el catálogo</span>
+                    <span>
+                      Estos atributos son usados como filtros en el catálogo
+                    </span>
                   </div>
-                  
+
                   {filterConfig.map((filter) => {
-                    const attrIndex = attributes.findIndex(a => a.key === filter.key);
-                    const currentValue = attrIndex >= 0 ? attributes[attrIndex].value : "";
-                    
+                    const attrIndex = attributes.findIndex(
+                      (a) => a.key === filter.key
+                    );
+                    const currentValue =
+                      attrIndex >= 0 ? attributes[attrIndex].value : "";
+
                     return (
                       <div key={filter.key} class={styles.filterAttributeItem}>
                         <label class={styles.filterLabel}>
                           {filter.label}
                           <span class={styles.filterType}>({filter.type})</span>
                         </label>
-                        
-                        {/* Select type */}
+
                         {filter.type === "select" && filter.options && (
                           <select
                             class={styles.formSelect}
@@ -1472,40 +1872,63 @@ export default function ProductForm({
                               if (attrIndex >= 0) {
                                 updateAttribute(attrIndex, "value", newValue);
                               } else {
-                                setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                                setAttributes([
+                                  ...attributes,
+                                  { key: filter.key, value: newValue },
+                                ]);
                               }
                             }}
                           >
-                            <option value="">Seleccionar {filter.label.toLowerCase()}...</option>
-                            {filter.options.map(opt => (
-                              <option key={opt} value={opt}>{opt}</option>
+                            <option value="">
+                              Seleccionar {filter.label.toLowerCase()}...
+                            </option>
+                            {filter.options.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
                             ))}
                           </select>
                         )}
-                        
-                        {/* Checkbox type (multiple values) */}
+
                         {filter.type === "checkbox" && filter.options && (
                           <div class={styles.checkboxGroup}>
-                            {filter.options.map(opt => {
-                              const isChecked = String(currentValue).split(",").map(v => v.trim()).includes(opt);
+                            {filter.options.map((opt) => {
+                              const isChecked = String(currentValue)
+                                .split(",")
+                                .map((v) => v.trim())
+                                .includes(opt);
                               return (
                                 <label key={opt} class={styles.checkboxLabel}>
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={(e) => {
-                                      const values = currentValue ? String(currentValue).split(",").map(v => v.trim()).filter(v => v) : [];
+                                      const values = currentValue
+                                        ? String(currentValue)
+                                            .split(",")
+                                            .map((v) => v.trim())
+                                            .filter((v) => v)
+                                        : [];
                                       let newValues: string[];
                                       if (e.currentTarget.checked) {
                                         newValues = [...values, opt];
                                       } else {
-                                        newValues = values.filter(v => v !== opt);
+                                        newValues = values.filter(
+                                          (v) => v !== opt
+                                        );
                                       }
                                       const newValue = newValues.join(", ");
                                       if (attrIndex >= 0) {
-                                        updateAttribute(attrIndex, "value", newValue);
+                                        updateAttribute(
+                                          attrIndex,
+                                          "value",
+                                          newValue
+                                        );
                                       } else {
-                                        setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                                        setAttributes([
+                                          ...attributes,
+                                          { key: filter.key, value: newValue },
+                                        ]);
                                       }
                                     }}
                                   />
@@ -1515,20 +1938,25 @@ export default function ProductForm({
                             })}
                           </div>
                         )}
-                        
-                        {/* Boolean type */}
+
                         {filter.type === "boolean" && (
                           <div class={styles.booleanGroup}>
                             <label class={styles.radioLabel}>
                               <input
                                 type="radio"
                                 name={`filter_${filter.key}`}
-                                checked={currentValue === "true" || currentValue === "Sí"}
+                                checked={
+                                  currentValue === "true" ||
+                                  currentValue === "Sí"
+                                }
                                 onChange={() => {
                                   if (attrIndex >= 0) {
                                     updateAttribute(attrIndex, "value", "Sí");
                                   } else {
-                                    setAttributes([...attributes, { key: filter.key, value: "Sí" }]);
+                                    setAttributes([
+                                      ...attributes,
+                                      { key: filter.key, value: "Sí" },
+                                    ]);
                                   }
                                 }}
                               />
@@ -1538,12 +1966,18 @@ export default function ProductForm({
                               <input
                                 type="radio"
                                 name={`filter_${filter.key}`}
-                                checked={currentValue === "false" || currentValue === "No"}
+                                checked={
+                                  currentValue === "false" ||
+                                  currentValue === "No"
+                                }
                                 onChange={() => {
                                   if (attrIndex >= 0) {
                                     updateAttribute(attrIndex, "value", "No");
                                   } else {
-                                    setAttributes([...attributes, { key: filter.key, value: "No" }]);
+                                    setAttributes([
+                                      ...attributes,
+                                      { key: filter.key, value: "No" },
+                                    ]);
                                   }
                                 }}
                               />
@@ -1564,8 +1998,7 @@ export default function ProductForm({
                             </label>
                           </div>
                         )}
-                        
-                        {/* Range type */}
+
                         {filter.type === "range" && (
                           <div class={styles.rangeInput}>
                             <input
@@ -1575,21 +2008,27 @@ export default function ProductForm({
                               min={filter.min}
                               max={filter.max}
                               step="any"
-                              placeholder={`${filter.min || 0} - ${filter.max || 100}`}
+                              placeholder={`${filter.min || 0} - ${
+                                filter.max || 100
+                              }`}
                               onInput={(e) => {
                                 const newValue = e.currentTarget.value;
                                 if (attrIndex >= 0) {
                                   updateAttribute(attrIndex, "value", newValue);
                                 } else {
-                                  setAttributes([...attributes, { key: filter.key, value: newValue }]);
+                                  setAttributes([
+                                    ...attributes,
+                                    { key: filter.key, value: newValue },
+                                  ]);
                                 }
                               }}
                             />
-                            {filter.min !== undefined && filter.max !== undefined && (
-                              <span class={styles.rangeHint}>
-                                Rango: {filter.min} - {filter.max}
-                              </span>
-                            )}
+                            {filter.min !== undefined &&
+                              filter.max !== undefined && (
+                                <span class={styles.rangeHint}>
+                                  Rango: {filter.min} - {filter.max}
+                                </span>
+                              )}
                           </div>
                         )}
                       </div>
@@ -1598,17 +2037,22 @@ export default function ProductForm({
                 </div>
               )}
 
-              {/* Custom attributes (not from filter_config) */}
               <div class={styles.customAttributes}>
                 {filterConfig.length > 0 && (
-                  <h4 class={styles.customAttributesTitle}>Atributos adicionales</h4>
+                  <h4 class={styles.customAttributesTitle}>
+                    Atributos adicionales
+                  </h4>
                 )}
-                
+
                 <div class={styles.attributesList}>
                   {attributes
-                    .filter(attr => !filterConfig.find(f => f.key === attr.key))
+                    .filter(
+                      (attr) => !filterConfig.find((f) => f.key === attr.key)
+                    )
                     .map((attr) => {
-                      const originalIndex = attributes.findIndex(a => a.key === attr.key);
+                      const originalIndex = attributes.findIndex(
+                        (a) => a.key === attr.key
+                      );
                       return (
                         <div key={originalIndex} class={styles.attributeItem}>
                           <input
@@ -1616,17 +2060,40 @@ export default function ProductForm({
                             class={`${styles.formInput} ${styles.attrKey}`}
                             placeholder="Nombre"
                             value={attr.key}
-                            onInput={(e) => updateAttribute(originalIndex, "key", e.currentTarget.value)}
+                            onInput={(e) =>
+                              updateAttribute(
+                                originalIndex,
+                                "key",
+                                e.currentTarget.value
+                              )
+                            }
                           />
                           <input
                             type="text"
                             class={`${styles.formInput} ${styles.attrValue}`}
                             placeholder="Valor"
                             value={attr.value}
-                            onInput={(e) => updateAttribute(originalIndex, "value", e.currentTarget.value)}
+                            onInput={(e) =>
+                              updateAttribute(
+                                originalIndex,
+                                "value",
+                                e.currentTarget.value
+                              )
+                            }
                           />
-                          <button type="button" class={styles.removeAttr} onClick={() => removeAttribute(originalIndex)}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <button
+                            type="button"
+                            class={styles.removeAttr}
+                            onClick={() => removeAttribute(originalIndex)}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
                               <line x1="18" y1="6" x2="6" y2="18" />
                               <line x1="6" y1="6" x2="18" y2="18" />
                             </svg>
@@ -1636,8 +2103,19 @@ export default function ProductForm({
                     })}
                 </div>
 
-                <button type="button" class={styles.addAttributeBtn} onClick={addAttribute}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button
+                  type="button"
+                  class={styles.addAttributeBtn}
+                  onClick={addAttribute}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
@@ -1649,12 +2127,21 @@ export default function ProductForm({
         </div>
       </form>
 
-      {/* Delete Asset Modal */}
       {deleteAssetModal.isOpen && (
-        <div class={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && cancelDeleteAsset()}>
+        <div
+          class={styles.modalOverlay}
+          onClick={(e) => e.target === e.currentTarget && cancelDeleteAsset()}
+        >
           <div class={styles.modal}>
             <div class={`${styles.modalIcon} ${styles.warning}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                 <line x1="10" y1="11" x2="10" y2="17" />
@@ -1663,10 +2150,11 @@ export default function ProductForm({
             </div>
             <h3 class={styles.modalTitle}>Eliminar archivo</h3>
             <p class={styles.modalMessage}>
-              ¿Estás seguro de que deseas eliminar <strong>{deleteAssetModal.assetName}</strong>?
-              {"\n"}
+              ¿Estás seguro de que deseas eliminar{" "}
+              <strong>{deleteAssetModal.assetName}</strong>?{"\n"}
               <span class={styles.modalHint}>
-                El archivo se eliminará permanentemente del servidor al guardar los cambios.
+                El archivo se eliminará permanentemente del servidor al guardar
+                los cambios.
               </span>
             </p>
             <div class={styles.modalActions}>
@@ -1674,7 +2162,14 @@ export default function ProductForm({
                 Cancelar
               </button>
               <button class={styles.dangerBtn} onClick={confirmDeleteAsset}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                 </svg>
@@ -1685,12 +2180,23 @@ export default function ProductForm({
         </div>
       )}
 
-      {/* Delete Product Modal */}
       {showDeleteModal && product && (
-        <div class={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}>
+        <div
+          class={styles.modalOverlay}
+          onClick={(e) =>
+            e.target === e.currentTarget && setShowDeleteModal(false)
+          }
+        >
           <div class={styles.modal}>
             <div class={`${styles.modalIcon} ${styles.danger}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -1698,11 +2204,15 @@ export default function ProductForm({
             </div>
             <h3 class={styles.modalTitle}>Eliminar producto</h3>
             <p class={styles.modalMessage}>
-              ¿Estás seguro de que deseas eliminar <strong>{product.name}</strong>? Esta acción no se puede deshacer y se
-              eliminarán todas las imágenes y archivos asociados.
+              ¿Estás seguro de que deseas eliminar{" "}
+              <strong>{product.name}</strong>? Esta acción no se puede deshacer
+              y se eliminarán todas las imágenes y archivos asociados.
             </p>
             <div class={styles.modalActions}>
-              <button class={styles.secondaryBtn} onClick={() => setShowDeleteModal(false)}>
+              <button
+                class={styles.secondaryBtn}
+                onClick={() => setShowDeleteModal(false)}
+              >
                 Cancelar
               </button>
               <button class={styles.dangerBtn} onClick={handleDelete}>
@@ -1716,25 +2226,39 @@ export default function ProductForm({
       {/* Preview Modal */}
       {previewModal.isOpen && (
         <div class={styles.previewOverlay} onClick={closePreview}>
-          <div class={styles.previewModalContainer} onClick={(e) => e.stopPropagation()}>
-            <button type="button" class={styles.previewClose} onClick={closePreview}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div
+            class={styles.previewModalContainer}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              class={styles.previewClose}
+              onClick={closePreview}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
             <div class={styles.previewContent}>
               {previewModal.isVideo ? (
-                <video 
-                  src={previewModal.url} 
-                  controls 
-                  autoPlay 
+                <video
+                  src={previewModal.url}
+                  controls
+                  autoPlay
                   class={styles.previewVideo}
                 />
               ) : (
-                <img 
-                  src={previewModal.url} 
-                  alt={previewModal.title} 
+                <img
+                  src={previewModal.url}
+                  alt={previewModal.title}
                   class={styles.previewImage}
                 />
               )}
@@ -1743,7 +2267,12 @@ export default function ProductForm({
               <span class={styles.previewName}>{previewModal.title}</span>
               {previewModal.isVideo && (
                 <span class={styles.previewType}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
                   Video

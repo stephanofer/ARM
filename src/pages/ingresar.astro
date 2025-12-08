@@ -377,7 +377,6 @@ if (data.user) {
   </style>
 
   <script>
-    // Elementos del DOM
     const form = document.getElementById("signinForm") as HTMLFormElement;
     const emailInput = document.getElementById("email") as HTMLInputElement;
     const passwordInput = document.getElementById(
@@ -405,7 +404,6 @@ if (data.user) {
     const eyeIcon = document.querySelector<SVGElement>("#eyeIcon");
     const eyeOffIcon = document.querySelector<SVGElement>("#eyeOffIcon");
 
-    // Toggle mostrar/ocultar contraseña
     togglePassword.addEventListener("click", () => {
       const isPassword = passwordInput.type === "password";
       passwordInput.type = isPassword ? "text" : "password";
@@ -417,13 +415,11 @@ if (data.user) {
       );
     });
 
-    // Validación de email
     function validateEmail(email: string): boolean {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     }
 
-    // Limpiar error al escribir
     emailInput.addEventListener("input", () => {
       emailError.textContent = "";
       emailInput.classList.remove("error");
@@ -436,7 +432,6 @@ if (data.user) {
       formErrorMessage.classList.remove("visible");
     });
 
-    // Validación en blur
     emailInput.addEventListener("blur", () => {
       const email = emailInput.value.trim();
       if (email && !validateEmail(email)) {
@@ -455,22 +450,18 @@ if (data.user) {
       }
     });
 
-    // Manejo del submit
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // Limpiar errores previos
       emailError.textContent = "";
       passwordError.textContent = "";
       formErrorMessage.classList.remove("visible");
       emailInput.classList.remove("error");
       passwordInput.classList.remove("error");
 
-      // Obtener valores
       const email = emailInput.value.trim();
       const password = passwordInput.value;
 
-      // Validación
       let hasError = false;
 
       if (!email) {
@@ -496,7 +487,6 @@ if (data.user) {
       }
 
       if (hasError) {
-        // Focus en el primer campo con error
         if (emailInput.classList.contains("error")) {
           emailInput.focus();
         } else if (passwordInput.classList.contains("error")) {
@@ -505,7 +495,6 @@ if (data.user) {
         return;
       }
 
-      // Deshabilitar botón y mostrar loader
       submitButton.disabled = true;
       buttonText.classList.add("hidden");
       buttonLoader.classList.remove("hidden");
@@ -521,15 +510,12 @@ if (data.user) {
         });
 
         if (response.ok) {
-          // Redirección exitosa
           window.location.href = "/admin";
         } else {
-          // Error de autenticación
           const errorText = await response.text();
           let errorMessage =
             "Credenciales incorrectas. Por favor, verifica tu correo y contraseña.";
 
-          // Personalizar mensajes de error
           if (errorText.toLowerCase().includes("invalid")) {
             errorMessage =
               "Correo o contraseña incorrectos. Por favor, inténtalo de nuevo.";
@@ -543,7 +529,6 @@ if (data.user) {
           formErrorMessage.textContent = errorMessage;
           formErrorMessage.classList.add("visible");
 
-          // Añadir efecto de error a los inputs
           emailInput.classList.add("error");
           passwordInput.classList.add("error");
           passwordInput.select();
@@ -554,7 +539,7 @@ if (data.user) {
           "Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.";
         formErrorMessage.classList.add("visible");
       } finally {
-        // Restaurar botón
+        // Restaurar boxtón
         submitButton.disabled = false;
         buttonText.classList.remove("hidden");
         buttonLoader.classList.add("hidden");

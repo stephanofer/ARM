@@ -1,5 +1,5 @@
-import { atom } from 'nanostores';
-import type { Product } from '../lib/data';
+import { atom } from "nanostores";
+import type { Product } from "@/lib/data/types";
 
 /**
  * Store de productos - Contiene la lista actual y estado de carga

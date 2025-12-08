@@ -3,10 +3,12 @@ import { ProductCard } from "./ProductCard";
 import styles from "./ProductsGrid.module.css";
 
 export interface ProductsGridProps {
-  products: Array<Product & { 
-    primaryImageUrl?: string | null; 
-    secondaryImageUrl?: string | null 
-  }>;
+  products: Array<
+    Product & {
+      primaryImageUrl?: string | null;
+      secondaryImageUrl?: string | null;
+    }
+  >;
   isLoading: boolean;
 }
 
@@ -32,11 +34,13 @@ function ProductSkeleton() {
 }
 
 export function ProductsGrid({ products, isLoading }: ProductsGridProps) {
-  // Mostrar skeletons cuando está cargando
   if (isLoading) {
     return (
-      <div className={styles.grid} aria-busy="true" aria-label="Cargando productos...">
-        {/* Mostrar 6 skeletons por defecto */}
+      <div
+        className={styles.grid}
+        aria-busy="true"
+        aria-label="Cargando productos..."
+      >
         {Array.from({ length: 6 }).map((_, index) => (
           <ProductSkeleton key={`skeleton-${index}`} />
         ))}
@@ -47,13 +51,13 @@ export function ProductsGrid({ products, isLoading }: ProductsGridProps) {
   return (
     <div className={styles.grid}>
       {products.map((product, index) => (
-        <div 
-          key={product.id} 
+        <div
+          key={product.id}
           className={styles.productWrapper}
           style={{ animationDelay: `${index * 50}ms` }}
         >
-          <ProductCard 
-            product={product} 
+          <ProductCard
+            product={product}
             primaryImageUrl={product.primaryImageUrl || undefined}
             secondaryImageUrl={product.secondaryImageUrl || undefined}
           />

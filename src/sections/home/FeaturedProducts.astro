@@ -10,7 +10,6 @@ const supabase = createClient(
   import.meta.env.SUPABASE_ANON_KEY
 );
 
-
 const dataResponse = await supabase.from("products").select("*").limit(3);
 const products: Product[] = dataResponse.data || [];
 

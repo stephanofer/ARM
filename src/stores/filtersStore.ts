@@ -1,5 +1,5 @@
-import { atom, computed } from 'nanostores';
-import type { AttributeFilters, SortOption } from '../lib/data/types';
+import { atom, computed } from "nanostores";
+import type { AttributeFilters, SortOption } from "../lib/data/types";
 
 /**
  * Store de filtros - ESPEJO de la URL (no fuente de verdad)
@@ -18,7 +18,7 @@ export interface FiltersState {
 }
 
 const initialFiltersState: FiltersState = {
-  categorySlug: '',
+  categorySlug: "",
   subcategorySlug: null,
   page: 1,
   pageSize: 2, // Para testear paginación
@@ -75,11 +75,18 @@ export function setSubcategory(subcategorySlug: string | null) {
   });
 }
 
-export function setAttributeFilter(key: string, value: string | string[] | null) {
+export function setAttributeFilter(
+  key: string,
+  value: string | string[] | null
+) {
   const current = filtersStore.get();
   const newFilters = { ...current.attributeFilters };
 
-  if (value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+  if (
+    value === null ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0)
+  ) {
     delete newFilters[key];
   } else {
     newFilters[key] = value;

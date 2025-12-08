@@ -8,7 +8,6 @@
   font-weight: 450;
 }
 
-/* Contador de resultados para mobile (debajo del título) */
 .mobileResultsCount {
   display: none;
   font-size: 0.9375rem;
@@ -33,12 +32,10 @@
   min-width: 0;
 }
 
-/* Mobile toolbar (filtro + orden) */
 .mobileToolbar {
   display: none;
 }
 
-/* Desktop SortBar */
 .desktopSortBar {
   display: block;
 }
@@ -51,21 +48,17 @@
 
   .sidebar {
     position: static;
-    /* Mantener visible para que el drawer funcione */
   }
-  
-  /* Ocultar título grande en mobile si lo prefieres */
+
   .title {
     font-size: var(--fs-xl, 1.5rem);
     margin-bottom: 0.25rem;
   }
-  
-  /* Mostrar contador de resultados en mobile */
+
   .mobileResultsCount {
     display: block;
   }
-  
-  /* Mostrar toolbar mobile */
+
   .mobileToolbar {
     display: flex;
     align-items: center;
@@ -74,8 +67,7 @@
     margin-bottom: 1rem;
     border-bottom: 1px solid #e5e7eb;
   }
-  
-  /* Botón de Filtro */
+
   .mobileFilterBtn {
     display: flex;
     align-items: center;
@@ -91,41 +83,37 @@
     transition: all 0.2s ease;
     white-space: nowrap;
   }
-  
+
   .mobileFilterBtn:hover {
     border-color: #d1d5db;
     background: #f9fafb;
   }
-  
+
   .mobileFilterBtn:active {
     transform: scale(0.98);
   }
-  
+
   .mobileFilterBtn svg {
     color: #6b7280;
   }
-  
-  /* Wrapper del sort en mobile */
+
   .mobileSortWrapper {
     flex: 1;
     min-width: 0;
   }
-  
-  /* Ocultar el SortBar de desktop */
+
   .desktopSortBar {
     display: none;
   }
 }
 
-/* Ajustes para el SortBar cuando está dentro del mobile wrapper */
 @media (max-width: 1024px) {
   .mobileSortWrapper :global(.container) {
     padding-bottom: 0;
     margin-bottom: 0;
     border-bottom: none;
   }
-  
-  /* Ocultar el contador de resultados en mobile (ya está en el título) */
+
   .mobileSortWrapper :global(.results) {
     display: none;
   }

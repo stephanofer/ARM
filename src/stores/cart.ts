@@ -37,14 +37,19 @@ type CartItemData = Omit<CartItem, "quantity">;
  * Agrega un producto al carrito con la cantidad especificada.
  * Si el producto ya existe, suma la cantidad.
  */
-export function addToCart(product: CartItemData, quantity: number = DEFAULT_QUANTITY) {
+export function addToCart(
+  product: CartItemData,
+  quantity: number = DEFAULT_QUANTITY
+) {
   const currentCart = $cart.get();
   const productId = product.id.toString();
   const quantityToAdd = clampQuantity(quantity);
-  
+
   if (currentCart[productId]) {
     // Producto existe: sumar cantidad (respetando el máximo)
-    const newQuantity = clampQuantity(currentCart[productId].quantity + quantityToAdd);
+    const newQuantity = clampQuantity(
+      currentCart[productId].quantity + quantityToAdd
+    );
     $cart.setKey(productId, {
       ...currentCart[productId],
       quantity: newQuantity,
@@ -71,7 +76,10 @@ export function increaseQuantity(productId: string) {
 
 export function decreaseQuantity(productId: string) {
   const currentCart = $cart.get();
-  if (currentCart[productId] && currentCart[productId].quantity > MIN_QUANTITY) {
+  if (
+    currentCart[productId] &&
+    currentCart[productId].quantity > MIN_QUANTITY
+  ) {
     $cart.setKey(productId, {
       ...currentCart[productId],
       quantity: currentCart[productId].quantity - 1,

@@ -1,16 +1,16 @@
-import { atom } from 'nanostores';
+import { atom } from "nanostores";
 
 /**
  * Store de UI - Estado visual compartido
  */
 export interface UIState {
-  viewMode: 'grid' | 'list';
+  viewMode: "grid" | "list";
   isFiltersOpen: boolean;
   isMobileMenuOpen: boolean;
 }
 
 const initialUIState: UIState = {
-  viewMode: 'grid',
+  viewMode: "grid",
   isFiltersOpen: true,
   isMobileMenuOpen: false,
 };
@@ -20,7 +20,7 @@ export const uiStore = atom<UIState>(initialUIState);
 /**
  * Cambia el modo de vista
  */
-export function setViewMode(viewMode: 'grid' | 'list') {
+export function setViewMode(viewMode: "grid" | "list") {
   uiStore.set({
     ...uiStore.get(),
     viewMode,

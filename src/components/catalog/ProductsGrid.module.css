@@ -5,7 +5,6 @@
   margin-bottom: 3rem;
 }
 
-/* Wrapper para animación de entrada */
 .productWrapper {
   animation: fadeInUp 0.4s ease-out forwards;
   opacity: 0;
@@ -21,10 +20,6 @@
     transform: translateY(0);
   }
 }
-
-/* ==================== */
-/* SKELETON LOADING     */
-/* ==================== */
 
 .skeletonCard {
   background: #fff;
@@ -75,7 +70,6 @@
   margin-top: 0.25rem;
 }
 
-/* Shimmer animation - efecto de brillo que pasa */
 .shimmer {
   position: absolute;
   top: 0;
@@ -99,10 +93,6 @@
     transform: translateX(100%);
   }
 }
-
-/* ==================== */
-/* PRODUCT CARD         */
-/* ==================== */
 
 .card {
   background: white;
@@ -198,21 +188,20 @@
   margin: 0;
 }
 
-/* Accessibility: reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .productWrapper {
     animation: none;
     opacity: 1;
   }
-  
+
   .shimmer {
     animation: none;
   }
-  
+
   .card:hover {
     transform: none;
   }
-  
+
   .card:hover .image {
     transform: none;
   }
@@ -235,7 +224,7 @@
   .price {
     font-size: 1.25rem;
   }
-  
+
   .skeletonInfo {
     padding: 1rem;
   }

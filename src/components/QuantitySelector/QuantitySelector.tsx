@@ -3,30 +3,28 @@ import { MIN_QUANTITY, MAX_QUANTITY, clampQuantity } from "@/stores/cart";
 import styles from "./QuantitySelector.module.css";
 
 interface QuantitySelectorProps {
-  /** Valor inicial */
   initialValue?: number;
-  /** Callback cuando cambia la cantidad */
   onChange?: (quantity: number) => void;
-  /** Clase CSS adicional */
   className?: string;
 }
 
-/**
- * Selector de cantidad reutilizable.
- * Maneja la validación automática del rango permitido.
- */
 export function QuantitySelector({
   initialValue = MIN_QUANTITY,
   onChange,
   className = "",
 }: QuantitySelectorProps) {
-  const [quantity, setQuantityState] = useState(() => clampQuantity(initialValue));
+  const [quantity, setQuantityState] = useState(() =>
+    clampQuantity(initialValue)
+  );
 
-  const updateQuantity = useCallback((newValue: number) => {
-    const clamped = clampQuantity(newValue);
-    setQuantityState(clamped);
-    onChange?.(clamped);
-  }, [onChange]);
+  const updateQuantity = useCallback(
+    (newValue: number) => {
+      const clamped = clampQuantity(newValue);
+      setQuantityState(clamped);
+      onChange?.(clamped);
+    },
+    [onChange]
+  );
 
   const handleDecrease = () => {
     if (quantity > MIN_QUANTITY) {
@@ -43,18 +41,15 @@ export function QuantitySelector({
   const handleInputChange = (e: Event) => {
     const target = e.target as HTMLInputElement;
     const value = parseInt(target.value, 10);
-    
-    // Si está vacío o no es número, no actualizamos aún (esperar blur)
+
     if (target.value === "" || isNaN(value)) return;
-    
-    // Validar en tiempo real: si excede el máximo, corregir inmediatamente
+
     if (value > MAX_QUANTITY) {
       target.value = MAX_QUANTITY.toString();
       updateQuantity(MAX_QUANTITY);
       return;
     }
-    
-    // Si es válido, actualizar
+
     if (value >= MIN_QUANTITY) {
       updateQuantity(value);
     }
@@ -63,11 +58,10 @@ export function QuantitySelector({
   const handleBlur = (e: Event) => {
     const target = e.target as HTMLInputElement;
     const value = parseInt(target.value, 10);
-    
-    // Al perder foco, asegurar valor válido
+
     const validValue = clampQuantity(value);
     target.value = validValue.toString();
-    
+
     if (validValue !== quantity) {
       updateQuantity(validValue);
     }
@@ -94,7 +88,7 @@ export function QuantitySelector({
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
-      
+
       <input
         type="number"
         className={styles.quantityInput}
@@ -105,7 +99,7 @@ export function QuantitySelector({
         onBlur={handleBlur}
         aria-label="Cantidad"
       />
-      
+
       <button
         type="button"
         className={styles.quantityBtn}

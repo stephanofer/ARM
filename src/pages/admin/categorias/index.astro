@@ -4,21 +4,27 @@ import { createClient } from "@/lib/supabase";
 import { getAllCategoriesWithSubcategories } from "@/lib/data/admin";
 import CategoriesManager from "@/components/admin/CategoriesManager";
 
-const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 const categories = await getAllCategoriesWithSubcategories(supabase);
 ---
 
-<CMSLayout title="Categorías - ARM Admin" description="Gestión de categorías ARM">
+<CMSLayout
+  title="Categorías - ARM Admin"
+  description="Gestión de categorías ARM"
+>
   <div class="categories-page">
-    <!-- Header -->
     <header class="page-header">
       <div class="header-content">
         <h1 class="page-title">Categorías y Subcategorías</h1>
-        <p class="page-subtitle">Gestiona la estructura de tu catálogo de productos</p>
+        <p class="page-subtitle">
+          Gestiona la estructura de tu catálogo de productos
+        </p>
       </div>
     </header>
 
-    <!-- Manager Component -->
     <CategoriesManager client:load initialCategories={categories} />
   </div>
 </CMSLayout>
@@ -29,7 +35,6 @@ const categories = await getAllCategoriesWithSubcategories(supabase);
     margin: 0 auto;
   }
 
-  /* Header */
   .page-header {
     margin-bottom: 1.5rem;
   }

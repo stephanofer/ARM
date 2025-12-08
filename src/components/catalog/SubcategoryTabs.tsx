@@ -1,6 +1,6 @@
-import type { Subcategory } from '@/lib/data/types';
-import { setSubcategory } from '@/stores/filtersStore';
-import styles from './SubcategoryTabs.module.css';
+import type { Subcategory } from "@/lib/data/types";
+import { setSubcategory } from "@/stores/filtersStore";
+import styles from "./SubcategoryTabs.module.css";
 
 export interface SubcategoryTabsProps {
   subcategories: Subcategory[];
@@ -11,7 +11,6 @@ export function SubcategoryTabs({
   subcategories,
   currentSubcategorySlug,
 }: SubcategoryTabsProps) {
-
   const handleTabClick = (slug: string | null) => {
     setSubcategory(slug);
   };
@@ -23,20 +22,20 @@ export function SubcategoryTabs({
   return (
     <div className={styles.container}>
       <div className={styles.tabs}>
-        {/* Tab "Todos" */}
         <button
-          className={`${styles.tab} ${currentSubcategorySlug === null ? styles.active : ''}`}
+          className={`${styles.tab} ${
+            currentSubcategorySlug === null ? styles.active : ""
+          }`}
           onClick={() => handleTabClick(null)}
         >
           Todos
         </button>
 
-        {/* Tabs de subcategorías */}
         {subcategories.map((subcategory) => (
           <button
             key={subcategory.id}
             className={`${styles.tab} ${
-              currentSubcategorySlug === subcategory.slug ? styles.active : ''
+              currentSubcategorySlug === subcategory.slug ? styles.active : ""
             }`}
             onClick={() => handleTabClick(subcategory.slug)}
           >

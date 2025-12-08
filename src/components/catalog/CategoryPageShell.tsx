@@ -51,11 +51,6 @@ export interface CategoryPageShellProps {
   };
 }
 
-/**
- * Shell principal de la página de categoría/subcategoría
- * Maneja sincronización URL ↔ Store ↔ API ↔ UI
- */
-// Valores permitidos para sort
 const VALID_SORT_OPTIONS = [
   "price_asc",
   "price_desc",
@@ -64,31 +59,24 @@ const VALID_SORT_OPTIONS = [
   "oldest",
 ] as const;
 
-/**
- * Sanitiza y valida parámetros de URL para evitar valores inválidos
- */
 function sanitizeUrlParams(
   params: URLSearchParams,
   subcategorySlugs: string[]
 ) {
-  // Page: si NaN o < 1 → 1
   const rawPage = params.get("page");
   const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
   const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
 
-  // Sort: si no está en valores permitidos → null
   const rawSort = params.get("sort");
   const sort =
     rawSort && VALID_SORT_OPTIONS.includes(rawSort as any) ? rawSort : null;
 
-  // Subcategory: si no existe en la lista → null
   const rawSubcategory = params.get("subcategoria");
   const subcategorySlug =
     rawSubcategory && subcategorySlugs.includes(rawSubcategory)
       ? rawSubcategory
       : null;
 
-  // MinPrice/MaxPrice: si NaN → undefined
   const rawMinPrice = params.get("minPrice");
   const rawMaxPrice = params.get("maxPrice");
   const minPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
@@ -102,7 +90,6 @@ function sanitizeUrlParams(
       ? maxPrice
       : undefined;
 
-  // InStock: solo true si es exactamente "true"
   const inStock = params.get("inStock") === "true";
 
   return {
@@ -130,22 +117,16 @@ export function CategoryPageShell({
   const hasInitialProductsRendered = useRef(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // AbortController para cancelar requests anteriores y evitar race conditions
   const abortControllerRef = useRef<AbortController | null>(null);
-  // ID único para cada request, para verificar que el response corresponde al request actual
   const requestIdRef = useRef(0);
 
-  // Lista de slugs de subcategorías para validación
   const subcategorySlugs = subcategories.map((s) => s.slug);
 
-  // Estado para el drawer de filtros en mobile
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  // Estado local para filter config dinámico
   const [currentFilterConfig, setCurrentFilterConfig] =
     useState<FilterConfig[]>(filterConfig);
 
-  // Usar productos iniciales hasta que el store se inicialice
   const displayProducts = isInitialized ? products.items : initialProducts;
   const displayTotal = isInitialized ? products.total : initialPagination.total;
   const displayPage = isInitialized ? products.page : initialPagination.page;
@@ -153,10 +134,8 @@ export function CategoryPageShell({
     ? products.totalPages
     : initialPagination.totalPages;
 
-  // Inicializar stores al montar
   useEffect(() => {
     if (!isInitialized) {
-      // Inicializar filtersStore con valores iniciales
       initFiltersStore({
         categorySlug: category.slug,
         subcategorySlug: initialFilters.subcategorySlug,
@@ -169,7 +148,6 @@ export function CategoryPageShell({
         inStock: initialFilters.inStock,
       });
 
-      // Inicializar productsStore con productos iniciales
       initProductsStore({
         items: initialProducts,
         page: initialPagination.page,
@@ -178,36 +156,30 @@ export function CategoryPageShell({
         totalPages: initialPagination.totalPages,
       });
 
-      // Cachear subcategorías
       cacheSubcategories(category.slug, subcategories);
 
-      // Cachear filter config inicial si hay subcategoría
       if (currentSubcategory) {
         cacheFilterConfig(currentSubcategory.slug, filterConfig);
       }
 
-      // Marcar que los productos iniciales ya están renderizados
       hasInitialProductsRendered.current = true;
 
       setIsInitialized(true);
     }
-  }, []); // Vacío para que solo se ejecute una vez
+  }, []);
 
-  // Efecto: Cargar filter config cuando cambia la subcategoría
   useEffect(() => {
     if (!filters.subcategorySlug) {
       setCurrentFilterConfig([]);
       return;
     }
 
-    // Intentar obtener del cache
     const cached = getCachedFilterConfig(filters.subcategorySlug);
     if (cached) {
       setCurrentFilterConfig(cached);
       return;
     }
 
-    // Si no está en cache, cargar desde subcategories (ya están en memoria)
     const subcategory = subcategories.find(
       (s) => s.slug === filters.subcategorySlug
     );
@@ -220,7 +192,6 @@ export function CategoryPageShell({
     }
   }, [filters.subcategorySlug]);
 
-  // Efecto: Sincronizar filtersStore → URL + API
   useEffect(() => {
     if (!isInitialized) return;
     if (isSyncingUrl.current) return;
@@ -266,16 +237,13 @@ export function CategoryPageShell({
     };
 
     const fetchProducts = async () => {
-      // Cancelar request anterior si existe (evita race conditions)
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
 
-      // Crear nuevo AbortController para este request
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
-      // Incrementar ID de request para verificar que el response es el correcto
       const currentRequestId = ++requestIdRef.current;
 
       try {
@@ -320,9 +288,8 @@ export function CategoryPageShell({
           signal: controller.signal,
         });
 
-        // Verificar que este request sigue siendo el actual
         if (currentRequestId !== requestIdRef.current) {
-          return; // Request obsoleto, ignorar response
+          return;
         }
 
         if (!response.ok) {
@@ -331,7 +298,6 @@ export function CategoryPageShell({
 
         const data = await response.json();
 
-        // Doble verificación después de parsear JSON
         if (currentRequestId !== requestIdRef.current) {
           return;
         }
@@ -346,12 +312,10 @@ export function CategoryPageShell({
           error: null,
         });
       } catch (error) {
-        // Ignorar errores de abort (son intencionales)
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
 
-        // Verificar que este request sigue siendo el actual
         if (currentRequestId !== requestIdRef.current) {
           return;
         }
@@ -377,20 +341,18 @@ export function CategoryPageShell({
     filters.subcategorySlug,
     filters.page,
     filters.sort,
-    JSON.stringify(filters.attributeFilters), // Serializar para evitar renders por referencia
+    JSON.stringify(filters.attributeFilters),
     filters.minPrice,
     filters.maxPrice,
     filters.inStock,
   ]);
 
-  // Listener de popstate (navegación atrás/adelante)
   useEffect(() => {
     const handlePopState = () => {
       isSyncingUrl.current = true;
 
       const params = new URLSearchParams(window.location.search);
 
-      // Usar función de sanitización para validar todos los parámetros
       const sanitized = sanitizeUrlParams(params, subcategorySlugs);
 
       const attributeFilters: Record<string, string | string[]> = {};
@@ -418,7 +380,6 @@ export function CategoryPageShell({
         }
       });
 
-      // Actualizar filtersStore con valores sanitizados
       initFiltersStore({
         categorySlug: category.slug,
         subcategorySlug: sanitized.subcategorySlug,
@@ -440,7 +401,6 @@ export function CategoryPageShell({
     return () => window.removeEventListener("popstate", handlePopState);
   }, [category.slug, filters.pageSize, subcategorySlugs]);
 
-  // Cleanup: cancelar requests pendientes al desmontar
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
@@ -451,9 +411,7 @@ export function CategoryPageShell({
 
   return (
     <div className={styles.container}>
-      {/* Tabs de subcategorías */}
       <div className={styles.mainContent}>
-        {/* Panel de filtros */}
         <aside className={styles.sidebar}>
           <FiltersPanel
             subcategories={subcategories}
@@ -475,7 +433,6 @@ export function CategoryPageShell({
               : "Sin resultados"}
           </p>
 
-          {/* Barra móvil con filtro y orden */}
           <div className={styles.mobileToolbar}>
             <button
               className={styles.mobileFilterBtn}
@@ -495,7 +452,6 @@ export function CategoryPageShell({
               <span>Filtro</span>
             </button>
 
-            {/* SortBar en mobile es solo el select */}
             <div className={styles.mobileSortWrapper}>
               <SortBar
                 currentSort={filters.sort}
@@ -505,7 +461,6 @@ export function CategoryPageShell({
             </div>
           </div>
 
-          {/* Barra de orden y resultados (desktop) */}
           <div className={styles.desktopSortBar}>
             <SortBar
               currentSort={filters.sort}
@@ -514,14 +469,12 @@ export function CategoryPageShell({
             />
           </div>
 
-          {/* Estados de error/loading/vacío */}
           {products.error && <ErrorState error={products.error} />}
 
           {!products.error &&
             !products.isLoading &&
             displayProducts.length === 0 && <EmptyState />}
 
-          {/* Grid de productos */}
           {!products.error && displayProducts.length > 0 && (
             <>
               <ProductsGrid
@@ -529,7 +482,6 @@ export function CategoryPageShell({
                 isLoading={products.isLoading}
               />
 
-              {/* Paginación */}
               <Pagination
                 currentPage={displayPage}
                 totalPages={displayTotalPages || 1}

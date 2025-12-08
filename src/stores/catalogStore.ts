@@ -1,5 +1,5 @@
-import { atom } from 'nanostores';
-import type { Subcategory, FilterConfig } from '../lib/data/types';
+import { atom } from "nanostores";
+import type { Subcategory, FilterConfig } from "../lib/data/types";
 
 /**
  * Store de catálogo - Cachea subcategorías y filter configs por categoría
@@ -19,7 +19,10 @@ export const catalogStore = atom<CatalogState>(initialCatalogState);
 /**
  * Cachea las subcategorías de una categoría
  */
-export function cacheSubcategories(categorySlug: string, subcategories: Subcategory[]) {
+export function cacheSubcategories(
+  categorySlug: string,
+  subcategories: Subcategory[]
+) {
   const current = catalogStore.get();
   catalogStore.set({
     ...current,
@@ -33,7 +36,9 @@ export function cacheSubcategories(categorySlug: string, subcategories: Subcateg
 /**
  * Obtiene las subcategorías cacheadas de una categoría
  */
-export function getCachedSubcategories(categorySlug: string): Subcategory[] | null {
+export function getCachedSubcategories(
+  categorySlug: string
+): Subcategory[] | null {
   const state = catalogStore.get();
   return state.subcategoriesByCategorySlug[categorySlug] || null;
 }
@@ -41,7 +46,10 @@ export function getCachedSubcategories(categorySlug: string): Subcategory[] | nu
 /**
  * Cachea el filter config de una subcategoría
  */
-export function cacheFilterConfig(subcategorySlug: string, filterConfig: FilterConfig[]) {
+export function cacheFilterConfig(
+  subcategorySlug: string,
+  filterConfig: FilterConfig[]
+) {
   const current = catalogStore.get();
   catalogStore.set({
     ...current,
@@ -55,7 +63,9 @@ export function cacheFilterConfig(subcategorySlug: string, filterConfig: FilterC
 /**
  * Obtiene el filter config cacheado de una subcategoría
  */
-export function getCachedFilterConfig(subcategorySlug: string): FilterConfig[] | null {
+export function getCachedFilterConfig(
+  subcategorySlug: string
+): FilterConfig[] | null {
   const state = catalogStore.get();
   return state.filterConfigBySubcategorySlug[subcategorySlug] || null;
 }

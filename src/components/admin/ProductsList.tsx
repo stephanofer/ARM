@@ -28,7 +28,6 @@ interface ProductsListProps {
   basePath?: string;
 }
 
-// Build URL with params - static function that doesn't need window
 function buildUrlStatic(
   basePath: string,
   currentSearch: string,
@@ -36,11 +35,12 @@ function buildUrlStatic(
   params: { page?: number; search?: string; category?: string }
 ) {
   const searchParams = new URLSearchParams();
-  
+
   const page = params.page !== undefined ? params.page : 1;
   const search = params.search !== undefined ? params.search : currentSearch;
-  const category = params.category !== undefined ? params.category : currentCategory;
-  
+  const category =
+    params.category !== undefined ? params.category : currentCategory;
+
   if (page > 1) {
     searchParams.set("page", page.toString());
   }
@@ -50,7 +50,7 @@ function buildUrlStatic(
   if (category) {
     searchParams.set("category", category);
   }
-  
+
   const queryString = searchParams.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;
 }
@@ -67,42 +67,62 @@ export default function ProductsList({
 }: ProductsListProps) {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState(initialSearch);
-  const [categoryId, setCategoryId] = useState(initialCategoryId?.toString() || "");
-  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
-  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; name: string }>({
+  const [categoryId, setCategoryId] = useState(
+    initialCategoryId?.toString() || ""
+  );
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(
+    new Set()
+  );
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    id: number | null;
+    name: string;
+  }>({
     open: false,
     id: null,
     name: "",
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Build URL with params
-  function buildUrl(params: { page?: number; search?: string; category?: string }) {
-    return buildUrlStatic(basePath, initialSearch, initialCategoryId?.toString(), params);
+  function buildUrl(params: {
+    page?: number;
+    search?: string;
+    category?: string;
+  }) {
+    return buildUrlStatic(
+      basePath,
+      initialSearch,
+      initialCategoryId?.toString(),
+      params
+    );
   }
 
-  // Handle search submit
   function handleSearch(e: Event) {
     e.preventDefault();
     if (typeof window !== "undefined") {
-      window.location.href = buildUrl({ page: 1, search, category: categoryId });
+      window.location.href = buildUrl({
+        page: 1,
+        search,
+        category: categoryId,
+      });
     }
   }
 
-  // Clear search
   function clearSearch() {
     setSearch("");
     if (typeof window !== "undefined") {
-      window.location.href = buildUrl({ page: 1, search: "", category: categoryId });
+      window.location.href = buildUrl({
+        page: 1,
+        search: "",
+        category: categoryId,
+      });
     }
   }
 
-  // Handle category change
   function handleCategoryChange(value: string) {
     setCategoryId(value);
   }
 
-  // Toggle select all
   function toggleSelectAll(checked: boolean) {
     if (checked) {
       setSelectedProducts(new Set(products.map((p) => p.id)));
@@ -111,7 +131,6 @@ export default function ProductsList({
     }
   }
 
-  // Toggle single product
   function toggleProduct(id: number) {
     const newSet = new Set(selectedProducts);
     if (newSet.has(id)) {
@@ -122,17 +141,14 @@ export default function ProductsList({
     setSelectedProducts(newSet);
   }
 
-  // Open delete modal
   function openDeleteModal(id: number, name: string) {
     setDeleteModal({ open: true, id, name });
   }
 
-  // Close delete modal
   function closeDeleteModal() {
     setDeleteModal({ open: false, id: null, name: "" });
   }
 
-  // Confirm delete
   async function confirmDelete() {
     if (!deleteModal.id) return;
 
@@ -149,7 +165,6 @@ export default function ProductsList({
         setProducts((prev) => prev.filter((p) => p.id !== deleteModal.id));
         closeDeleteModal();
 
-        // Reload if no products left
         if (products.length === 1 && typeof window !== "undefined") {
           window.location.reload();
         }
@@ -164,7 +179,6 @@ export default function ProductsList({
     }
   }
 
-  // Format date
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString("es-AR", {
       day: "numeric",
@@ -174,7 +188,6 @@ export default function ProductsList({
 
   return (
     <div class={styles.productsPage}>
-      {/* Header */}
       <header class={styles.pageHeader}>
         <div class={styles.headerContent}>
           <h1 class={styles.pageTitle}>Productos</h1>
@@ -183,7 +196,14 @@ export default function ProductsList({
           </p>
         </div>
         <a href="/admin/productos/nuevo" class={styles.primaryBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -191,11 +211,18 @@ export default function ProductsList({
         </a>
       </header>
 
-      {/* Filters Bar */}
       <div class={styles.filtersBar}>
         <form class={styles.searchForm} onSubmit={handleSearch}>
           <div class={styles.searchInputWrapper}>
-            <svg class={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class={styles.searchIcon}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
             </svg>
@@ -207,8 +234,19 @@ export default function ProductsList({
               onInput={(e) => setSearch(e.currentTarget.value)}
             />
             {search && (
-              <button type="button" class={styles.clearSearch} onClick={clearSearch}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button
+                type="button"
+                class={styles.clearSearch}
+                onClick={clearSearch}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -222,14 +260,17 @@ export default function ProductsList({
           >
             <option value="">Todas las categorías</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </select>
-          <button type="submit" class={styles.filterBtn}>Filtrar</button>
+          <button type="submit" class={styles.filterBtn}>
+            Filtrar
+          </button>
         </form>
       </div>
 
-      {/* Products Table */}
       {products.length > 0 ? (
         <div class={styles.tableContainer}>
           <table class={styles.productsTable}>
@@ -238,7 +279,10 @@ export default function ProductsList({
                 <th class={styles.thCheckbox}>
                   <input
                     type="checkbox"
-                    checked={selectedProducts.size === products.length && products.length > 0}
+                    checked={
+                      selectedProducts.size === products.length &&
+                      products.length > 0
+                    }
                     onChange={(e) => toggleSelectAll(e.currentTarget.checked)}
                   />
                 </th>
@@ -264,11 +308,29 @@ export default function ProductsList({
                     <div class={styles.productCell}>
                       <div class={styles.productThumb}>
                         {product.thumbnail_url ? (
-                          <img src={product.thumbnail_url} alt={product.name} loading="lazy" />
+                          <img
+                            src={product.thumbnail_url}
+                            alt={product.name}
+                            loading="lazy"
+                          />
                         ) : (
                           <div class={styles.noImage}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <rect
+                                x="3"
+                                y="3"
+                                width="18"
+                                height="18"
+                                rx="2"
+                                ry="2"
+                              />
                               <circle cx="8.5" cy="8.5" r="1.5" />
                               <polyline points="21 15 16 10 5 21" />
                             </svg>
@@ -276,7 +338,10 @@ export default function ProductsList({
                         )}
                       </div>
                       <div class={styles.productInfo}>
-                        <a href={`/admin/productos/${product.slug}`} class={styles.productName}>
+                        <a
+                          href={`/admin/productos/${product.slug}`}
+                          class={styles.productName}
+                        >
                           {product.name}
                         </a>
                         <span class={styles.productSlug}>/{product.slug}</span>
@@ -284,29 +349,62 @@ export default function ProductsList({
                     </div>
                   </td>
                   <td>
-                    <span class={styles.categoryBadge}>{product.category_name}</span>
+                    <span class={styles.categoryBadge}>
+                      {product.category_name}
+                    </span>
                   </td>
                   <td class={styles.hideTablet}>
-                    <span class={styles.subcategoryText}>{product.subcategory_name || "—"}</span>
+                    <span class={styles.subcategoryText}>
+                      {product.subcategory_name || "—"}
+                    </span>
                   </td>
                   <td class={styles.hideTablet}>
-                    <span class={`${styles.stockBadge} ${product.stock > 0 ? styles.inStock : styles.outOfStock}`}>
+                    <span
+                      class={`${styles.stockBadge} ${
+                        product.stock > 0 ? styles.inStock : styles.outOfStock
+                      }`}
+                    >
                       {product.stock}
                     </span>
                   </td>
                   <td class={styles.hideMobile}>
-                    <span class={styles.dateText}>{formatDate(product.created_at)}</span>
+                    <span class={styles.dateText}>
+                      {formatDate(product.created_at)}
+                    </span>
                   </td>
                   <td class={styles.tdActions}>
                     <div class={styles.actionsMenu}>
-                      <a href={`/admin/productos/${product.slug}`} class={styles.actionBtn} title="Editar">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <a
+                        href={`/admin/productos/${product.slug}`}
+                        class={styles.actionBtn}
+                        title="Editar"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </a>
-                      <a href={`/producto/${product.slug}`} class={styles.actionBtn} target="_blank" title="Ver en sitio">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <a
+                        href={`/producto/${product.slug}`}
+                        class={styles.actionBtn}
+                        target="_blank"
+                        title="Ver en sitio"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                           <polyline points="15 3 21 3 21 9" />
                           <line x1="10" y1="14" x2="21" y2="3" />
@@ -314,10 +412,19 @@ export default function ProductsList({
                       </a>
                       <button
                         class={`${styles.actionBtn} ${styles.deleteBtn}`}
-                        onClick={() => openDeleteModal(product.id, product.name)}
+                        onClick={() =>
+                          openDeleteModal(product.id, product.name)
+                        }
                         title="Eliminar"
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
                           <polyline points="3 6 5 6 21 6" />
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                         </svg>
@@ -332,7 +439,14 @@ export default function ProductsList({
       ) : (
         <div class={styles.emptyState}>
           <div class={styles.emptyIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
               {search ? (
                 <>
                   <circle cx="11" cy="11" r="8" />
@@ -350,10 +464,19 @@ export default function ProductsList({
               : "Comienza agregando tu primer producto al catálogo"}
           </p>
           {search ? (
-            <a href="/admin/productos" class={styles.secondaryBtn}>Ver todos los productos</a>
+            <a href="/admin/productos" class={styles.secondaryBtn}>
+              Ver todos los productos
+            </a>
           ) : (
             <a href="/admin/productos/nuevo" class={styles.primaryBtn}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -363,15 +486,31 @@ export default function ProductsList({
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <nav class={styles.pagination} aria-label="Paginación de productos">
           <a
-            href={currentPage > 1 ? buildUrl({ page: currentPage - 1, search: initialSearch, category: initialCategoryId?.toString() }) : "#"}
-            class={`${styles.paginationBtn} ${currentPage <= 1 ? styles.disabled : ""}`}
+            href={
+              currentPage > 1
+                ? buildUrl({
+                    page: currentPage - 1,
+                    search: initialSearch,
+                    category: initialCategoryId?.toString(),
+                  })
+                : "#"
+            }
+            class={`${styles.paginationBtn} ${
+              currentPage <= 1 ? styles.disabled : ""
+            }`}
             aria-disabled={currentPage <= 1}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Anterior
@@ -382,24 +521,50 @@ export default function ProductsList({
           </div>
 
           <a
-            href={currentPage < totalPages ? buildUrl({ page: currentPage + 1, search: initialSearch, category: initialCategoryId?.toString() }) : "#"}
-            class={`${styles.paginationBtn} ${currentPage >= totalPages ? styles.disabled : ""}`}
+            href={
+              currentPage < totalPages
+                ? buildUrl({
+                    page: currentPage + 1,
+                    search: initialSearch,
+                    category: initialCategoryId?.toString(),
+                  })
+                : "#"
+            }
+            class={`${styles.paginationBtn} ${
+              currentPage >= totalPages ? styles.disabled : ""
+            }`}
             aria-disabled={currentPage >= totalPages}
           >
             Siguiente
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </a>
         </nav>
       )}
 
-      {/* Delete Modal */}
       {deleteModal.open && (
-        <div class={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && closeDeleteModal()}>
+        <div
+          class={styles.modalOverlay}
+          onClick={(e) => e.target === e.currentTarget && closeDeleteModal()}
+        >
           <div class={styles.modal}>
             <div class={`${styles.modalIcon} ${styles.danger}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -407,12 +572,19 @@ export default function ProductsList({
             </div>
             <h3 class={styles.modalTitle}>Eliminar producto</h3>
             <p class={styles.modalMessage}>
-              ¿Estás seguro de que deseas eliminar <strong>{deleteModal.name}</strong>?
-              Esta acción no se puede deshacer y se eliminarán todas las imágenes asociadas.
+              ¿Estás seguro de que deseas eliminar{" "}
+              <strong>{deleteModal.name}</strong>? Esta acción no se puede
+              deshacer y se eliminarán todas las imágenes asociadas.
             </p>
             <div class={styles.modalActions}>
-              <button class={styles.secondaryBtn} onClick={closeDeleteModal}>Cancelar</button>
-              <button class={styles.dangerBtn} onClick={confirmDelete} disabled={isDeleting}>
+              <button class={styles.secondaryBtn} onClick={closeDeleteModal}>
+                Cancelar
+              </button>
+              <button
+                class={styles.dangerBtn}
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
                 {isDeleting ? "Eliminando..." : "Eliminar"}
               </button>
             </div>

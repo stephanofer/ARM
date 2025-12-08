@@ -31,7 +31,10 @@ export function CartItems() {
                 <img src={item.image_url || ""} alt={item.name} />
               </div>
               <div className={styles["cart-item-details"]}>
-                <a href={`/producto/${item.slug}`}  className={styles["cart-item-header"]}>
+                <a
+                  href={`/producto/${item.slug}`}
+                  className={styles["cart-item-header"]}
+                >
                   <h3 className={styles["cart-item-name"]}>{item.name}</h3>
                   <div className={styles["cart-item-meta"]}>
                     <span className={styles["cart-item-brand"]}>
@@ -68,15 +71,13 @@ export function CartItems() {
                       onInput={(e) => {
                         const target = e.currentTarget;
                         const value = parseInt(target.value, 10);
-                        
-                        // Si excede el máximo, corregir inmediatamente
+
                         if (value > MAX_QUANTITY) {
                           target.value = MAX_QUANTITY.toString();
                           setQuantity(String(item.id), MAX_QUANTITY);
                           return;
                         }
-                        
-                        // Si es válido, actualizar
+
                         if (!isNaN(value) && value >= MIN_QUANTITY) {
                           setQuantity(String(item.id), value);
                         }

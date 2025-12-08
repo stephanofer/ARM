@@ -11,10 +11,6 @@ interface AddToCartSectionProps {
   product: CartItemData;
 }
 
-/**
- * Sección de agregar al carrito para la página de producto.
- * Combina el selector de cantidad con el botón de agregar.
- */
 export function AddToCartSection({ product }: AddToCartSectionProps) {
   const [quantity, setQuantity] = useState(DEFAULT_QUANTITY);
 

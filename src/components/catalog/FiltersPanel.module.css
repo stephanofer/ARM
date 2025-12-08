@@ -220,7 +220,6 @@
   font-size: 0.813rem;
 }
 
-/* Scrollbar personalizada */
 .filters-sidebar::-webkit-scrollbar {
   width: 6px;
 }
@@ -290,7 +289,6 @@
   padding-right: 20px;
 }
 
-
 .filterGroup.collapsed .filterLabel::after {
   transform: rotate(-90deg);
 }
@@ -350,7 +348,6 @@
   padding: 0.5rem 0;
 }
 
-/* Inputs numéricos del rango */
 .rangeInputs {
   display: flex;
   align-items: center;
@@ -378,7 +375,6 @@
   color: #9ca3af;
 }
 
-/* Remove spin buttons */
 .rangeNumberInput::-webkit-inner-spin-button,
 .rangeNumberInput::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -391,7 +387,6 @@
   font-size: 0.875rem;
 }
 
-/* Dual Range Slider Container */
 .dualRangeContainer {
   position: relative;
   height: 6px;
@@ -473,7 +468,6 @@
   transform: scale(1.25);
 }
 
-/* Etiquetas del rango */
 .rangeLabels {
   display: flex;
   justify-content: space-between;
@@ -493,7 +487,6 @@
   color: #9ca3af;
 }
 
-/* Estilos antiguos (mantener compatibilidad) */
 .range {
   width: 100%;
   height: 6px;
@@ -534,16 +527,11 @@
   .container {
     margin-bottom: 1.5rem;
   }
-  
-  /* Ocultar sidebar en mobile */
+
   .filters-sidebar {
     display: none;
   }
 }
-
-/* ================================== */
-/* MOBILE DRAWER / MODAL              */
-/* ================================== */
 
 .mobileDrawerOverlay {
   display: none;
@@ -554,7 +542,6 @@
 }
 
 @media (max-width: 1024px) {
-  /* Overlay oscuro */
   .mobileDrawerOverlay {
     display: block;
     position: fixed;
@@ -575,7 +562,6 @@
     visibility: visible;
   }
 
-  /* Drawer que sube desde abajo */
   .mobileDrawer {
     display: flex;
     flex-direction: column;
@@ -596,7 +582,6 @@
     transform: translateY(0);
   }
 
-  /* Header del drawer */
   .drawerHeader {
     display: flex;
     justify-content: space-between;
@@ -607,7 +592,7 @@
   }
 
   .drawerHeader::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 8px;
     left: 50%;
@@ -648,7 +633,6 @@
     transform: scale(0.95);
   }
 
-  /* Contenido scrolleable */
   .drawerContent {
     flex: 1;
     overflow-y: auto;
@@ -656,7 +640,6 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Scrollbar del drawer */
   .drawerContent::-webkit-scrollbar {
     width: 4px;
   }
@@ -670,7 +653,6 @@
     border-radius: 2px;
   }
 
-  /* Footer con botones */
   .drawerFooter {
     display: flex;
     gap: 0.75rem;
@@ -678,7 +660,6 @@
     border-top: 1px solid #e5e7eb;
     background: white;
     flex-shrink: 0;
-    /* Safe area para iPhones con notch */
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
 
@@ -727,16 +708,15 @@
   }
 }
 
-/* Accessibility: reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .mobileDrawerOverlay {
     transition: opacity 0.1s ease;
   }
-  
+
   .mobileDrawer {
     transition: transform 0.1s ease;
   }
-  
+
   .drawerClose:active,
   .drawerApplyBtn:active {
     transform: none;

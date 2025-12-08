@@ -27,21 +27,26 @@ const supabase = createClient({
   cookies: Astro.cookies,
 });
 
-// Valores permitidos para sort
-const VALID_SORT_OPTIONS = ['price_asc', 'price_desc', 'name_asc', 'name_desc', 'oldest'];
+const VALID_SORT_OPTIONS = [
+  "price_asc",
+  "price_desc",
+  "name_asc",
+  "name_desc",
+  "oldest",
+];
 
 const url = new URL(Astro.request.url);
 
-// Sanitización de parámetros URL para evitar valores inválidos
 const rawPage = url.searchParams.get("page");
 const parsedPage = rawPage ? parseInt(rawPage, 10) : 1;
 const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
 
 const rawPageSize = url.searchParams.get("pageSize");
 const parsedPageSize = rawPageSize ? parseInt(rawPageSize, 10) : PAGE_SIZE;
-const pageSize = Number.isNaN(parsedPageSize) || parsedPageSize < 1 || parsedPageSize > 50 
-  ? PAGE_SIZE 
-  : parsedPageSize;
+const pageSize =
+  Number.isNaN(parsedPageSize) || parsedPageSize < 1 || parsedPageSize > 50
+    ? PAGE_SIZE
+    : parsedPageSize;
 
 const rawSort = url.searchParams.get("sort");
 const sort = rawSort && VALID_SORT_OPTIONS.includes(rawSort) ? rawSort : null;
@@ -50,12 +55,18 @@ const rawMinPrice = url.searchParams.get("minPrice");
 const rawMaxPrice = url.searchParams.get("maxPrice");
 const parsedMinPrice = rawMinPrice ? parseFloat(rawMinPrice) : undefined;
 const parsedMaxPrice = rawMaxPrice ? parseFloat(rawMaxPrice) : undefined;
-const minPrice = parsedMinPrice !== undefined && !Number.isNaN(parsedMinPrice) && parsedMinPrice >= 0 
-  ? parsedMinPrice 
-  : undefined;
-const maxPrice = parsedMaxPrice !== undefined && !Number.isNaN(parsedMaxPrice) && parsedMaxPrice >= 0 
-  ? parsedMaxPrice 
-  : undefined;
+const minPrice =
+  parsedMinPrice !== undefined &&
+  !Number.isNaN(parsedMinPrice) &&
+  parsedMinPrice >= 0
+    ? parsedMinPrice
+    : undefined;
+const maxPrice =
+  parsedMaxPrice !== undefined &&
+  !Number.isNaN(parsedMaxPrice) &&
+  parsedMaxPrice >= 0
+    ? parsedMaxPrice
+    : undefined;
 
 const inStock = url.searchParams.get("inStock") === "true";
 const subcategorySlug = url.searchParams.get("subcategoria");
@@ -93,11 +104,11 @@ if (!categoryData) {
 
 const { category, subcategories } = categoryData;
 
-// Validar que la subcategoría existe en la lista
-const subcategorySlugs = subcategories.map(s => s.slug);
-const validatedSubcategorySlug = subcategorySlug && subcategorySlugs.includes(subcategorySlug) 
-  ? subcategorySlug 
-  : null;
+const subcategorySlugs = subcategories.map((s) => s.slug);
+const validatedSubcategorySlug =
+  subcategorySlug && subcategorySlugs.includes(subcategorySlug)
+    ? subcategorySlug
+    : null;
 
 let currentSubcategory = null;
 let filterConfig: any[] = [];
@@ -143,12 +154,10 @@ if (currentSubcategory) {
   );
 }
 
-// Enriquecer productos con URLs de imágenes
 const enrichedProducts = await enrichProductsWithImages(
   supabase,
   productsResponse.items
 );
-
 
 const initialFilters = {
   subcategorySlug: validatedSubcategorySlug,
@@ -210,5 +219,4 @@ const pageDescription = currentSubcategory
   header {
     margin-bottom: 1rem;
   }
-
 </style>

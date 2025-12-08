@@ -5,27 +5,14 @@ import { addToCart, DEFAULT_QUANTITY } from "@/stores/cart";
 type CartItemData = Omit<CartItem, "quantity">;
 
 interface AddToCartButtonProps {
-  /** Datos del producto a agregar */
   product: CartItemData;
-  /** Cantidad a agregar (por defecto 1) */
   quantity?: number;
-  /** Callback ejecutado después de agregar al carrito */
   onAddToCart?: () => void;
-  /** Texto personalizado del botón */
   label?: string;
-  /** Si solo muestra el icono (sin texto) */
   iconOnly?: boolean;
-  /** Clase CSS adicional */
   className?: string;
 }
 
-/**
- * Botón para agregar productos al carrito.
- * 
- * Casos de uso:
- * - ProductCard: Solo botón, agrega 1 unidad (quantity=1)
- * - Página de producto: Con QuantitySelector, recibe quantity como prop
- */
 export function AddToCartButton({
   product,
   quantity = DEFAULT_QUANTITY,

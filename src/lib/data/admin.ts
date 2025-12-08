@@ -1,10 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Category, Subcategory, Product, ProductAsset } from "./types";
 
-// ============================
-// TIPOS PARA EL ADMIN
-// ============================
-
 export interface RecentProduct {
   id: number;
   name: string;
@@ -70,7 +66,8 @@ export async function getDashboardStats(
     supabase.from("product_assets").select("*", { count: "exact", head: true }),
     supabase
       .from("products")
-      .select(`
+      .select(
+        `
         id,
         name,
         slug,
@@ -78,7 +75,8 @@ export async function getDashboardStats(
         categories(name),
         subcategories(name),
         product_assets(storage_bucket, storage_path, is_primary, section)
-      `)
+      `
+      )
       .order("created_at", { ascending: false })
       .limit(5),
     supabase
@@ -107,32 +105,34 @@ export async function getDashboardStats(
   );
 
   // Procesar productos recientes para incluir thumbnail y nombres
-  const recentProducts: RecentProduct[] = (recentProductsResult.data || []).map((p: any) => {
-    let thumbnail_url: string | null = null;
-    
-    // Buscar el asset primario de la galería
-    const assets = p.product_assets || [];
-    const primaryAsset = assets.find(
-      (a: any) => a.section === "gallery" && a.is_primary
-    ) || assets.find((a: any) => a.section === "gallery");
-    
-    if (primaryAsset?.storage_bucket && primaryAsset?.storage_path) {
-      const { data } = supabase.storage
-        .from(primaryAsset.storage_bucket)
-        .getPublicUrl(primaryAsset.storage_path);
-      thumbnail_url = data?.publicUrl || null;
-    }
+  const recentProducts: RecentProduct[] = (recentProductsResult.data || []).map(
+    (p: any) => {
+      let thumbnail_url: string | null = null;
 
-    return {
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      thumbnail_url,
-      category_name: p.categories?.name || "Sin categoría",
-      subcategory_name: p.subcategories?.name || null,
-      created_at: p.created_at,
-    };
-  });
+      // Buscar el asset primario de la galería
+      const assets = p.product_assets || [];
+      const primaryAsset =
+        assets.find((a: any) => a.section === "gallery" && a.is_primary) ||
+        assets.find((a: any) => a.section === "gallery");
+
+      if (primaryAsset?.storage_bucket && primaryAsset?.storage_path) {
+        const { data } = supabase.storage
+          .from(primaryAsset.storage_bucket)
+          .getPublicUrl(primaryAsset.storage_path);
+        thumbnail_url = data?.publicUrl || null;
+      }
+
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        thumbnail_url,
+        category_name: p.categories?.name || "Sin categoría",
+        subcategory_name: p.subcategories?.name || null,
+        created_at: p.created_at,
+      };
+    }
+  );
 
   return {
     totalProducts: productsResult.count || 0,
@@ -267,10 +267,10 @@ export async function getAdminProducts(
   const products: AdminProduct[] = (data || []).map((p: any) => {
     // Buscar el asset primario de la galería
     const assets = p.product_assets || [];
-    const primaryAsset = assets.find(
-      (a: any) => a.section === "gallery" && a.is_primary
-    ) || assets.find((a: any) => a.section === "gallery");
-    
+    const primaryAsset =
+      assets.find((a: any) => a.section === "gallery" && a.is_primary) ||
+      assets.find((a: any) => a.section === "gallery");
+
     let thumbnail_url: string | null = null;
     if (primaryAsset?.storage_bucket && primaryAsset?.storage_path) {
       const { data: urlData } = supabase.storage
@@ -375,8 +375,7 @@ export async function updateProduct(
   const updateData: any = {};
 
   if (data.name !== undefined) updateData.name = data.name.trim();
-  if (data.slug !== undefined)
-    updateData.slug = data.slug.toLowerCase().trim();
+  if (data.slug !== undefined) updateData.slug = data.slug.toLowerCase().trim();
   if (data.description !== undefined)
     updateData.description = data.description?.trim() || null;
   if (data.price !== undefined) updateData.price = data.price;
@@ -677,9 +676,7 @@ export function generateSlug(name: string): string {
 /**
  * Valida los datos de un producto
  */
-export function validateProductData(
-  data: Partial<ProductFormData>
-): string[] {
+export function validateProductData(data: Partial<ProductFormData>): string[] {
   const errors: string[] = [];
 
   if (!data.name?.trim()) {

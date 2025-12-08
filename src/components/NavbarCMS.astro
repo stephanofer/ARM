@@ -17,7 +17,6 @@ function isActive(href: string): boolean {
 
 <nav class="cms-navbar">
   <div class="navbar-container">
-    <!-- Logo / Brand -->
     <a href="/admin" class="navbar-brand">
       <div class="brand-icon">
         <svg
@@ -38,7 +37,6 @@ function isActive(href: string): boolean {
       >
     </a>
 
-    <!-- Navigation Links -->
     <div class="navbar-nav">
       {
         navItems.map((item) => (
@@ -96,9 +94,7 @@ function isActive(href: string): boolean {
       }
     </div>
 
-    <!-- Right Section -->
     <div class="navbar-right">
-      <!-- View Site Link -->
       <a href="/" class="view-site-btn" target="_blank" rel="noopener">
         <svg
           width="16"
@@ -116,7 +112,6 @@ function isActive(href: string): boolean {
         <span>Ver sitio</span>
       </a>
 
-      <!-- User Menu -->
       <div class="user-menu">
         <button class="user-btn" id="user-menu-btn">
           <div class="user-avatar">
@@ -165,7 +160,6 @@ function isActive(href: string): boolean {
       </div>
     </div>
 
-    <!-- Mobile Menu Button -->
     <button class="mobile-menu-btn" id="mobile-menu-btn">
       <svg
         width="24"
@@ -182,7 +176,6 @@ function isActive(href: string): boolean {
     </button>
   </div>
 
-  <!-- Mobile Navigation -->
   <div class="mobile-nav" id="mobile-nav">
     {
       navItems.map((item) => (
@@ -222,7 +215,6 @@ function isActive(href: string): boolean {
     gap: 2rem;
   }
 
-  /* Brand */
   .navbar-brand {
     display: flex;
     align-items: center;
@@ -253,7 +245,6 @@ function isActive(href: string): boolean {
     color: #6b7280;
   }
 
-  /* Navigation */
   .navbar-nav {
     display: flex;
     align-items: center;
@@ -289,7 +280,6 @@ function isActive(href: string): boolean {
     flex-shrink: 0;
   }
 
-  /* Right Section */
   .navbar-right {
     display: flex;
     align-items: center;
@@ -316,7 +306,6 @@ function isActive(href: string): boolean {
     background: #f9fafb;
   }
 
-  /* User Menu */
   .user-menu {
     position: relative;
   }
@@ -407,7 +396,6 @@ function isActive(href: string): boolean {
     background: #fef2f2;
   }
 
-  /* Mobile */
   .mobile-menu-btn {
     display: none;
     padding: 0.5rem;
@@ -489,7 +477,6 @@ function isActive(href: string): boolean {
     const logoutBtn = document.getElementById(
       "logout-btn"
     ) as HTMLButtonElement;
-
 
     if (userBtn && userDropdown) {
       userBtn.addEventListener("click", () => {

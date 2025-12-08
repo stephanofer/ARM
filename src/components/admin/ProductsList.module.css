@@ -1,10 +1,8 @@
-/* Products List Page */
 .productsPage {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* Header */
 .pageHeader {
   display: flex;
   justify-content: space-between;
@@ -32,7 +30,6 @@
   margin: 0;
 }
 
-/* Buttons */
 .primaryBtn {
   display: inline-flex;
   align-items: center;
@@ -100,7 +97,6 @@
   cursor: not-allowed;
 }
 
-/* Filters Bar */
 .filtersBar {
   background: var(--admin-card-bg, white);
   border: 1px solid var(--admin-border, #e5e7eb);
@@ -170,7 +166,6 @@
   border: 1px solid var(--admin-border, #e5e7eb);
   border-radius: 8px;
   font-size: 0.9375rem;
-  /* background: var(--admin-card-bg, white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 0.625rem center; */
   color: var(--admin-text, #111827);
   cursor: pointer;
   min-width: 180px;
@@ -197,7 +192,6 @@
   background: #e5e7eb;
 }
 
-/* Table */
 .tableContainer {
   background: var(--admin-card-bg, white);
   border: 1px solid var(--admin-border, #e5e7eb);
@@ -250,7 +244,6 @@
   width: 120px;
 }
 
-/* Product Cell */
 .productCell {
   display: flex;
   align-items: center;
@@ -309,8 +302,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Badges */
 .categoryBadge {
   display: inline-block;
   padding: 0.25rem 0.625rem;
@@ -350,7 +341,6 @@
   white-space: nowrap;
 }
 
-/* Actions */
 .tdActions {
   text-align: right;
 }
@@ -387,7 +377,6 @@
   color: #dc2626;
 }
 
-/* Empty State */
 .emptyState {
   text-align: center;
   padding: 4rem 1rem;
@@ -421,7 +410,6 @@
   margin: 0 0 1.5rem;
 }
 
-/* Pagination */
 .pagination {
   display: flex;
   align-items: center;
@@ -461,7 +449,6 @@
   color: var(--admin-text-muted, #6b7280);
 }
 
-/* Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -524,8 +511,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
@@ -539,7 +530,6 @@
   }
 }
 
-/* Responsive hiding */
 .hideTablet {
   display: table-cell;
 }

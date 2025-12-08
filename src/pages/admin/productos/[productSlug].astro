@@ -4,24 +4,27 @@ import { getAllCategoriesWithSubcategories } from "@/lib/data/admin";
 import { createClient } from "@/lib/supabase";
 import ProductForm from "@/components/admin/ProductForm";
 
-const supabase = createClient({ request: Astro.request, cookies: Astro.cookies });
+const supabase = createClient({
+  request: Astro.request,
+  cookies: Astro.cookies,
+});
 
-// Obtener slug del producto
 const { productSlug } = Astro.params;
 
 if (!productSlug) {
   return Astro.redirect("/admin/productos");
 }
 
-// Obtener producto
 const { data: product, error } = await supabase
   .from("products")
-  .select(`
+  .select(
+    `
     *,
     categories(id, name),
     subcategories(id, name),
     product_assets(*)
-  `)
+  `
+  )
   .eq("slug", productSlug)
   .single();
 
@@ -29,41 +32,38 @@ if (error || !product) {
   return Astro.redirect("/admin/productos");
 }
 
-// Procesar assets con URLs públicas
-const processedAssets = (product.product_assets || []).map((asset: any) => {
-  const { data } = supabase.storage
-    .from(asset.storage_bucket)
-    .getPublicUrl(asset.storage_path);
-  return {
-    id: asset.id,
-    public_url: data?.publicUrl || null,
-    alt: asset.alt,
-    title: asset.title,
-    is_primary: asset.is_primary,
-    is_secondary: asset.is_secondary || false,
-    section: asset.section || "gallery",
-    kind: asset.kind || "image",
-    filename: asset.filename,
-    file_size_bytes: asset.file_size_bytes,
-    mime_type: asset.mime_type,
-    sort_order: asset.sort_order,
-  };
-}).sort((a: any, b: any) => a.sort_order - b.sort_order);
+const processedAssets = (product.product_assets || [])
+  .map((asset: any) => {
+    const { data } = supabase.storage
+      .from(asset.storage_bucket)
+      .getPublicUrl(asset.storage_path);
+    return {
+      id: asset.id,
+      public_url: data?.publicUrl || null,
+      alt: asset.alt,
+      title: asset.title,
+      is_primary: asset.is_primary,
+      is_secondary: asset.is_secondary || false,
+      section: asset.section || "gallery",
+      kind: asset.kind || "image",
+      filename: asset.filename,
+      file_size_bytes: asset.file_size_bytes,
+      mime_type: asset.mime_type,
+      sort_order: asset.sort_order,
+    };
+  })
+  .sort((a: any, b: any) => a.sort_order - b.sort_order);
 
-// Agrupar assets por sección
 const assetsGrouped = {
   gallery: processedAssets.filter((a: any) => a.section === "gallery"),
   additional: processedAssets.filter((a: any) => a.section === "additional"),
   download: processedAssets.filter((a: any) => a.section === "download"),
 };
 
-// Obtener categorías
 const categories = await getAllCategoriesWithSubcategories(supabase);
 
-// Verificar si es un producto recién creado
 const isNew = Astro.url.searchParams.get("created") === "true";
 
-// Preparar datos del producto para el componente
 const productData = {
   id: product.id,
   name: product.name,
@@ -80,7 +80,7 @@ const productData = {
 ---
 
 <CMSLayout title={`${product.name} - ARM Admin`} description="Editar producto">
-  <ProductForm 
+  <ProductForm
     client:load
     product={productData}
     assets={assetsGrouped}

@@ -17,98 +17,94 @@ const supabase = createClient({
 
 const productDetails = await getProductFullDetailsBySlug(supabase, productSlug);
 
-
-
 if (!productDetails) {
   return Astro.redirect("/404");
 }
 
 const { product, category, subcategory, assets } = productDetails;
 
-// Helper para obtener URL pública de Supabase Storage
 const getPublicUrl = (bucket: string, path: string) => {
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
 };
 
-// Preparar assets con URLs públicas
-const galleryAssets = assets.gallery.map(asset => ({
+const galleryAssets = assets.gallery.map((asset) => ({
   ...asset,
   url: getPublicUrl(asset.storage_bucket, asset.storage_path),
-  posterUrl: asset.poster_storage_path ? getPublicUrl(asset.storage_bucket, asset.poster_storage_path) : null,
+  posterUrl: asset.poster_storage_path
+    ? getPublicUrl(asset.storage_bucket, asset.poster_storage_path)
+    : null,
 }));
 
-const additionalAssets = assets.additional.map(asset => ({
-  ...asset,
-  url: getPublicUrl(asset.storage_bucket, asset.storage_path),
-}));
-
-const downloadAssets = assets.download.map(asset => ({
+const additionalAssets = assets.additional.map((asset) => ({
   ...asset,
   url: getPublicUrl(asset.storage_bucket, asset.storage_path),
 }));
 
-// Obtener imagen principal para fallback
-const primaryImage = galleryAssets.find(a => a.is_primary) || galleryAssets[0];
+const downloadAssets = assets.download.map((asset) => ({
+  ...asset,
+  url: getPublicUrl(asset.storage_bucket, asset.storage_path),
+}));
 
-// Información del producto
-const brand = product.brand || product.attributes.brand || 'ARM';
-const material = product.attributes.material || 'Madera';
+const primaryImage =
+  galleryAssets.find((a) => a.is_primary) || galleryAssets[0];
 
-// Meta tags
+const brand = product.brand || product.attributes.brand || "ARM";
+const material = product.attributes.material || "Madera";
+
 const pageTitle = `${product.name} | ARM`;
-const pageDescription = product.description || `${product.name} - ${subcategory.name}`;
+const pageDescription =
+  product.description || `${product.name} - ${subcategory.name}`;
 
-// Helper para formatear tipos de archivo (MIME types largos a extensiones legibles)
-const getFileTypeLabel = (mimeType: string | null, filename: string | null): string => {
-  // Primero intentar obtener la extensión del filename
+const getFileTypeLabel = (
+  mimeType: string | null,
+  filename: string | null
+): string => {
   if (filename) {
-    const ext = filename.split('.').pop()?.toUpperCase();
+    const ext = filename.split(".").pop()?.toUpperCase();
     if (ext && ext.length <= 5) return ext;
   }
-  
-  if (!mimeType) return 'ARCHIVO';
-  
-  // Mapeo de MIME types comunes a extensiones legibles
+
+  if (!mimeType) return "ARCHIVO";
+
   const mimeMap: Record<string, string> = {
-    'application/pdf': 'PDF',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'XLSX',
-    'application/vnd.ms-excel': 'XLS',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
-    'application/msword': 'DOC',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PPTX',
-    'application/vnd.ms-powerpoint': 'PPT',
-    'application/zip': 'ZIP',
-    'application/x-rar-compressed': 'RAR',
-    'application/x-7z-compressed': '7Z',
-    'text/plain': 'TXT',
-    'text/csv': 'CSV',
-    'image/jpeg': 'JPG',
-    'image/png': 'PNG',
-    'image/gif': 'GIF',
-    'image/webp': 'WEBP',
+    "application/pdf": "PDF",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "XLSX",
+    "application/vnd.ms-excel": "XLS",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      "DOCX",
+    "application/msword": "DOC",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+      "PPTX",
+    "application/vnd.ms-powerpoint": "PPT",
+    "application/zip": "ZIP",
+    "application/x-rar-compressed": "RAR",
+    "application/x-7z-compressed": "7Z",
+    "text/plain": "TXT",
+    "text/csv": "CSV",
+    "image/jpeg": "JPG",
+    "image/png": "PNG",
+    "image/gif": "GIF",
+    "image/webp": "WEBP",
   };
-  
+
   const lowerMime = mimeType.toLowerCase();
   if (mimeMap[lowerMime]) return mimeMap[lowerMime];
-  
-  // Si no está en el mapa, intentar extraer la extensión del MIME type
-  const parts = mimeType.split('/');
+
+  const parts = mimeType.split("/");
   if (parts.length === 2) {
     const subtype = parts[1].toUpperCase();
-    // Si es muy largo, truncar
     if (subtype.length > 6) {
       return subtype.substring(0, 4);
     }
     return subtype;
   }
-  
-  return 'ARCHIVO';
+
+  return "ARCHIVO";
 };
 
-// Helper para formatear tamaño de archivo
 const formatFileSize = (bytes: number | null): string => {
-  if (!bytes) return '';
+  if (!bytes) return "";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -117,7 +113,6 @@ const formatFileSize = (bytes: number | null): string => {
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <div class="product-page">
-    <!-- Breadcrumb -->
     <div class="breadcrumb-container">
       <nav class="breadcrumb">
         <a href="/">Inicio</a>
@@ -130,90 +125,101 @@ const formatFileSize = (bytes: number | null): string => {
       </nav>
     </div>
 
-    <!-- Product Main Section -->
     <section class="product-main">
-      <!-- Gallery Section - Shopify Style -->
       <div class="gallery-section">
-        <!-- Thumbnails (izquierda en desktop, abajo en mobile) -->
-        {galleryAssets.length > 1 && (
-          <div class="gallery-thumbnails">
-            {galleryAssets.map((asset, index) => (
-              <button
-                class={`thumbnail ${index === 0 ? "active" : ""}`}
-                data-index={index}
-                aria-label={`Ver ${asset.kind === 'video' ? 'video' : 'imagen'} ${index + 1}`}
-              >
-                {asset.kind === "image" ? (
-                  <img
-                    src={asset.url}
-                    alt={asset.alt || `${product.name} - Vista ${index + 1}`}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="video-thumbnail">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <!-- Imagen Principal -->
-        <div class="gallery-main" data-single={galleryAssets.length <= 1 ? "true" : "false"}>
-          {galleryAssets.length > 0 ? (
-            galleryAssets.map((asset, index) => (
-              <div
-                class={`media-item ${index === 0 ? "active" : ""}`}
-                data-index={index}
-              >
-                {asset.kind === "image" ? (
-                  <img 
-                    src={asset.url} 
-                    alt={asset.alt || product.name}
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
-                ) : (
-                  <video 
-                    controls 
-                    preload="metadata"
-                    poster={asset.posterUrl || undefined}
-                  >
-                    <source src={asset.url} type={asset.mime_type || "video/mp4"} />
-                    Tu navegador no soporta el elemento de video.
-                  </video>
-                )}
-              </div>
-            ))
-          ) : (
-            <div class="media-item active">
-              <div class="no-image">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-                <p>Sin imagen disponible</p>
-              </div>
+        {
+          galleryAssets.length > 1 && (
+            <div class="gallery-thumbnails">
+              {galleryAssets.map((asset, index) => (
+                <button
+                  class={`thumbnail ${index === 0 ? "active" : ""}`}
+                  data-index={index}
+                  aria-label={`Ver ${asset.kind === "video" ? "video" : "imagen"} ${index + 1}`}
+                >
+                  {asset.kind === "image" ? (
+                    <img
+                      src={asset.url}
+                      alt={asset.alt || `${product.name} - Vista ${index + 1}`}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="video-thumbnail">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
-          )}
+          )
+        }
+
+        <div
+          class="gallery-main"
+          data-single={galleryAssets.length <= 1 ? "true" : "false"}
+        >
+          {
+            galleryAssets.length > 0 ? (
+              galleryAssets.map((asset, index) => (
+                <div
+                  class={`media-item ${index === 0 ? "active" : ""}`}
+                  data-index={index}
+                >
+                  {asset.kind === "image" ? (
+                    <img
+                      src={asset.url}
+                      alt={asset.alt || product.name}
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  ) : (
+                    <video
+                      controls
+                      preload="metadata"
+                      poster={asset.posterUrl || undefined}
+                    >
+                      <source
+                        src={asset.url}
+                        type={asset.mime_type || "video/mp4"}
+                      />
+                      Tu navegador no soporta el elemento de video.
+                    </video>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div class="media-item active">
+                <div class="no-image">
+                  <svg
+                    width="80"
+                    height="80"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                  </svg>
+                  <p>Sin imagen disponible</p>
+                </div>
+              </div>
+            )
+          }
         </div>
       </div>
 
-      <!-- Product Info Section -->
       <div class="product-info">
         <h1 class="product-title">{product.name}</h1>
         <p class="product-subtitle">{subcategory.name}</p>
 
-        <!-- Product Meta -->
         <div class="product-meta">
           <div class="meta-item">
             <span class="meta-label">Marca:</span>
@@ -229,7 +235,6 @@ const formatFileSize = (bytes: number | null): string => {
           </div>
         </div>
 
-        <!-- Add to Cart -->
         <AddToCartSection
           product={{
             id: product.id,
@@ -242,7 +247,6 @@ const formatFileSize = (bytes: number | null): string => {
           client:load
         />
 
-        <!-- Quick Actions Links -->
         <div class="quick-links">
           <a href="#detalles" class="quick-link">
             <svg
@@ -258,43 +262,54 @@ const formatFileSize = (bytes: number | null): string => {
             </svg>
             Detalles del producto
           </a>
-          {additionalAssets.length > 0 && (
-            <a href="#ejemplos" class="quick-link">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                <line x1="7" y1="2" x2="7" y2="22"></line>
-                <line x1="17" y1="2" x2="17" y2="22"></line>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-              </svg>
-              Ver más imágenes
-            </a>
-          )}
-          {downloadAssets.length > 0 && (
-            <a href="#descargas" class="quick-link">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                aria-hidden="true"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              Archivos descargables
-            </a>
-          )}
+          {
+            additionalAssets.length > 0 && (
+              <a href="#ejemplos" class="quick-link">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <rect
+                    x="2"
+                    y="2"
+                    width="20"
+                    height="20"
+                    rx="2.18"
+                    ry="2.18"
+                  />
+                  <line x1="7" y1="2" x2="7" y2="22" />
+                  <line x1="17" y1="2" x2="17" y2="22" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                </svg>
+                Ver más imágenes
+              </a>
+            )
+          }
+          {
+            downloadAssets.length > 0 && (
+              <a href="#descargas" class="quick-link">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Archivos descargables
+              </a>
+            )
+          }
           <a href="#confianza" class="quick-link">
             <svg
               width="16"
@@ -313,344 +328,434 @@ const formatFileSize = (bytes: number | null): string => {
       </div>
     </section>
 
-    <!-- Product Details Section -->
-    <!-- Product Details Section - Two Column Layout -->
     <section id="detalles" class="details-section">
       <div class="details-grid">
-        <!-- Left Column: Description + Accordions -->
         <div class="details-left">
           <h2 class="details-title">Detalles del producto</h2>
-          {product.description && (
-            <p class="details-description">{product.description}</p>
-          )}
+          {
+            product.description && (
+              <p class="details-description">{product.description}</p>
+            )
+          }
 
-          <!-- Accordions -->
           <div class="accordions-container">
-            <!-- Características - Abierto por defecto -->
             <details class="accordion" open>
               <summary class="accordion-header">
                 <span>Características</span>
-                <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </summary>
-              <div class="accordion-content">
-                <!-- Nuestra Madera -->
-                <div class="info-block">
-                  <h4 class="info-block-title">Nuestra madera</h4>
-                  <p class="info-block-text">
-                    Este es un mueble sostenible y reciclable con certificación PEFC. 
-                    Fabricado con madera maciza ecológica de pino insignis, procedente de bosques locales y sostenibles.
-                  </p>
-                </div>
-
-                <!-- Material -->
-                {material && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Material</span>
-                    <span class="characteristic-value">{material}</span>
-                  </div>
-                )}
-
-                <!-- Marca -->
-                {brand && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Marca</span>
-                    <span class="characteristic-value">{brand}</span>
-                  </div>
-                )}
-
-                <!-- Acabado -->
-                {product.attributes.acabado && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Acabado</span>
-                    <span class="characteristic-value">{product.attributes.acabado}</span>
-                  </div>
-                )}
-
-                <!-- Montaje -->
-                {product.attributes.montaje && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Montaje</span>
-                    <span class="characteristic-value">{product.attributes.montaje}</span>
-                  </div>
-                )}
-
-                <!-- Envío -->
-                {product.attributes.envio && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Envío</span>
-                    <span class="characteristic-value">{product.attributes.envio}</span>
-                  </div>
-                )}
-
-                <!-- Embalaje -->
-                {product.attributes.embalaje && (
-                  <div class="characteristic-item">
-                    <span class="characteristic-label">Embalaje</span>
-                    <span class="characteristic-value">{product.attributes.embalaje}</span>
-                  </div>
-                )}
-
-                <!-- Todas las características dinámicas restantes -->
-                {Object.entries(product.attributes)
-                  .filter(([key]) => 
-                    !['medida', 'dimensi', 'altura', 'ancho', 'largo', 'profund', 'fondo', 'longitud', 'alto', 'acabado', 'montaje', 'envio', 'embalaje', 'material', 'brand', 'sku', 'price_note'].some(term => key.toLowerCase().includes(term))
-                  )
-                  .map(([key, value]) => (
-                    <div class="characteristic-item">
-                      <span class="characteristic-label">{key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}</span>
-                      <span class="characteristic-value">{typeof value === 'object' ? JSON.stringify(value) : value}</span>
-                    </div>
-                  ))}
-              </div>
-            </details>
-          </div>
-        </div>
-
-        <!-- Right Column: Measurements -->
-        <div class="details-right">
-          <h2 class="measurements-title">Medidas</h2>
-          
-          {/* Verificar si hay alguna medida disponible */}
-          {(product.attributes.altura || product.attributes.alto || 
-            product.attributes.longitud || product.attributes.largo || product.attributes.ancho ||
-            product.attributes.fondo || product.attributes.profundidad ||
-            product.attributes.dimensiones ||
-            Object.keys(product.attributes).some(k => k.toLowerCase().includes('medida') || k.toLowerCase().includes('dimensi'))) ? (
-            <div class="measurements-grid">
-              <!-- Altura -->
-              {(product.attributes.altura || product.attributes.alto) && (
-                <div class="measurement-card">
-                  <h4 class="measurement-label">Altura</h4>
-                  <p class="measurement-value">
-                    {product.attributes.altura || product.attributes.alto}
-                  </p>
-                </div>
-              )}
-
-              <!-- Longitud -->
-              {(product.attributes.longitud || product.attributes.largo || product.attributes.ancho) && (
-                <div class="measurement-card">
-                  <h4 class="measurement-label">Longitud</h4>
-                  <p class="measurement-value">
-                    {product.attributes.longitud || product.attributes.largo || product.attributes.ancho}
-                  </p>
-                </div>
-              )}
-
-              <!-- Fondo / Profundidad -->
-              {(product.attributes.fondo || product.attributes.profundidad) && (
-                <div class="measurement-card">
-                  <h4 class="measurement-label">Fondo</h4>
-                  <p class="measurement-value">
-                    {product.attributes.fondo || product.attributes.profundidad}
-                  </p>
-                </div>
-              )}
-
-              <!-- Dimensiones generales -->
-              {product.attributes.dimensiones && (
-                <div class="measurement-card full-width">
-                  <h4 class="measurement-label">Dimensiones</h4>
-                  <p class="measurement-value">
-                    {product.attributes.dimensiones}
-                  </p>
-                </div>
-              )}
-
-              <!-- Otras medidas dinámicas -->
-              {Object.entries(product.attributes)
-                .filter(([key]) => 
-                  (key.toLowerCase().includes('medida') || 
-                  key.toLowerCase().includes('dimensi')) &&
-                  !['dimensiones'].includes(key.toLowerCase())
-                )
-                .map(([key, value]) => (
-                  <div class="measurement-card">
-                    <h4 class="measurement-label">{key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}</h4>
-                    <p class="measurement-value">{value}</p>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <!-- Estado sin medidas especificadas -->
-            <div class="no-measurements">
-              <svg class="no-measurements-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              </svg>
-              <span class="no-measurements-text">Medidas no especificadas. Consulta la ficha técnica para más detalles.</span>
-            </div>
-          )}
-
-          <!-- Nota informativa sobre ficha técnica -->
-          {downloadAssets.length > 0 && (
-            <div class="tech-sheet-note">
-              <div class="tech-sheet-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </div>
-              <div class="tech-sheet-content">
-                <p class="tech-sheet-text">
-                  ¿Necesitas información más detallada? Descarga la <strong>ficha técnica</strong> del producto con todas las especificaciones completas.
-                </p>
-                <a href="#descargas" class="tech-sheet-link">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  Ver archivos descargables
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-
-    <!-- Examples Section - Galería Adicional -->
-    {additionalAssets.length > 0 && (
-      <section id="ejemplos" class="examples-section">
-        <div class="examples-header">
-          <h2>Galería adicional</h2>
-          <p class="section-subtitle">
-            Explora más detalles y perspectivas del producto
-          </p>
-          <p class="image-count">
-            {additionalAssets.length} {additionalAssets.length === 1 ? 'elemento' : 'elementos'}
-          </p>
-        </div>
-
-        <div class="examples-grid" data-count={additionalAssets.length}>
-          {additionalAssets.map((asset, index) => (
-            <article 
-              class={`example-item ${asset.kind === 'video' ? 'video-item' : 'image-item'}`}
-              data-index={index}
-            >
-              <div class="example-media-wrapper">
-                {asset.kind === "image" ? (
-                  <img
-                    src={asset.url}
-                    alt={asset.alt || `${product.name} - ${asset.title || `Vista ${index + 1}`}`}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <>
-                    <video
-                      class="example-video"
-                      preload="metadata"
-                      playsinline
-                      muted
-                    >
-                      <source src={asset.url} type={asset.mime_type || "video/mp4"} />
-                      Tu navegador no soporta el elemento de video.
-                    </video>
-                    <div class="video-overlay">
-                      <div class="video-play-button">
-                        <svg
-                          width="48"
-                          height="48"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                      </div>
-                      <span class="video-label">Reproducir video</span>
-                    </div>
-                  </>
-                )}
-              </div>
-              {asset.title && (
-                <div class="example-caption">
-                  <span>{asset.title}</span>
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-
-        <!-- Nota para el diseñador (comentario visible solo en desarrollo) -->
-        <!-- 
-          📐 ESPECIFICACIONES PARA IMÁGENES:
-          - Proporción recomendada: 4:3 (landscape) o 3:4 (portrait)
-          - Resolución mínima: 800x600px
-          - Resolución óptima: 1200x900px
-          - Formato: WebP preferido, JPG como fallback
-          - Peso máximo: 500KB por imagen
-        -->
-      </section>
-    )}
-
-    <!-- Downloads Section -->
-    {downloadAssets.length > 0 && (
-      <section id="descargas" class="downloads-section">
-        <h2>Archivos descargables</h2>
-        <p class="section-subtitle">Manuales, certificados y documentación</p>
-
-        <div class="downloads-grid">
-          {downloadAssets.map((file) => (
-            <button 
-              type="button"
-              class="download-card" 
-              data-url={file.url}
-              data-filename={file.filename || 'archivo'}
-              aria-label={`Descargar ${file.title || file.filename}`}
-            >
-              <div class="download-icon">
                 <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="12" y1="18" x2="12" y2="12" />
-                  <polyline points="9 15 12 18 15 15" />
-                </svg>
-              </div>
-              <div class="download-info">
-                <h3>{file.title || file.filename}</h3>
-                <div class="download-meta">
-                  <span class="file-type">{getFileTypeLabel(file.mime_type, file.filename)}</span>
-                  {file.file_size_bytes && (
-                    <span class="file-size">{formatFileSize(file.file_size_bytes)}</span>
-                  )}
-                </div>
-              </div>
-              <div class="download-action">
-                <svg
+                  class="accordion-icon"
                   width="20"
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
-                  aria-hidden="true"
                 >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-    )}
+              </summary>
+              <div class="accordion-content">
+                <div class="info-block">
+                  <h4 class="info-block-title">Nuestra madera</h4>
+                  <p class="info-block-text">
+                    Este es un mueble sostenible y reciclable con certificación
+                    PEFC. Fabricado con madera maciza ecológica de pino
+                    insignis, procedente de bosques locales y sostenibles.
+                  </p>
+                </div>
 
-    <!-- Trust Section -->
+                {
+                  material && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Material</span>
+                      <span class="characteristic-value">{material}</span>
+                    </div>
+                  )
+                }
+
+                {
+                  brand && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Marca</span>
+                      <span class="characteristic-value">{brand}</span>
+                    </div>
+                  )
+                }
+
+                {
+                  product.attributes.acabado && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Acabado</span>
+                      <span class="characteristic-value">
+                        {product.attributes.acabado}
+                      </span>
+                    </div>
+                  )
+                }
+
+                {
+                  product.attributes.montaje && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Montaje</span>
+                      <span class="characteristic-value">
+                        {product.attributes.montaje}
+                      </span>
+                    </div>
+                  )
+                }
+
+                {
+                  product.attributes.envio && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Envío</span>
+                      <span class="characteristic-value">
+                        {product.attributes.envio}
+                      </span>
+                    </div>
+                  )
+                }
+
+                {
+                  product.attributes.embalaje && (
+                    <div class="characteristic-item">
+                      <span class="characteristic-label">Embalaje</span>
+                      <span class="characteristic-value">
+                        {product.attributes.embalaje}
+                      </span>
+                    </div>
+                  )
+                }
+
+                {
+                  Object.entries(product.attributes)
+                    .filter(
+                      ([key]) =>
+                        ![
+                          "medida",
+                          "dimensi",
+                          "altura",
+                          "ancho",
+                          "largo",
+                          "profund",
+                          "fondo",
+                          "longitud",
+                          "alto",
+                          "acabado",
+                          "montaje",
+                          "envio",
+                          "embalaje",
+                          "material",
+                          "brand",
+                          "sku",
+                          "price_note",
+                        ].some((term) => key.toLowerCase().includes(term))
+                    )
+                    .map(([key, value]) => (
+                      <div class="characteristic-item">
+                        <span class="characteristic-label">
+                          {key
+                            .replace(/_/g, " ")
+                            .replace(/^\w/, (c) => c.toUpperCase())}
+                        </span>
+                        <span class="characteristic-value">
+                          {typeof value === "object"
+                            ? JSON.stringify(value)
+                            : value}
+                        </span>
+                      </div>
+                    ))
+                }
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="details-right">
+          <h2 class="measurements-title">Medidas</h2>
+
+          {
+            product.attributes.altura ||
+            product.attributes.alto ||
+            product.attributes.longitud ||
+            product.attributes.largo ||
+            product.attributes.ancho ||
+            product.attributes.fondo ||
+            product.attributes.profundidad ||
+            product.attributes.dimensiones ||
+            Object.keys(product.attributes).some(
+              (k) =>
+                k.toLowerCase().includes("medida") ||
+                k.toLowerCase().includes("dimensi")
+            ) ? (
+              <div class="measurements-grid">
+                {(product.attributes.altura || product.attributes.alto) && (
+                  <div class="measurement-card">
+                    <h4 class="measurement-label">Altura</h4>
+                    <p class="measurement-value">
+                      {product.attributes.altura || product.attributes.alto}
+                    </p>
+                  </div>
+                )}
+
+                {(product.attributes.longitud ||
+                  product.attributes.largo ||
+                  product.attributes.ancho) && (
+                  <div class="measurement-card">
+                    <h4 class="measurement-label">Longitud</h4>
+                    <p class="measurement-value">
+                      {product.attributes.longitud ||
+                        product.attributes.largo ||
+                        product.attributes.ancho}
+                    </p>
+                  </div>
+                )}
+
+                {(product.attributes.fondo ||
+                  product.attributes.profundidad) && (
+                  <div class="measurement-card">
+                    <h4 class="measurement-label">Fondo</h4>
+                    <p class="measurement-value">
+                      {product.attributes.fondo ||
+                        product.attributes.profundidad}
+                    </p>
+                  </div>
+                )}
+
+                {product.attributes.dimensiones && (
+                  <div class="measurement-card full-width">
+                    <h4 class="measurement-label">Dimensiones</h4>
+                    <p class="measurement-value">
+                      {product.attributes.dimensiones}
+                    </p>
+                  </div>
+                )}
+
+                {Object.entries(product.attributes)
+                  .filter(
+                    ([key]) =>
+                      (key.toLowerCase().includes("medida") ||
+                        key.toLowerCase().includes("dimensi")) &&
+                      !["dimensiones"].includes(key.toLowerCase())
+                  )
+                  .map(([key, value]) => (
+                    <div class="measurement-card">
+                      <h4 class="measurement-label">
+                        {key
+                          .replace(/_/g, " ")
+                          .replace(/^\w/, (c) => c.toUpperCase())}
+                      </h4>
+                      <p class="measurement-value">{value}</p>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div class="no-measurements">
+                <svg
+                  class="no-measurements-icon"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                </svg>
+                <span class="no-measurements-text">
+                  Medidas no especificadas. Consulta la ficha técnica para más
+                  detalles.
+                </span>
+              </div>
+            )
+          }
+
+          {
+            downloadAssets.length > 0 && (
+              <div class="tech-sheet-note">
+                <div class="tech-sheet-icon">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                </div>
+                <div class="tech-sheet-content">
+                  <p class="tech-sheet-text">
+                    ¿Necesitas información más detallada? Descarga la{" "}
+                    <strong>ficha técnica</strong> del producto con todas las
+                    especificaciones completas.
+                  </p>
+                  <a href="#descargas" class="tech-sheet-link">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Ver archivos descargables
+                  </a>
+                </div>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    {
+      additionalAssets.length > 0 && (
+        <section id="ejemplos" class="examples-section">
+          <div class="examples-header">
+            <h2>Galería adicional</h2>
+            <p class="section-subtitle">
+              Explora más detalles y perspectivas del producto
+            </p>
+            <p class="image-count">
+              {additionalAssets.length}{" "}
+              {additionalAssets.length === 1 ? "elemento" : "elementos"}
+            </p>
+          </div>
+
+          <div class="examples-grid" data-count={additionalAssets.length}>
+            {additionalAssets.map((asset, index) => (
+              <article
+                class={`example-item ${asset.kind === "video" ? "video-item" : "image-item"}`}
+                data-index={index}
+              >
+                <div class="example-media-wrapper">
+                  {asset.kind === "image" ? (
+                    <img
+                      src={asset.url}
+                      alt={
+                        asset.alt ||
+                        `${product.name} - ${asset.title || `Vista ${index + 1}`}`
+                      }
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <>
+                      <video
+                        class="example-video"
+                        preload="metadata"
+                        playsinline
+                        muted
+                      >
+                        <source
+                          src={asset.url}
+                          type={asset.mime_type || "video/mp4"}
+                        />
+                        Tu navegador no soporta el elemento de video.
+                      </video>
+                      <div class="video-overlay">
+                        <div class="video-play-button">
+                          <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                          </svg>
+                        </div>
+                        <span class="video-label">Reproducir video</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+                {asset.title && (
+                  <div class="example-caption">
+                    <span>{asset.title}</span>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      downloadAssets.length > 0 && (
+        <section id="descargas" class="downloads-section">
+          <h2>Archivos descargables</h2>
+          <p class="section-subtitle">Manuales, certificados y documentación</p>
+
+          <div class="downloads-grid">
+            {downloadAssets.map((file) => (
+              <button
+                type="button"
+                class="download-card"
+                data-url={file.url}
+                data-filename={file.filename || "archivo"}
+                aria-label={`Descargar ${file.title || file.filename}`}
+              >
+                <div class="download-icon">
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <polyline points="9 15 12 18 15 15" />
+                  </svg>
+                </div>
+                <div class="download-info">
+                  <h3>{file.title || file.filename}</h3>
+                  <div class="download-meta">
+                    <span class="file-type">
+                      {getFileTypeLabel(file.mime_type, file.filename)}
+                    </span>
+                    {file.file_size_bytes && (
+                      <span class="file-size">
+                        {formatFileSize(file.file_size_bytes)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div class="download-action">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
     <section id="confianza" class="trust-section">
       <div class="trust-header">
         <h2>Madera ecológica, fabricación local</h2>
@@ -762,12 +867,10 @@ const formatFileSize = (bytes: number | null): string => {
     padding: 0 1.5rem;
   }
 
-  /* Breadcrumb */
   .breadcrumb-container {
     padding: 1.5rem 0;
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 2rem;
-    /* Prevenir desbordamiento */
     overflow: hidden;
   }
 
@@ -776,9 +879,7 @@ const formatFileSize = (bytes: number | null): string => {
     align-items: center;
     gap: 8px;
     font-size: 0.875rem;
-    /* NO wrap - una sola línea */
     flex-wrap: nowrap;
-    /* Prevenir desbordamiento */
     overflow: hidden;
     max-width: 100%;
   }
@@ -787,7 +888,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: #6b7280;
     text-decoration: none;
     transition: color 0.2s ease;
-    /* No encogerse */
     flex-shrink: 0;
     white-space: nowrap;
   }
@@ -804,16 +904,13 @@ const formatFileSize = (bytes: number | null): string => {
   .breadcrumb .current {
     color: #111827;
     font-weight: 500;
-    /* Truncar si es muy largo */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Permitir que se encoja */
     flex-shrink: 1;
     min-width: 0;
   }
 
-  /* Product Main Section */
   .product-main {
     display: grid;
     grid-template-columns: minmax(500px, 700px) 1fr;
@@ -822,7 +919,6 @@ const formatFileSize = (bytes: number | null): string => {
     align-items: start;
   }
 
-  /* ===== GALLERY - Shopify Style ===== */
   .gallery-section {
     display: grid;
     grid-template-columns: 75px 1fr;
@@ -832,7 +928,6 @@ const formatFileSize = (bytes: number | null): string => {
     max-width: 700px;
   }
 
-  /* Thumbnails Container - Vertical en desktop */
   .gallery-thumbnails {
     display: flex;
     flex-direction: column;
@@ -850,7 +945,6 @@ const formatFileSize = (bytes: number | null): string => {
     display: none;
   }
 
-  /* Thumbnail Individual */
   .thumbnail {
     width: 68px;
     height: 68px;
@@ -861,7 +955,9 @@ const formatFileSize = (bytes: number | null): string => {
     overflow: hidden;
     cursor: pointer;
     background: #fff;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease;
     padding: 4px;
     flex-shrink: 0;
     position: relative;
@@ -881,7 +977,6 @@ const formatFileSize = (bytes: number | null): string => {
     border-width: 2px;
   }
 
-  /* Thumbnail images */
   .thumbnail img {
     width: 100%;
     height: 100%;
@@ -890,8 +985,6 @@ const formatFileSize = (bytes: number | null): string => {
     display: block;
     border-radius: 4px;
   }
-
-  /* Video Thumbnail Indicator */
   .video-thumbnail {
     width: 100%;
     height: 100%;
@@ -905,7 +998,7 @@ const formatFileSize = (bytes: number | null): string => {
   }
 
   .video-thumbnail::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.1);
@@ -917,19 +1010,16 @@ const formatFileSize = (bytes: number | null): string => {
     opacity: 1;
   }
 
-  /* Main Gallery Container - Shopify Style */
   .gallery-main {
     position: relative;
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    /* Aspect ratio 1:1 como Shopify */
     aspect-ratio: 1 / 1;
     border: 1px solid #e5e7eb;
   }
 
-  /* Cuando solo hay una imagen, ocupa todo el ancho */
   .gallery-main[data-single="true"] {
     grid-column: 1 / -1;
   }
@@ -948,7 +1038,6 @@ const formatFileSize = (bytes: number | null): string => {
     align-items: center;
     justify-content: center;
     background: #fff;
-    /* Padding interno para que la imagen respire */
     padding: 24px;
     box-sizing: border-box;
   }
@@ -959,7 +1048,6 @@ const formatFileSize = (bytes: number | null): string => {
     z-index: 1;
   }
 
-  /* Imágenes - Llenan el contenedor manteniendo proporción */
   .media-item img {
     width: 100%;
     height: 100%;
@@ -968,7 +1056,6 @@ const formatFileSize = (bytes: number | null): string => {
     display: block;
   }
 
-  /* Videos */
   .media-item video {
     width: 100%;
     height: 100%;
@@ -1004,7 +1091,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: white;
   }
 
-  /* Product Info */
   .product-info {
     padding-top: 1rem;
   }
@@ -1022,8 +1108,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: #6b7280;
     margin: 0 0 2rem 0;
   }
-
-  /* Product Price */
   .product-price {
     margin-bottom: 2rem;
     padding-bottom: 2rem;
@@ -1045,7 +1129,6 @@ const formatFileSize = (bytes: number | null): string => {
     display: block;
   }
 
-  /* No Image State */
   .no-image {
     display: flex;
     flex-direction: column;
@@ -1054,7 +1137,6 @@ const formatFileSize = (bytes: number | null): string => {
     width: 100%;
     height: 100%;
     color: #9ca3af;
-    /* Asegurar que ocupe todo el espacio del contenedor */
     position: absolute;
     top: 0;
     left: 0;
@@ -1069,12 +1151,10 @@ const formatFileSize = (bytes: number | null): string => {
     font-size: 0.875rem;
   }
 
-  /* Quick Links */
   .quick-links {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    /* margin-bottom: 2rem; */
     padding-bottom: 2rem;
     border-bottom: 1px solid #e5e7eb;
   }
@@ -1102,8 +1182,6 @@ const formatFileSize = (bytes: number | null): string => {
   .quick-link svg {
     flex-shrink: 0;
   }
-
-  /* Add to Cart */
   .add-to-cart-section {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -1151,14 +1229,13 @@ const formatFileSize = (bytes: number | null): string => {
     background: white;
   }
 
-  /* Ocultar flechas del input number */
   #quantity::-webkit-outer-spin-button,
   #quantity::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
 
-  #quantity[type=number] {
+  #quantity[type="number"] {
     -moz-appearance: textfield;
   }
 
@@ -1185,7 +1262,6 @@ const formatFileSize = (bytes: number | null): string => {
     cursor: not-allowed;
   }
 
-  /* Product Meta */
   .product-meta {
     display: flex;
     flex-direction: column;
@@ -1219,7 +1295,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: #ef4444;
   }
 
-  /* ===== NEW DETAILS SECTION - Two Column Layout ===== */
   .details-section {
     margin-bottom: 4rem;
     padding: 3rem 0;
@@ -1238,7 +1313,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0 auto;
   }
 
-  /* Left Column */
   .details-left {
     display: flex;
     flex-direction: column;
@@ -1289,7 +1363,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
   }
 
-  /* Accordions */
   .accordions-container {
     display: flex;
     flex-direction: column;
@@ -1358,7 +1431,6 @@ const formatFileSize = (bytes: number | null): string => {
     font-weight: 500;
   }
 
-  /* Characteristic items dentro del accordion */
   .characteristic-item {
     display: flex;
     justify-content: space-between;
@@ -1384,7 +1456,6 @@ const formatFileSize = (bytes: number | null): string => {
     text-align: right;
   }
 
-  /* Tech Sheet Note */
   .tech-sheet-note {
     display: flex;
     gap: 1rem;
@@ -1439,7 +1510,6 @@ const formatFileSize = (bytes: number | null): string => {
     text-decoration: underline;
   }
 
-  /* No Measurements State */
   .no-measurements {
     display: flex;
     align-items: center;
@@ -1472,8 +1542,6 @@ const formatFileSize = (bytes: number | null): string => {
       transform: translateY(0);
     }
   }
-
-  /* Right Column - Measurements */
   .details-right {
     display: flex;
     flex-direction: column;
@@ -1517,7 +1585,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
   }
 
-  /* Measurements */
   .measurements-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1563,7 +1630,6 @@ const formatFileSize = (bytes: number | null): string => {
     line-height: 1.6;
   }
 
-  /* ===== EXAMPLES SECTION - Galería Adicional ===== */
   .examples-section {
     margin-bottom: 4rem;
     padding: 3rem 0;
@@ -1594,15 +1660,12 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
   }
 
-  /* Grid Principal - Diseño adaptativo según cantidad */
   .examples-grid {
     display: grid;
     gap: 1rem;
-    /* Grid por defecto: 3 columnas */
     grid-template-columns: repeat(3, 1fr);
   }
 
-  /* Ajustes según cantidad de elementos */
   .examples-grid[data-count="1"] {
     grid-template-columns: 1fr;
     max-width: 600px;
@@ -1619,13 +1682,11 @@ const formatFileSize = (bytes: number | null): string => {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  /* Item individual */
   .example-item {
     position: relative;
     border-radius: 12px;
     overflow: hidden;
     background: #f8f9fa;
-    /* Aspect ratio consistente 4:3 para estandarización */
     aspect-ratio: 4 / 3;
   }
 
@@ -1636,7 +1697,6 @@ const formatFileSize = (bytes: number | null): string => {
     overflow: hidden;
   }
 
-  /* Imágenes */
   .example-item img {
     width: 100%;
     height: 100%;
@@ -1644,7 +1704,6 @@ const formatFileSize = (bytes: number | null): string => {
     object-position: center;
   }
 
-  /* Videos */
   .example-item.video-item {
     cursor: pointer;
   }
@@ -1697,7 +1756,7 @@ const formatFileSize = (bytes: number | null): string => {
   }
 
   .video-play-button svg {
-    margin-left: 4px; /* Ajuste visual para centrar el triángulo */
+    margin-left: 4px;
   }
 
   .example-item.video-item:hover .video-play-button {
@@ -1712,7 +1771,6 @@ const formatFileSize = (bytes: number | null): string => {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
-  /* Estado reproduciendo */
   .example-item.video-item.playing .video-overlay {
     opacity: 0;
     pointer-events: none;
@@ -1722,7 +1780,6 @@ const formatFileSize = (bytes: number | null): string => {
     z-index: 3;
   }
 
-  /* Caption opcional */
   .example-caption {
     position: absolute;
     bottom: 0;
@@ -1748,7 +1805,6 @@ const formatFileSize = (bytes: number | null): string => {
     color: white;
   }
 
-  /* Downloads y Trust Section mantienen sus estilos */
   .downloads-section,
   .trust-section {
     margin-bottom: 4rem;
@@ -1763,7 +1819,6 @@ const formatFileSize = (bytes: number | null): string => {
     text-align: center;
   }
 
-  /* Downloads Section */
   .downloads-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1799,7 +1854,7 @@ const formatFileSize = (bytes: number | null): string => {
   }
 
   .download-card.downloading::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(
@@ -1817,7 +1872,7 @@ const formatFileSize = (bytes: number | null): string => {
   }
 
   .download-card.downloading .download-info::after {
-    content: 'Descargando...';
+    content: "Descargando...";
     position: absolute;
     top: 50%;
     left: 0;
@@ -1833,18 +1888,32 @@ const formatFileSize = (bytes: number | null): string => {
   }
 
   @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(3px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
   }
 
   .download-icon {
@@ -1904,7 +1973,6 @@ const formatFileSize = (bytes: number | null): string => {
     flex-shrink: 0;
   }
 
-  /* Trust Section */
   .trust-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1941,7 +2009,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
   }
 
-  /* Trust Section Horizontal Layout */
   .trust-section {
     padding-bottom: 3rem;
     margin-bottom: 0;
@@ -2002,8 +2069,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
     font-size: 0.9375rem;
   }
-
-  /* New Tabs Styles */
   .specs-table {
     display: flex;
     flex-direction: column;
@@ -2135,7 +2200,6 @@ const formatFileSize = (bytes: number | null): string => {
     margin: 0;
   }
 
-  /* ===== ANIMACIONES DE ENTRADA ===== */
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -2191,12 +2255,10 @@ const formatFileSize = (bytes: number | null): string => {
     }
   }
 
-  /* Breadcrumb animación */
   .breadcrumb-container {
     animation: fadeInUp 0.6s ease-out forwards;
   }
 
-  /* Galería animación */
   .gallery-section {
     animation: fadeInLeft 0.7s ease-out 0.1s forwards;
     opacity: 0;
@@ -2207,14 +2269,25 @@ const formatFileSize = (bytes: number | null): string => {
     animation: staggerFadeIn 0.4s ease-out forwards;
   }
 
-  .gallery-thumbnails .thumbnail:nth-child(1) { animation-delay: 0.25s; }
-  .gallery-thumbnails .thumbnail:nth-child(2) { animation-delay: 0.3s; }
-  .gallery-thumbnails .thumbnail:nth-child(3) { animation-delay: 0.35s; }
-  .gallery-thumbnails .thumbnail:nth-child(4) { animation-delay: 0.4s; }
-  .gallery-thumbnails .thumbnail:nth-child(5) { animation-delay: 0.45s; }
-  .gallery-thumbnails .thumbnail:nth-child(n+6) { animation-delay: 0.5s; }
+  .gallery-thumbnails .thumbnail:nth-child(1) {
+    animation-delay: 0.25s;
+  }
+  .gallery-thumbnails .thumbnail:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  .gallery-thumbnails .thumbnail:nth-child(3) {
+    animation-delay: 0.35s;
+  }
+  .gallery-thumbnails .thumbnail:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  .gallery-thumbnails .thumbnail:nth-child(5) {
+    animation-delay: 0.45s;
+  }
+  .gallery-thumbnails .thumbnail:nth-child(n + 6) {
+    animation-delay: 0.5s;
+  }
 
-  /* Product Info animación */
   .product-info {
     animation: fadeInRight 0.7s ease-out 0.2s forwards;
     opacity: 0;
@@ -2235,9 +2308,15 @@ const formatFileSize = (bytes: number | null): string => {
     animation: staggerFadeIn 0.4s ease-out forwards;
   }
 
-  .product-meta .meta-item:nth-child(1) { animation-delay: 0.55s; }
-  .product-meta .meta-item:nth-child(2) { animation-delay: 0.65s; }
-  .product-meta .meta-item:nth-child(3) { animation-delay: 0.75s; }
+  .product-meta .meta-item:nth-child(1) {
+    animation-delay: 0.55s;
+  }
+  .product-meta .meta-item:nth-child(2) {
+    animation-delay: 0.65s;
+  }
+  .product-meta .meta-item:nth-child(3) {
+    animation-delay: 0.75s;
+  }
 
   .add-to-cart-section {
     animation: fadeInUp 0.5s ease-out 0.8s forwards;
@@ -2249,19 +2328,28 @@ const formatFileSize = (bytes: number | null): string => {
     animation: staggerFadeIn 0.4s ease-out forwards;
   }
 
-  .quick-links .quick-link:nth-child(1) { animation-delay: 0.9s; }
-  .quick-links .quick-link:nth-child(2) { animation-delay: 1s; }
-  .quick-links .quick-link:nth-child(3) { animation-delay: 1.1s; }
-  .quick-links .quick-link:nth-child(4) { animation-delay: 1.2s; }
+  .quick-links .quick-link:nth-child(1) {
+    animation-delay: 0.9s;
+  }
+  .quick-links .quick-link:nth-child(2) {
+    animation-delay: 1s;
+  }
+  .quick-links .quick-link:nth-child(3) {
+    animation-delay: 1.1s;
+  }
+  .quick-links .quick-link:nth-child(4) {
+    animation-delay: 1.2s;
+  }
 
-  /* Secciones con animación al scroll (se activan con IntersectionObserver en JS) */
   .details-section,
   .examples-section,
   .downloads-section,
   .trust-section {
     opacity: 0;
     transform: translateY(40px);
-    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    transition:
+      opacity 0.7s ease-out,
+      transform 0.7s ease-out;
   }
 
   .details-section.animate-in,
@@ -2272,44 +2360,98 @@ const formatFileSize = (bytes: number | null): string => {
     transform: translateY(0);
   }
 
-  /* Animación de las tarjetas de descarga */
   .download-card {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
   }
 
-  .downloads-section.animate-in .download-card:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
-  .downloads-section.animate-in .download-card:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-  .downloads-section.animate-in .download-card:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+  .downloads-section.animate-in .download-card:nth-child(1) {
+    transition-delay: 0.1s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .downloads-section.animate-in .download-card:nth-child(2) {
+    transition-delay: 0.2s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .downloads-section.animate-in .download-card:nth-child(3) {
+    transition-delay: 0.3s;
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-  /* Animación de los items de la galería adicional */
   .example-item {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
   }
 
-  .examples-section.animate-in .example-item:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
-  .examples-section.animate-in .example-item:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
-  .examples-section.animate-in .example-item:nth-child(3) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-  .examples-section.animate-in .example-item:nth-child(4) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
-  .examples-section.animate-in .example-item:nth-child(5) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
-  .examples-section.animate-in .example-item:nth-child(n+6) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+  .examples-section.animate-in .example-item:nth-child(1) {
+    transition-delay: 0.1s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .examples-section.animate-in .example-item:nth-child(2) {
+    transition-delay: 0.15s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .examples-section.animate-in .example-item:nth-child(3) {
+    transition-delay: 0.2s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .examples-section.animate-in .example-item:nth-child(4) {
+    transition-delay: 0.25s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .examples-section.animate-in .example-item:nth-child(5) {
+    transition-delay: 0.3s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .examples-section.animate-in .example-item:nth-child(n + 6) {
+    transition-delay: 0.35s;
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-  /* Animación de las tarjetas de confianza */
   .trust-card-horizontal {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition:
+      opacity 0.5s ease-out,
+      transform 0.5s ease-out;
   }
 
-  .trust-section.animate-in .trust-card-horizontal:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
-  .trust-section.animate-in .trust-card-horizontal:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
-  .trust-section.animate-in .trust-card-horizontal:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
-  .trust-section.animate-in .trust-card-horizontal:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(1) {
+    transition-delay: 0.1s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(2) {
+    transition-delay: 0.2s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(3) {
+    transition-delay: 0.3s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .trust-section.animate-in .trust-card-horizontal:nth-child(4) {
+    transition-delay: 0.4s;
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-  /* Hover con transiciones suaves */
   .thumbnail,
   .quick-link,
   .download-card,
@@ -2317,13 +2459,11 @@ const formatFileSize = (bytes: number | null): string => {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Animación del badge de novedad */
   .product-badges .badge {
     animation: scaleIn 0.4s ease-out 0.6s forwards;
     opacity: 0;
   }
 
-  /* Preferencia de movimiento reducido */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -2332,7 +2472,7 @@ const formatFileSize = (bytes: number | null): string => {
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
-    
+
     .gallery-section,
     .product-info,
     .product-title,
@@ -2364,14 +2504,12 @@ const formatFileSize = (bytes: number | null): string => {
     }
   }
 
-  /* Responsive */
   @media (max-width: 1024px) {
     .product-main {
       grid-template-columns: 1fr;
       gap: 2rem;
     }
 
-    /* Gallery para tablets - Shopify style */
     .gallery-section {
       grid-template-columns: 70px 1fr;
       gap: 10px;
@@ -2408,7 +2546,6 @@ const formatFileSize = (bytes: number | null): string => {
       grid-template-columns: repeat(3, 1fr);
     }
 
-    /* Galería adicional - Tablet */
     .examples-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 0.875rem;
@@ -2440,7 +2577,6 @@ const formatFileSize = (bytes: number | null): string => {
       padding: 0 1rem;
     }
 
-    /* ===== GALLERY MOBILE - Shopify Style ===== */
     .gallery-section {
       display: flex;
       flex-direction: column;
@@ -2450,7 +2586,6 @@ const formatFileSize = (bytes: number | null): string => {
       overflow: hidden;
     }
 
-    /* Imagen principal - Cuadrada como Shopify */
     .gallery-main {
       order: 1;
       width: 100%;
@@ -2463,7 +2598,6 @@ const formatFileSize = (bytes: number | null): string => {
       padding: 16px;
     }
 
-    /* Thumbnails - Horizontal scroll */
     .gallery-thumbnails {
       order: 2;
       display: flex;
@@ -2498,7 +2632,6 @@ const formatFileSize = (bytes: number | null): string => {
     }
 
     .thumbnail.active {
-      /* Estado activo claro en mobile */
       border-color: #111827;
       box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.15);
     }
@@ -2527,7 +2660,6 @@ const formatFileSize = (bytes: number | null): string => {
       gap: 1.5rem;
     }
 
-    /* Galería adicional - Mobile */
     .examples-section {
       padding: 2rem 0;
     }
@@ -2552,7 +2684,6 @@ const formatFileSize = (bytes: number | null): string => {
       max-width: 100%;
     }
 
-    /* En mobile con 2 elementos, mostrar lado a lado */
     .examples-grid[data-count="2"] {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -2599,10 +2730,6 @@ const formatFileSize = (bytes: number | null): string => {
       font-size: 1.75rem;
     }
 
-    /* .trust-section {
-      padding-: 0 1rem 3rem 1rem;
-    } */
-
     .spec-row {
       grid-template-columns: 1fr;
       gap: 0.5rem;
@@ -2636,7 +2763,6 @@ const formatFileSize = (bytes: number | null): string => {
       grid-template-columns: 1fr;
     }
 
-    /* Gallery en pantallas pequeñas - Shopify style */
     .gallery-main {
       aspect-ratio: 1 / 1;
       border-radius: 8px;
@@ -2675,103 +2801,111 @@ const formatFileSize = (bytes: number | null): string => {
 </style>
 
 <script>
-  // 1. Envolvemos la lógica en una función para poder reutilizarla
   const initProductPage = () => {
-
-    // Gallery functionality - Enhanced with scroll-to-active for mobile
-    const thumbnails = document.querySelectorAll<HTMLButtonElement>(".thumbnail");
+    const thumbnails =
+      document.querySelectorAll<HTMLButtonElement>(".thumbnail");
     const mediaItems = document.querySelectorAll<HTMLDivElement>(".media-item");
-    const thumbnailsContainer = document.querySelector<HTMLDivElement>(".gallery-thumbnails");
+    const thumbnailsContainer = document.querySelector<HTMLDivElement>(
+      ".gallery-thumbnails"
+    );
 
-    // Helper: Scroll thumbnail into view (for mobile horizontal scroll)
     const scrollThumbnailIntoView = (thumb: HTMLButtonElement) => {
       if (!thumbnailsContainer) return;
-      
-      // Solo hacer scroll horizontal en mobile
+
       const isMobile = window.innerWidth <= 768;
       if (!isMobile) return;
 
       const containerRect = thumbnailsContainer.getBoundingClientRect();
       const thumbRect = thumb.getBoundingClientRect();
-      
-      // Calcular la posición para centrar el thumbnail
-      const scrollLeft = thumb.offsetLeft - (containerRect.width / 2) + (thumbRect.width / 2);
-      
+
+      const scrollLeft =
+        thumb.offsetLeft - containerRect.width / 2 + thumbRect.width / 2;
+
       thumbnailsContainer.scrollTo({
         left: Math.max(0, scrollLeft),
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     };
 
     if (thumbnails.length > 0 && mediaItems.length > 0) {
       thumbnails.forEach((thumb) => {
         thumb.addEventListener("click", () => {
-          const index = parseInt(thumb.getAttribute('data-index') || '0');
-          
+          const index = parseInt(thumb.getAttribute("data-index") || "0");
+
           thumbnails.forEach((t) => t.classList.remove("active"));
           mediaItems.forEach((m) => m.classList.remove("active"));
-          
+
           thumb.classList.add("active");
           if (mediaItems[index]) {
             mediaItems[index].classList.add("active");
           }
-          
-          // Scroll el thumbnail activo al centro en mobile
+
           scrollThumbnailIntoView(thumb);
         });
       });
     }
 
-    // Smooth scroll
-    document.querySelectorAll<HTMLAnchorElement>(".quick-link").forEach((link) => {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const href = link.getAttribute("href");
-        if (!href) return;
-        
-        const targetId = href.substring(1);
-        const targetElement = document.getElementById(targetId);
+    document
+      .querySelectorAll<HTMLAnchorElement>(".quick-link")
+      .forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const href = link.getAttribute("href");
+          if (!href) return;
 
-        if (targetElement) {
-          const offset = 80;
-          const elementPosition = targetElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          const targetId = href.substring(1);
+          const targetElement = document.getElementById(targetId);
 
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-          });
-        }
+          if (targetElement) {
+            const offset = 80;
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition =
+              elementPosition + window.pageYOffset - offset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth",
+            });
+          }
+        });
       });
-    });
 
-    // ===== LIGHTBOX FUNCTIONALITY =====
-    const lightbox = document.getElementById('lightbox');
-    const lightboxContent = lightbox?.querySelector('.lightbox-content');
-    const lightboxClose = lightbox?.querySelector('.lightbox-close');
-    const lightboxPrev = lightbox?.querySelector('.lightbox-prev');
-    const lightboxNext = lightbox?.querySelector('.lightbox-next');
-    const lightboxCurrent = lightbox?.querySelector('.lightbox-current');
-    const lightboxThumbs = lightbox?.querySelectorAll<HTMLButtonElement>('.lightbox-thumb');
-    const galleryItems = document.querySelectorAll<HTMLButtonElement>('.gallery-item');
-    
+    const lightbox = document.getElementById("lightbox");
+    const lightboxContent = lightbox?.querySelector(".lightbox-content");
+    const lightboxClose = lightbox?.querySelector(".lightbox-close");
+    const lightboxPrev = lightbox?.querySelector(".lightbox-prev");
+    const lightboxNext = lightbox?.querySelector(".lightbox-next");
+    const lightboxCurrent = lightbox?.querySelector(".lightbox-current");
+    const lightboxThumbs =
+      lightbox?.querySelectorAll<HTMLButtonElement>(".lightbox-thumb");
+    const galleryItems =
+      document.querySelectorAll<HTMLButtonElement>(".gallery-item");
+
     let currentIndex = 0;
     let totalItems = galleryItems.length;
 
-    // Set single attribute if only 1 item
     if (lightbox && totalItems <= 1) {
-      lightbox.setAttribute('data-single', 'true');
+      lightbox.setAttribute("data-single", "true");
     }
 
-    // Get gallery data
-    const getGalleryData = (): Array<{type: string, url: string, alt: string, mime: string}> => {
-      const data: Array<{type: string, url: string, alt: string, mime: string}> = [];
-      galleryItems.forEach(item => {
+    const getGalleryData = (): Array<{
+      type: string;
+      url: string;
+      alt: string;
+      mime: string;
+    }> => {
+      const data: Array<{
+        type: string;
+        url: string;
+        alt: string;
+        mime: string;
+      }> = [];
+      galleryItems.forEach((item) => {
         data.push({
-          type: item.dataset.type || 'image',
-          url: item.dataset.url || '',
-          alt: item.dataset.alt || '',
-          mime: item.dataset.mime || 'video/mp4'
+          type: item.dataset.type || "image",
+          url: item.dataset.url || "",
+          alt: item.dataset.alt || "",
+          mime: item.dataset.mime || "video/mp4",
         });
       });
       return data;
@@ -2779,20 +2913,18 @@ const formatFileSize = (bytes: number | null): string => {
 
     const galleryData = getGalleryData();
 
-    // Update lightbox content
     const updateLightboxContent = (index: number) => {
       if (!lightboxContent || !galleryData[index]) return;
 
       const item = galleryData[index];
       currentIndex = index;
 
-      // Stop any playing videos
-      const existingVideo = lightboxContent.querySelector('video');
+      const existingVideo = lightboxContent.querySelector("video");
       if (existingVideo) {
         existingVideo.pause();
       }
 
-      if (item.type === 'image') {
+      if (item.type === "image") {
         lightboxContent.innerHTML = `<img src="${item.url}" alt="${item.alt}" />`;
       } else {
         lightboxContent.innerHTML = `
@@ -2803,44 +2935,37 @@ const formatFileSize = (bytes: number | null): string => {
         `;
       }
 
-      // Update counter
       if (lightboxCurrent) {
         lightboxCurrent.textContent = String(index + 1);
       }
 
-      // Update thumbnails
       lightboxThumbs?.forEach((thumb, i) => {
-        thumb.classList.toggle('active', i === index);
+        thumb.classList.toggle("active", i === index);
       });
     };
 
-    // Open lightbox
     const openLightbox = (index: number) => {
       if (!lightbox) return;
-      
+
       updateLightboxContent(index);
-      lightbox.classList.add('active');
-      document.body.style.overflow = 'hidden';
-      
-      // Focus trap
+      lightbox.classList.add("active");
+      document.body.style.overflow = "hidden";
+
       (lightboxClose as HTMLElement)?.focus();
     };
 
-    // Close lightbox
     const closeLightbox = () => {
       if (!lightbox || !lightboxContent) return;
 
-      // Stop any playing videos
-      const video = lightboxContent.querySelector('video');
+      const video = lightboxContent.querySelector("video");
       if (video) {
         video.pause();
       }
 
-      lightbox.classList.remove('active');
-      document.body.style.overflow = '';
+      lightbox.classList.remove("active");
+      document.body.style.overflow = "";
     };
 
-    // Navigation
     const goToPrev = () => {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : totalItems - 1;
       updateLightboxContent(newIndex);
@@ -2851,214 +2976,213 @@ const formatFileSize = (bytes: number | null): string => {
       updateLightboxContent(newIndex);
     };
 
-    // Event listeners
     galleryItems.forEach((item, index) => {
-      item.addEventListener('click', () => openLightbox(index));
+      item.addEventListener("click", () => openLightbox(index));
     });
 
-    lightboxClose?.addEventListener('click', closeLightbox);
-    lightboxPrev?.addEventListener('click', goToPrev);
-    lightboxNext?.addEventListener('click', goToNext);
+    lightboxClose?.addEventListener("click", closeLightbox);
+    lightboxPrev?.addEventListener("click", goToPrev);
+    lightboxNext?.addEventListener("click", goToNext);
 
     lightboxThumbs?.forEach((thumb, index) => {
-      thumb.addEventListener('click', () => updateLightboxContent(index));
+      thumb.addEventListener("click", () => updateLightboxContent(index));
     });
 
-    // Close on backdrop click
-    lightbox?.addEventListener('click', (e) => {
+    lightbox?.addEventListener("click", (e) => {
       if (e.target === lightbox) {
         closeLightbox();
       }
     });
 
-    // Keyboard navigation
     const handleKeydown = (e: KeyboardEvent) => {
-      if (!lightbox?.classList.contains('active')) return;
+      if (!lightbox?.classList.contains("active")) return;
 
       switch (e.key) {
-        case 'Escape':
+        case "Escape":
           closeLightbox();
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           goToPrev();
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           goToNext();
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener("keydown", handleKeydown);
 
-    // Touch swipe support for mobile
     let touchStartX = 0;
     let touchEndX = 0;
 
-    lightbox?.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    lightbox?.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      const diff = touchStartX - touchEndX;
-      
-      if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          goToNext();
-        } else {
-          goToPrev();
-        }
-      }
-    }, { passive: true });
-
-    // ===== END LIGHTBOX =====
-
-    // Lazy load videos
-    if ('IntersectionObserver' in window) {
-      const videoObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const video = entry.target as HTMLVideoElement;
-            if (video.dataset.src) {
-              video.src = video.dataset.src;
-              video.load();
-              videoObserver.unobserve(video);
-            }
-          }
-        });
-      }, { rootMargin: '50px' });
-
-      document.querySelectorAll<HTMLVideoElement>('video[data-src]').forEach(video => {
-        videoObserver.observe(video);
-      });
-    }
-
-    // Animaciones al scroll
-    const animateSections = document.querySelectorAll<HTMLElement>(
-      '.details-section, .examples-section, .downloads-section, .trust-section'
+    lightbox?.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      },
+      { passive: true }
     );
 
-    if ('IntersectionObserver' in window) {
-      const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            sectionObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    lightbox?.addEventListener(
+      "touchend",
+      (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
 
-      animateSections.forEach(section => {
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) {
+            goToNext();
+          } else {
+            goToPrev();
+          }
+        }
+      },
+      { passive: true }
+    );
+
+    if ("IntersectionObserver" in window) {
+      const videoObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const video = entry.target as HTMLVideoElement;
+              if (video.dataset.src) {
+                video.src = video.dataset.src;
+                video.load();
+                videoObserver.unobserve(video);
+              }
+            }
+          });
+        },
+        { rootMargin: "50px" }
+      );
+
+      document
+        .querySelectorAll<HTMLVideoElement>("video[data-src]")
+        .forEach((video) => {
+          videoObserver.observe(video);
+        });
+    }
+
+    const animateSections = document.querySelectorAll<HTMLElement>(
+      ".details-section, .examples-section, .downloads-section, .trust-section"
+    );
+
+    if ("IntersectionObserver" in window) {
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("animate-in");
+              sectionObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
+      );
+
+      animateSections.forEach((section) => {
         sectionObserver.observe(section);
       });
     } else {
-      animateSections.forEach(section => {
-        section.classList.add('animate-in');
+      animateSections.forEach((section) => {
+        section.classList.add("animate-in");
       });
     }
 
-    // ===== VIDEOS EN SECCIÓN DE EJEMPLOS =====
-    const exampleVideoItems = document.querySelectorAll<HTMLDivElement>('.example-item.video-item');
-    
-    exampleVideoItems.forEach(item => {
-      const video = item.querySelector<HTMLVideoElement>('video');
-      const overlay = item.querySelector<HTMLDivElement>('.video-overlay');
-      
+    const exampleVideoItems = document.querySelectorAll<HTMLDivElement>(
+      ".example-item.video-item"
+    );
+
+    exampleVideoItems.forEach((item) => {
+      const video = item.querySelector<HTMLVideoElement>("video");
+      const overlay = item.querySelector<HTMLDivElement>(".video-overlay");
+
       if (!video) return;
 
-      // Click en el item o overlay para reproducir/pausar
       const handlePlayPause = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (video.paused) {
-          // Pausar otros videos primero
-          document.querySelectorAll<HTMLVideoElement>('.example-video').forEach(v => {
-            if (v !== video && !v.paused) {
-              v.pause();
-              v.closest('.example-item')?.classList.remove('playing');
-            }
-          });
-          
+          document
+            .querySelectorAll<HTMLVideoElement>(".example-video")
+            .forEach((v) => {
+              if (v !== video && !v.paused) {
+                v.pause();
+                v.closest(".example-item")?.classList.remove("playing");
+              }
+            });
+
           video.play();
           video.controls = true;
-          item.classList.add('playing');
+          item.classList.add("playing");
         } else {
           video.pause();
-          item.classList.remove('playing');
+          item.classList.remove("playing");
         }
       };
 
-      // Click en overlay o video cuando no está reproduciendo
-      item.addEventListener('click', (e) => {
-        // Si el video está reproduciendo y el click es en el video, dejar que los controles funcionen
-        if (item.classList.contains('playing') && e.target === video) {
+      item.addEventListener("click", (e) => {
+        if (item.classList.contains("playing") && e.target === video) {
           return;
         }
         handlePlayPause(e);
       });
 
-      // Eventos del video
-      video.addEventListener('play', () => {
-        item.classList.add('playing');
+      video.addEventListener("play", () => {
+        item.classList.add("playing");
         video.controls = true;
       });
 
-      video.addEventListener('pause', () => {
-        // Solo quitar playing si el video terminó o se pausó manualmente
+      video.addEventListener("pause", () => {
         if (video.ended) {
-          item.classList.remove('playing');
+          item.classList.remove("playing");
           video.controls = false;
         }
       });
 
-      video.addEventListener('ended', () => {
-        item.classList.remove('playing');
+      video.addEventListener("ended", () => {
+        item.classList.remove("playing");
         video.controls = false;
         video.currentTime = 0;
       });
     });
 
-    // Download files - descarga sin abrir nueva pestaña
-    document.querySelectorAll<HTMLButtonElement>('.download-card').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const url = btn.dataset.url;
-        const filename = btn.dataset.filename || 'archivo';
-        
-        if (!url) return;
+    document
+      .querySelectorAll<HTMLButtonElement>(".download-card")
+      .forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const url = btn.dataset.url;
+          const filename = btn.dataset.filename || "archivo";
 
-        try {
-          // Mostrar estado de descarga
-          btn.classList.add('downloading');
-          
-          // Fetch del archivo
-          const response = await fetch(url);
-          const blob = await response.blob();
-          
-          // Crear link temporal para descarga
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          
-          // Limpiar
-          window.URL.revokeObjectURL(downloadUrl);
-          document.body.removeChild(a);
-          
-          btn.classList.remove('downloading');
-        } catch (error) {
-          console.error('Error al descargar:', error);
-          btn.classList.remove('downloading');
-          // Fallback: abrir en nueva pestaña si falla
-          window.open(url, '_blank');
-        }
+          if (!url) return;
+
+          try {
+            btn.classList.add("downloading");
+
+            const response = await fetch(url);
+            const blob = await response.blob();
+
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(downloadUrl);
+            document.body.removeChild(a);
+
+            btn.classList.remove("downloading");
+          } catch (error) {
+            console.error("Error al descargar:", error);
+            btn.classList.remove("downloading");
+            window.open(url, "_blank");
+          }
+        });
       });
-    });
-    // --- FIN DE TU CÓDIGO ORIGINAL ---
   };
 
-  // 2. Ejecutar en cada navegación (carga inicial + transiciones)
-  document.addEventListener('astro:page-load', initProductPage);
+  document.addEventListener("astro:page-load", initProductPage);
 </script>

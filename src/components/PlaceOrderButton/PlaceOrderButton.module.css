@@ -21,7 +21,6 @@
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.28);
 }
 
-/* Hover solo si NO está deshabilitado */
 .whatsapp-btn:not(:disabled):hover {
   background: #1ebe5d;
   transform: translateY(-2px);
@@ -32,28 +31,25 @@
   transform: scale(0.97);
 }
 
-/* Icono normal */
 .whatsapp-btn svg {
   width: 22px;
   height: 22px;
   stroke: white;
 }
 
-/* --- ESTADO DESHABILITADO (cuando no hay productos) --- */
 .whatsapp-btn:disabled {
-  background: #cfcfcf;              /* gris suave */
-  color: #777;                      /* texto tenue */
+  background: #cfcfcf; /* gris suave */
+  color: #777; /* texto tenue */
   cursor: not-allowed;
-  box-shadow: none;                 /* sin sombra */
+  box-shadow: none; /* sin sombra */
   transform: none;
 }
 
 .whatsapp-btn:disabled svg {
-  stroke: #777;                     /* icono gris */
-  opacity: 0.6;                     /* sensación apagada */
+  stroke: #777; /* icono gris */
+  opacity: 0.6; /* sensación apagada */
 }
 
-/* Evita hover visual cuando está deshabilitado */
 .whatsapp-btn:disabled:hover {
   transform: none;
   box-shadow: none;

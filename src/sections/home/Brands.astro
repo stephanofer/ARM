@@ -12,7 +12,6 @@ import SectionContainer from "@/components/SectionContainer.astro";
     <div class="brands-carousel-wrapper">
       <div class="brands-carousel">
         <div class="brands-track">
-          <!-- Primera serie de logos -->
           <div class="brand-item">
             <img src="/favicon.svg" alt="Redragon" class="brand-logo" />
           </div>
@@ -44,7 +43,6 @@ import SectionContainer from "@/components/SectionContainer.astro";
             <img src="/favicon.svg" alt="Streamplify" class="brand-logo" />
           </div>
 
-          <!-- Duplicado para efecto infinito -->
           <div class="brand-item">
             <img src="/favicon.svg" alt="Redragon" class="brand-logo" />
           </div>
@@ -126,7 +124,6 @@ import SectionContainer from "@/components/SectionContainer.astro";
     gap: 4rem;
   }
 
-  /* Pausar animación al hacer hover */
   .brands-carousel:hover .brands-track {
     animation-play-state: paused;
   }
@@ -169,7 +166,6 @@ import SectionContainer from "@/components/SectionContainer.astro";
     transform: scale(1.15);
   }
 
-  /* Responsive */
   @media (max-width: 768px) {
     .brands-track {
       gap: 3rem;
@@ -214,12 +210,10 @@ import SectionContainer from "@/components/SectionContainer.astro";
     }
   }
 
-  /* Mejora de rendimiento */
   .brands-track {
     will-change: transform;
   }
 
-  /* Asegurar suavidad en dispositivos móviles */
   @media (prefers-reduced-motion: reduce) {
     .brands-track {
       animation-duration: 60s;
