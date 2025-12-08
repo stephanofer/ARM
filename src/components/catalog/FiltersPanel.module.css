@@ -346,9 +346,154 @@
 .rangeGroup {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* Inputs numéricos del rango */
+.rangeInputs {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
+.rangeNumberInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  text-align: center;
+  transition: border-color 0.2s ease;
+  font-weight: 500;
+}
+
+.rangeNumberInput:focus {
+  outline: none;
+  border-color: #2d5f3f;
+  box-shadow: 0 0 0 3px rgba(45, 95, 63, 0.1);
+}
+
+.rangeNumberInput::placeholder {
+  color: #9ca3af;
+}
+
+/* Remove spin buttons */
+.rangeNumberInput::-webkit-inner-spin-button,
+.rangeNumberInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.rangeSeparator {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Dual Range Slider Container */
+.dualRangeContainer {
+  position: relative;
+  height: 6px;
+  margin: 0.5rem 0;
+}
+
+.dualRangeTrack {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.dualRangeHighlight {
+  position: absolute;
+  height: 6px;
+  background: #2d5f3f;
+  border-radius: 3px;
+}
+
+.dualRangeMin,
+.dualRangeMax {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  top: 0;
+}
+
+.dualRangeMin::-webkit-slider-thumb,
+.dualRangeMax::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2d5f3f;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.dualRangeMin::-webkit-slider-thumb:hover,
+.dualRangeMax::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.dualRangeMin::-webkit-slider-thumb:active,
+.dualRangeMax::-webkit-slider-thumb:active {
+  transform: scale(1.25);
+}
+
+.dualRangeMin::-moz-range-thumb,
+.dualRangeMax::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2d5f3f;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.dualRangeMin::-moz-range-thumb:hover,
+.dualRangeMax::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+.dualRangeMin::-moz-range-thumb:active,
+.dualRangeMax::-moz-range-thumb:active {
+  transform: scale(1.25);
+}
+
+/* Etiquetas del rango */
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.rangeLabelCurrent {
+  font-weight: 600;
+  color: #2d5f3f;
+  font-size: 0.85rem;
+}
+
+.rangeLabelMin,
+.rangeLabelMax {
+  color: #9ca3af;
+}
+
+/* Estilos antiguos (mantener compatibilidad) */
 .range {
   width: 100%;
   height: 6px;

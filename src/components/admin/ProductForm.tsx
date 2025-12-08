@@ -59,7 +59,7 @@ interface Product {
   stock: number;
   category_id: number;
   subcategory_id: number;
-  attributes: Record<string, string>;
+  attributes: Record<string, string | number>;
   created_at: string;
 }
 
@@ -104,7 +104,10 @@ export default function ProductForm({
   const [categoryId, setCategoryId] = useState(product?.category_id?.toString() || "");
   const [subcategoryId, setSubcategoryId] = useState(product?.subcategory_id?.toString() || "");
   const [attributes, setAttributes] = useState<{ key: string; value: string }[]>(
-    product?.attributes ? Object.entries(product.attributes).map(([key, value]) => ({ key, value })) : []
+    product?.attributes ? Object.entries(product.attributes).map(([key, value]) => ({ 
+      key, 
+      value: typeof value === 'number' ? value.toString() : value 
+    })) : []
   );
 
   // Assets state - grouped by section
@@ -197,7 +200,7 @@ export default function ProductForm({
     
     if (newFilters.length > 0) {
       // Merge existing attributes with new filter attributes
-      const existingAttrs = attributes.filter(a => filterKeys.includes(a.key) || a.value.trim());
+      const existingAttrs = attributes.filter(a => filterKeys.includes(a.key) || (typeof a.value === 'string' && a.value.trim()));
       const newAttrs = newFilters.map(f => ({
         key: f.key,
         value: "",
@@ -441,10 +444,18 @@ export default function ProductForm({
 
     try {
       // Build attributes object
-      const attributesObj: Record<string, string> = {};
+      const attributesObj: Record<string, string | number> = {};
       attributes.forEach(({ key, value }) => {
-        if (key.trim() && value.trim()) {
-          attributesObj[key.trim()] = value.trim();
+        const trimmedKey = key.trim();
+        const trimmedValue = value.trim();
+        if (trimmedKey && trimmedValue) {
+          // Solo convertir a número si es un filtro de tipo range
+          const filterDef = filterConfig.find(f => f.key === trimmedKey);
+          if (filterDef?.type === 'range') {
+            attributesObj[trimmedKey] = parseFloat(trimmedValue);
+          } else {
+            attributesObj[trimmedKey] = trimmedValue;
+          }
         }
       });
 
@@ -1476,14 +1487,14 @@ export default function ProductForm({
                         {filter.type === "checkbox" && filter.options && (
                           <div class={styles.checkboxGroup}>
                             {filter.options.map(opt => {
-                              const isChecked = currentValue.split(",").map(v => v.trim()).includes(opt);
+                              const isChecked = String(currentValue).split(",").map(v => v.trim()).includes(opt);
                               return (
                                 <label key={opt} class={styles.checkboxLabel}>
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={(e) => {
-                                      const values = currentValue ? currentValue.split(",").map(v => v.trim()).filter(v => v) : [];
+                                      const values = currentValue ? String(currentValue).split(",").map(v => v.trim()).filter(v => v) : [];
                                       let newValues: string[];
                                       if (e.currentTarget.checked) {
                                         newValues = [...values, opt];
@@ -1563,7 +1574,7 @@ export default function ProductForm({
                               value={currentValue}
                               min={filter.min}
                               max={filter.max}
-                              step={filter.step || 1}
+                              step="any"
                               placeholder={`${filter.min || 0} - ${filter.max || 100}`}
                               onInput={(e) => {
                                 const newValue = e.currentTarget.value;

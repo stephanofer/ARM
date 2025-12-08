@@ -21,12 +21,6 @@ export function ProductCard({
     <article className={styles["product-card"]}>
       <a href={productUrl} className={styles["product-link"]}>
         <div className={styles["product-image-wrapper"]}>
-          {!inStock && (
-            <span className={styles["badge"] + " " + styles["badge-discount"]}>
-              Agotado
-            </span>
-          )}
-
           <div className={styles["image-container"]}>
             {primaryImageUrl ? (
               <>

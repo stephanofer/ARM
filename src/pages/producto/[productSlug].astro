@@ -168,7 +168,7 @@ const formatFileSize = (bytes: number | null): string => {
         )}
 
         <!-- Imagen Principal -->
-        <div class="gallery-main" data-single={galleryAssets.length === 1 ? "true" : "false"}>
+        <div class="gallery-main" data-single={galleryAssets.length <= 1 ? "true" : "false"}>
           {galleryAssets.length > 0 ? (
             galleryAssets.map((asset, index) => (
               <div
@@ -1054,6 +1054,10 @@ const formatFileSize = (bytes: number | null): string => {
     width: 100%;
     height: 100%;
     color: #9ca3af;
+    /* Asegurar que ocupe todo el espacio del contenedor */
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .no-image svg {

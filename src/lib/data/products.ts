@@ -53,16 +53,33 @@ function applyFilters(
   if (filters.attributeFilters) {
     Object.entries(filters.attributeFilters).forEach(([key, value]) => {
       if (Array.isArray(value) && value.length > 0) {
-        // Si es array, construir condición OR manualmente
+        // Para múltiples valores, usar OR con múltiples contains
+        // Esto genera: WHERE attributes @> '{"key":"val1"}' OR attributes @> '{"key":"val2"}'
         const conditions = value.map(v => {
-          // Escapar comillas y construir la condición correctamente
-          return `attributes->${key}.eq."${v.replace(/"/g, '\\"')}"`;
+          // Usar formato correcto de PostgREST para JSONB contains
+          return `attributes.cs.${JSON.stringify({ [key]: v })}`;
         }).join(',');
         query = query.or(conditions);
       } else if (typeof value === 'string' && value) {
+        // Para valores de rango (ej: "60-90" para altura, peso, etc.)
+        if (value.includes('-') && /^\d+-\d+$/.test(value)) {
+          const [minStr, maxStr] = value.split('-');
+          const min = parseInt(minStr);
+          const max = parseInt(maxStr);
+          
+          // Comparar valores numéricos en JSONB (guardados como numbers, no strings)
+          query = query.gte(`attributes->${key}`, min);
+          query = query.lte(`attributes->${key}`, max);
+        }
         // Para valores booleanos en string
-        if (value === 'true' || value === 'false') {
-          query = query.eq(`attributes->${key}`, value === 'true');
+        else if (value === 'true' || value === 'false') {
+          // Los filtros boolean envían "true"/"false" pero en la BD pueden estar como:
+          // - "Sí"/"No" (español)
+          // - "true"/"false" (inglés) 
+          // - true/false (boolean nativo)
+          // Convertir true → "Sí", false → "No" para buscar en español
+          const spanishValue = value === 'true' ? 'Sí' : 'No';
+          query = query.contains('attributes', { [key]: spanishValue });
         } else {
           // Si es string simple, usar contains para buscar en el JSONB
           query = query.contains('attributes', { [key]: value });
@@ -107,12 +124,36 @@ export async function getProductsByCategory(
   pagination: Partial<Pagination> = {}
 ): Promise<PaginatedProductsResponse> {
   const normalized = normalizePagination(pagination);
+
+  // Primero obtener el count total
+  let countQuery = supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('category_id', categoryId);
+  
+  countQuery = applyFilters(countQuery, filters);
+  
+  const { count } = await countQuery;
+  const total = count || 0;
+  const totalPages = total > 0 ? Math.ceil(total / normalized.pageSize) : 0;
+
+  // Si la página solicitada está fuera de rango, devolver vacío
+  if (normalized.page > totalPages && totalPages > 0) {
+    return {
+      items: [],
+      page: normalized.page,
+      pageSize: normalized.pageSize,
+      total,
+      totalPages,
+    };
+  }
+
   const offset = (normalized.page - 1) * normalized.pageSize;
 
   // Query base
   let query = supabase
     .from('products')
-    .select('*', { count: 'exact' })
+    .select('*')
     .eq('category_id', categoryId);
 
   // Aplicar filtros
@@ -121,15 +162,12 @@ export async function getProductsByCategory(
   // Aplicar paginación
   query = query.range(offset, offset + normalized.pageSize - 1);
 
-  const { data, error, count } = await query;
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching products by category:', error);
     throw new Error('Failed to fetch products');
   }
-
-  const total = count || 0;
-  const totalPages = total > 0 ? Math.ceil(total / normalized.pageSize) : 0;
 
   return {
     items: data || [],
@@ -184,12 +222,36 @@ export async function getProductsBySubcategory(
   pagination: Partial<Pagination> = {}
 ): Promise<PaginatedProductsResponse> {
   const normalized = normalizePagination(pagination);
+
+  // Primero obtener el count total
+  let countQuery = supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('subcategory_id', subcategoryId);
+  
+  countQuery = applyFilters(countQuery, filters);
+  
+  const { count } = await countQuery;
+  const total = count || 0;
+  const totalPages = total > 0 ? Math.ceil(total / normalized.pageSize) : 0;
+
+  // Si la página solicitada está fuera de rango, devolver vacío
+  if (normalized.page > totalPages && totalPages > 0) {
+    return {
+      items: [],
+      page: normalized.page,
+      pageSize: normalized.pageSize,
+      total,
+      totalPages,
+    };
+  }
+
   const offset = (normalized.page - 1) * normalized.pageSize;
 
   // Query base
   let query = supabase
     .from('products')
-    .select('*', { count: 'exact' })
+    .select('*')
     .eq('subcategory_id', subcategoryId);
 
   // Aplicar filtros
@@ -198,15 +260,12 @@ export async function getProductsBySubcategory(
   // Aplicar paginación
   query = query.range(offset, offset + normalized.pageSize - 1);
 
-  const { data, error, count } = await query;
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching products by subcategory:', error);
     throw new Error('Failed to fetch products');
   }
-
-  const total = count || 0;
-  const totalPages = total > 0 ? Math.ceil(total / normalized.pageSize) : 0;
 
   return {
     items: data || [],
