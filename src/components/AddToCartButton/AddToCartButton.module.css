@@ -65,3 +65,59 @@
   .add-to-cart-btn svg {
     flex-shrink: 0;
   }
+
+  /* ============================================
+     RESPONSIVE STYLES
+     ============================================ */
+
+  /* Tablet */
+  @media (max-width: 768px) {
+    .add-to-cart-btn {
+      padding: 10px 14px;
+      font-size: 0.813rem;
+      gap: 6px;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .add-to-cart-btn {
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      border-radius: 5px;
+      gap: 5px;
+    }
+    
+    .add-to-cart-btn:hover {
+      transform: none; /* Better touch experience */
+      box-shadow: none;
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 380px) {
+    .add-to-cart-btn {
+      padding: 8px 10px;
+      font-size: 0.688rem;
+    }
+    
+    .add-to-cart-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .add-to-cart-btn {
+      transition: none;
+    }
+    
+    .add-to-cart-btn::before {
+      display: none;
+    }
+    
+    .add-to-cart-btn:hover {
+      transform: none;
+    }
+  }
