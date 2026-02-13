@@ -49,12 +49,12 @@ const downloadAssets = assets.download.map((asset) => ({
 const primaryImage =
   galleryAssets.find((a) => a.is_primary) || galleryAssets[0];
 
-const brand = product.brand || product.attributes.brand || "ARM";
-const material = product.attributes.material || "Madera";
+const brand = product.brand || product.attributes.brand || "A.R.M.";
+const material = product.attributes.material || "";
 
-const pageTitle = `${product.name} | ARM`;
+const pageTitle = `${product.name} | A.R.M. Corporations`;
 const pageDescription =
-  product.description || `${product.name} - ${subcategory.name}`;
+  product.description || `${product.name} - ${subcategory.name} | A.R.M. Corporations del Perú`;
 
 const getFileTypeLabel = (
   mimeType: string | null,
@@ -825,9 +825,9 @@ const formatFileSize = (bytes: number | null): string => {
             </svg>
           </div>
           <div class="trust-content">
-            <h3>Made in Gipuzkoa</h3>
+            <h3>Operamos en todo el Perú</h3>
             <p>
-              Producción local en nuestra fábrica de Aizarnazabal, Gipuzkoa.
+              Gestión logística desde Lima para atender a entidades en todo el territorio nacional.
             </p>
           </div>
         </div>

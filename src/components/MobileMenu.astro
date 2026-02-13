@@ -2,12 +2,12 @@
 import Close from "@/assets/svg/Close.svg";
 import { navLinks } from "@/const/nav";
 import { getAllSubcategories } from "@/lib/data/categories";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient({
-  request: Astro.request,
-  cookies: Astro.cookies,
-});
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_ANON_KEY
+);
 
 const subcategories = await getAllSubcategories(supabase);
 ---
@@ -15,7 +15,9 @@ const subcategories = await getAllSubcategories(supabase);
 <div class="mobile-menu-overlay" id="mobileMenuOverlay">
   <aside class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
-      <a href="/" class="mobile-menu-logo">ARM</a>
+      <a href="/" class="mobile-menu-logo">
+        <img src="/arm-logo.webp" alt="Logo ARM" class="mobile-logo-image" />
+      </a>
       <button
         class="close-button"
         id="closeMenuButton"
@@ -110,11 +112,21 @@ const subcategories = await getAllSubcategories(supabase);
   }
 
   .mobile-menu-logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+  }
+
+  .mobile-menu-logo:hover {
+    opacity: 0.8;
+  }
+
+  .mobile-logo-image {
+    height: 45px;
+    width: auto;
+    object-fit: contain;
+    display: block;
   }
 
   .close-button {

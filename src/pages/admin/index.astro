@@ -7,13 +7,13 @@ const supabase = createClient({ request: Astro.request, cookies: Astro.cookies }
 const stats = await getDashboardStats(supabase);
 ---
 
-<CMSLayout title="Dashboard - ARM Admin" description="Panel de administración ARM">
+<CMSLayout title="Dashboard - A.R.M. Admin" description="Panel de administración A.R.M. Corporations">
   <div class="dashboard">
     <!-- Header -->
     <header class="dashboard-header">
       <div class="header-content">
         <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Bienvenido al panel de administración de ARM</p>
+        <p class="page-subtitle">Bienvenido al panel de administración de A.R.M. Corporations</p>
       </div>
       <a href="/admin/productos/nuevo" class="primary-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

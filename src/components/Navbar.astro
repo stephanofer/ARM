@@ -17,7 +17,9 @@ import { navLinks } from "@/const/nav";
       <Hamburger />
     </button>
 
-    <a href="/" class="logo">ARM</a>
+    <a href="/" class="logo-link">
+      <img src="/arm-logo.webp" alt="Logo ARM" class="logo" />
+    </a>
 
     <ul class="nav-links">
       {
@@ -114,12 +116,22 @@ import { navLinks } from "@/const/nav";
     transform: scale(0.95);
   }
 
-  .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
+  .logo-link {
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+  }
+
+  .logo-link:hover {
+    opacity: 0.8;
+  }
+
+  .logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    display: block;
   }
 
   .search-container {
@@ -222,7 +234,13 @@ import { navLinks } from "@/const/nav";
     }
 
     .logo {
-      font-size: 1.25rem;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .logo {
+      height: 35px;
     }
   }
 </style>

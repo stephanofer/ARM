@@ -18,23 +18,8 @@ function isActive(href: string): boolean {
 <nav class="cms-navbar">
   <div class="navbar-container">
     <a href="/admin" class="navbar-brand">
-      <div class="brand-icon">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      </div>
-      <span class="brand-text">ARM <span class="brand-suffix">Admin</span></span
-      >
+      <img src="/arm-logo.webp" alt="Logo ARM" class="navbar-brand-image" />
+      <span class="brand-text">Admin</span>
     </a>
 
     <div class="navbar-nav">
@@ -221,28 +206,24 @@ function isActive(href: string): boolean {
     gap: 0.75rem;
     text-decoration: none;
     flex-shrink: 0;
+    transition: opacity 0.2s;
   }
 
-  .brand-icon {
-    width: 40px;
+  .navbar-brand:hover {
+    opacity: 0.8;
+  }
+
+  .navbar-brand-image {
     height: 40px;
-    background: #111827;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+    width: auto;
+    object-fit: contain;
+    display: block;
   }
 
   .brand-text {
     font-size: 1.25rem;
     font-weight: 700;
     color: #111827;
-  }
-
-  .brand-suffix {
-    font-weight: 400;
-    color: #6b7280;
   }
 
   .navbar-nav {

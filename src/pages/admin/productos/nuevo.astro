@@ -10,7 +10,7 @@ const supabase = createClient({ request: Astro.request, cookies: Astro.cookies }
 const categories = await getAllCategoriesWithSubcategories(supabase);
 ---
 
-<CMSLayout title="Nuevo Producto - ARM Admin" description="Crear nuevo producto">
+<CMSLayout title="Nuevo Producto - A.R.M. Admin" description="Crear nuevo producto">
   <ProductForm 
     client:load
     categories={categories}
